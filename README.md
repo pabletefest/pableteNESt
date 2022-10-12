@@ -1,5 +1,5 @@
-# Consoles-Emulator
-Different consoles emulators written in CPP (currently Work In Progress)
+# Videogame Console Emulators
+Different console emulators written in CPP (currently Work In Progress)
 
 Chronology:
 - NES
