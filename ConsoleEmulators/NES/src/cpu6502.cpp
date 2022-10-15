@@ -17,6 +17,10 @@ uint8_t CPU::readData(uint16_t address)
 
 void CPU::reset()
 {
+	A = 0;
+	X = 0;
+	Y = 0;
+	status = 0x00 | U; //Initially all zeros except unused bit 5 which is always 1
 }
 
 void CPU::clock()

@@ -18,9 +18,7 @@ public:
 	void clock();
 
 public:
-	uint64_t totalSystemClockCycles{0};
-
-private:
 	CPU cpu;
 	std::array<uint8_t, 64 * 1024> ram;
+	uint64_t totalSystemClockCycles{0};
 };
