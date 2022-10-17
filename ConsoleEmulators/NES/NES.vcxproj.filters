@@ -18,12 +18,18 @@
     <ClInclude Include="include\cpu6502.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\nesBus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu6502.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\NES.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nesBus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
