@@ -66,6 +66,10 @@ private:
 	uint8_t STX();	uint8_t STY();	uint8_t TAX();	uint8_t TAY();
 	uint8_t TSX();	uint8_t TXA();	uint8_t TXS();	uint8_t TYA();
 
+	// Default method for illegal opcodes (for now)
+	// Acts as a NOP instruction
+	uint8_t XXX();
+
 private:
 	NESBusSystem* bus;
 
@@ -74,8 +78,10 @@ private:
 	struct Instruction
 	{
 		std::string name;
-		uint8_t(CPU::* addressMode)(void) = nullptr;
-		uint8_t(CPU::* instruction)(void) = nullptr;
+		uint8_t (CPU::* addressMode)(void) = nullptr;
+		uint8_t (CPU::* instruction)(void) = nullptr;
 		uint8_t cyclesRequired = 0;
 	};
+
+	std::vector<Instruction> instructionsTable;
 };
