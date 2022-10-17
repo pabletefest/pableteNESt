@@ -1,3 +1,18 @@
+*.vsidx
+*.lock
+*.db
+ConsoleEmulators/.vs/ConsoleEmulators/v17/.suo
+*.opendb
+*.db-shm
+*.ipch
+*.log
+*.obj
+*.db-wal
+bin/
+ConsoleEmulators/bin/x64/Debug/NES_EMULATOR.exe
+ConsoleEmulators/bin/x64/Debug/NES_EMULATOR.pdb
+ConsoleEmulators/NES/NES.vcxproj.user
+
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio
 
