@@ -24,6 +24,29 @@ CPU::CPU(NESBusSystem* nesBus) : bus(nesBus)
 	};
 }
 
+void CPU::reset()
+{
+	A = 0;
+	X = 0;
+	Y = 0;
+	status = 0x00 | U; //Initially all zeros except unused bit 5 which is always 1
+
+	feched = 0x00;
+	effectiveAddr = 0x0000;
+	relativeAddr = 0x0000;
+	
+
+}
+
+void CPU::clock()
+{
+}
+
+bool CPU::isLastCompleted() const
+{
+	return instructionCycles == 0;
+}
+
 void CPU::writeData(uint16_t address, uint8_t data)
 {
 	bus->writeData(address, data);
@@ -34,21 +57,17 @@ uint8_t CPU::readData(uint16_t address)
 	return bus->readData(address);
 }
 
-void CPU::reset()
+uint8_t CPU::getStatusFlag(StatusFlags flag)
 {
-	A = 0;
-	X = 0;
-	Y = 0;
-	status = 0x00 | U; //Initially all zeros except unused bit 5 which is always 1
+	return status & flag;
 }
 
-void CPU::clock()
+void CPU::setStatusFlag(StatusFlags flag, bool isSet)
 {
-}
-
-bool CPU::isLastCompleted() const
-{
-	return cyclesInstruction == 0;
+	if (isSet)
+		status |= flag;
+	else
+		status &= ~flag;
 }
 
 

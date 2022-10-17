@@ -11,9 +11,6 @@ public:
 	CPU(NESBusSystem* nesBus);
 	~CPU() = default;
 
-	void writeData(uint16_t address, uint8_t data);
-	uint8_t readData(uint16_t address);
-
 	void reset();
 	void clock();
 
@@ -41,6 +38,12 @@ public:
 	bool isLastCompleted() const;
 
 private:
+
+	void writeData(uint16_t address, uint8_t data);
+	uint8_t readData(uint16_t address);
+
+	uint8_t getStatusFlag(StatusFlags flag);
+	void setStatusFlag(StatusFlags flag, bool isSet);
 
 	// ADDRESSING MODES
 	uint8_t IMP();	uint8_t IMM();
@@ -71,9 +74,12 @@ private:
 	uint8_t XXX();
 
 private:
-	NESBusSystem* bus;
+	NESBusSystem* bus = nullptr;
 
-	uint8_t cyclesInstruction = 0;
+	uint8_t feched = 0x00; // Operand value for the ALU
+	uint16_t effectiveAddr = 0x0000; // Address of operand
+	uint16_t relativeAddr = 0x0000; // Relative address for branch instructions
+	uint8_t instructionCycles = 0;
 
 	struct Instruction
 	{
