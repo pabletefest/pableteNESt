@@ -78,12 +78,14 @@ void CPU::setStatusFlag(StatusFlags flag, bool isSet)
 		status &= ~flag;
 }
 
-
+// ----------------------------
 // ----- ADDRESSING MODES -----
+// ----------------------------
 
 uint8_t CPU::IMP()
 {
 	fetched = A;
+
 	return 0;
 }
 
@@ -91,42 +93,86 @@ uint8_t CPU::IMM()
 {
 	effectiveAddr = readData(PC);
 	PC++;
+
 	return 0;
 }
 
 uint8_t CPU::ZP0()
 {
-	return uint8_t();
+	effectiveAddr = readData(PC);
+	PC++;
+	effectiveAddr &= 0x00FF;
+
+	return 0;
 }
 
 uint8_t CPU::ZPX()
 {
-	return uint8_t();
+	effectiveAddr = readData(PC) + X;
+	PC++;
+	effectiveAddr &= 0x00FF;
+
+	return 0;
 }
 
 uint8_t CPU::ZPY()
 {
-	return uint8_t();
+	effectiveAddr = readData(PC) + Y;
+	PC++;
+	effectiveAddr &= 0x00FF;
+	return 0;
 }
 
 uint8_t CPU::REL()
 {
-	return uint8_t();
+	relativeAddr = readData(PC);
+	PC++;
+
+	// When rel addr is 0x80 (1000 0000), it is 128 in unsigned representation, as relative increment goes from -128 to 127,
+	// we need to wrap over 128 to be -128 (127 + 1 = -128), so we make previous bots to 0x80 all 1s to make it signed negative.
+	if (relativeAddr & 0x80)
+		relativeAddr |= 0xFF00;
+
+	return 0;
 }
 
 uint8_t CPU::ABS()
 {
-	return uint8_t();
+	uint8_t lowByte = readData(PC);
+	PC++;
+	uint8_t highByte = readData(PC);
+	PC++;
+	effectiveAddr = (highByte << 8) | lowByte;
+
+	return 0;
 }
 
 uint8_t CPU::ABX()
 {
-	return uint8_t();
+	uint8_t lowByte = readData(PC);
+	PC++;
+	uint8_t highByte = readData(PC);
+	PC++;
+	effectiveAddr = ((highByte << 8) | lowByte) + X;
+	
+	if ((effectiveAddr & 0xFF00) != highByte)
+		return 1;
+	else
+		return 0;
 }
 
 uint8_t CPU::ABY()
 {
-	return uint8_t();
+	uint8_t lowByte = readData(PC);
+	PC++;
+	uint8_t highByte = readData(PC);
+	PC++;
+	effectiveAddr = ((highByte << 8) | lowByte) + Y;
+
+	if ((effectiveAddr & 0xFF00) != highByte)
+		return 1;
+	else
+		return 0;
 }
 
 uint8_t CPU::IND()
@@ -144,7 +190,9 @@ uint8_t CPU::IZY()
 	return uint8_t();
 }
 
+// ------------------------
 // ----- INSTRUCTIONS -----
+// ------------------------
 
 uint8_t CPU::ADC()
 {
