@@ -76,7 +76,7 @@ private:
 private:
 	NESBusSystem* bus = nullptr;
 
-	uint8_t feched = 0x00; // Operand value for the ALU
+	uint8_t fetched = 0x00; // Operand value for the ALU
 	uint16_t effectiveAddr = 0x0000; // Address of operand
 	uint16_t relativeAddr = 0x0000; // Relative address for branch instructions
 	uint8_t instructionCycles = 0;

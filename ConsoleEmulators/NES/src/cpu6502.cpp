@@ -26,16 +26,24 @@ CPU::CPU(NESBusSystem* nesBus) : bus(nesBus)
 
 void CPU::reset()
 {
+	//Registers
 	A = 0;
 	X = 0;
 	Y = 0;
 	status = 0x00 | U; //Initially all zeros except unused bit 5 which is always 1
+	SP = 0xFD;
 
-	feched = 0x00;
+	effectiveAddr = 0xFFFE;
+	uint8_t lowByte = readData(effectiveAddr);
+	uint8_t highByte = readData(effectiveAddr + 1);
+	PC = (highByte << 8) | lowByte;
+
+	fetched = 0x00;
 	effectiveAddr = 0x0000;
 	relativeAddr = 0x0000;
 	
-
+	// Cycles it takes (some doubts about the cycles required)
+	instructionCycles = 8;
 }
 
 void CPU::clock()
@@ -75,12 +83,15 @@ void CPU::setStatusFlag(StatusFlags flag, bool isSet)
 
 uint8_t CPU::IMP()
 {
-	return uint8_t();
+	fetched = A;
+	return 0;
 }
 
 uint8_t CPU::IMM()
 {
-	return uint8_t();
+	effectiveAddr = readData(PC);
+	PC++;
+	return 0;
 }
 
 uint8_t CPU::ZP0()
