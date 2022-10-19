@@ -177,7 +177,26 @@ uint8_t CPU::ABY()
 
 uint8_t CPU::IND()
 {
-	return uint8_t();
+	uint8_t intermediate_lo = readData(PC);
+	PC++;
+	uint8_t intermediate_hi = readData(PC);
+	PC++;
+	uint16_t intermediate_addr = (intermediate_hi << 8) | intermediate_lo;
+
+	if (intermediate_lo & 0x00FF)
+	{
+		uint8_t lowByte = readData(intermediate_addr & 0xFF00);
+		uint8_t highByte = readData(intermediate_addr + 1);
+		effectiveAddr = (highByte << 8) | lowByte;
+	}
+	else
+	{
+		uint8_t lowByte = readData(intermediate_addr);
+		uint8_t highByte = readData(intermediate_addr + 1);
+		effectiveAddr = (highByte << 8) | lowByte;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::IZX()
