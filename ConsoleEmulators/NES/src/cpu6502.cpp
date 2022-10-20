@@ -1,6 +1,8 @@
 #include "cpu6502.h"
 #include "nesBus.h"
 
+constexpr uint8_t base_stack = 0x0100;
+
 CPU::CPU(NESBusSystem* nesBus) : bus(nesBus)
 {
 	instructionsTable = 
@@ -46,8 +48,32 @@ void CPU::reset()
 	instructionCycles = 8;
 }
 
+void CPU::irq()
+{
+}
+
+void CPU::nmi()
+{
+}
+
 void CPU::clock()
 {
+	if (instructionCycles == 0) // Last instruction ended, we can execute the next one
+	{
+		uint8_t opcode = currentOpcode = readData(PC);
+		PC++;
+
+		instructionCycles = instructionsTable[opcode].cyclesRequired;
+
+		uint8_t possible_extra_cycle_1 = (this->*instructionsTable[opcode].addressMode)();
+		uint8_t possible_extra_cycle_2 = (this->*instructionsTable[opcode].instruction)();
+
+		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
+	}
+
+	instructionCycles--;
+
+	debugTotalCyclesElapsed++;
 }
 
 bool CPU::isLastCompleted() const
@@ -201,12 +227,32 @@ uint8_t CPU::IND()
 
 uint8_t CPU::IZX()
 {
-	return uint8_t();
+	uint16_t prevZPAddr = readData(PC) & 0x00FF;
+	PC++;
+	uint16_t postZPAddr = prevZPAddr + X;
+	postZPAddr &= 0x00FF; // The result must be always a zero page address
+
+	uint8_t lowByte = readData(postZPAddr);
+	uint8_t highByte = readData(postZPAddr + 1);
+	effectiveAddr = (highByte << 8) | lowByte;
+
+	return 0;
 }
 
 uint8_t CPU::IZY()
 {
-	return uint8_t();
+	uint16_t ptr_zp = readData(PC) & 0x00FF;
+	PC++;
+	uint16_t intermediate_lo = readData(ptr_zp);
+	uint16_t intermediate_hi = readData(ptr_zp + 1);
+	uint16_t intermediate_addr = (intermediate_hi << 8) | intermediate_lo;
+	bool crossPage = ((intermediate_addr + Y) & 0xFF00) != (intermediate_addr & 0xFF00);
+	effectiveAddr = intermediate_addr + Y;
+
+	if (crossPage)
+		return 1;
+	else
+		return 0;
 }
 
 // ------------------------
@@ -220,87 +266,231 @@ uint8_t CPU::ADC()
 
 uint8_t CPU::AND()
 {
-	return uint8_t();
+	fetch();
+
+	A &= fetched;
+	setStatusFlag(Z, A == 0);
+	setStatusFlag(N, A & 0x80);
+
+	return 1;
 }
 
 uint8_t CPU::ASL()
 {
-	return uint8_t();
+	fetch();
+
+	setStatusFlag(C, fetched & 0x80);
+	fetched << 1;
+	setStatusFlag(Z, A == 0);
+	setStatusFlag(N, A & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::BCC()
 {
-	return uint8_t();
+	if (getStatusFlag(C) == 0)
+	{
+		instructionCycles++;
+
+		effectiveAddr = PC + relativeAddr;
+
+		if ((effectiveAddr & 0xFF00) != (PC & 0xFF00))
+			instructionCycles++;
+
+		PC = effectiveAddr;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::BCS()
 {
-	return uint8_t();
+	if (getStatusFlag(C) == 1)
+	{
+		instructionCycles++;
+
+		effectiveAddr = PC + relativeAddr;
+
+		if ((effectiveAddr & 0xFF00) != (PC & 0xFF00))
+			instructionCycles++;
+
+		PC = effectiveAddr;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::BEQ()
 {
-	return uint8_t();
+	if (getStatusFlag(Z) == 1)
+	{
+		instructionCycles++;
+
+		effectiveAddr = PC + relativeAddr;
+
+		if ((effectiveAddr & 0xFF00) != (PC & 0xFF00))
+			instructionCycles++;
+
+		PC = effectiveAddr;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::BIT()
 {
-	return uint8_t();
+	fetch();
+
+	setStatusFlag(Z, A & fetched);
+	setStatusFlag(V, fetched & 0x40); // bit 6
+	setStatusFlag(N, fetched & 0x80); // bit 7
+
+	return 0;
 }
 
 uint8_t CPU::BMI()
 {
-	return uint8_t();
+	if (getStatusFlag(N) == 1)
+	{
+		instructionCycles++;
+
+		effectiveAddr = PC + relativeAddr;
+
+		if ((effectiveAddr & 0xFF00) != (PC & 0xFF00))
+			instructionCycles++;
+
+		PC = effectiveAddr;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::BNE()
 {
-	return uint8_t();
+	if (getStatusFlag(Z) == 0)
+	{
+		instructionCycles++;
+
+		effectiveAddr = PC + relativeAddr;
+
+		if ((effectiveAddr & 0xFF00) != (PC & 0xFF00))
+			instructionCycles++;
+
+		PC = effectiveAddr;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::BPL()
 {
-	return uint8_t();
+	if (getStatusFlag(N) == 0)
+	{
+		instructionCycles++;
+
+		effectiveAddr = PC + relativeAddr;
+
+		if ((effectiveAddr & 0xFF00) != (PC & 0xFF00))
+			instructionCycles++;
+
+		PC = effectiveAddr;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::BRK()
 {
-	return uint8_t();
+	
+	PC++; // Last executing instruction it's ensured to be finished before break happens
+	
+	writeData(base_stack + SP, (PC >> 8) & 0x00FF); // First we ensure 0s padding and we push hi byte 
+	SP--;
+	writeData(base_stack + SP, PC & 0x00FF);
+	SP--;
+
+	setStatusFlag(B, 1);
+	writeData(base_stack + SP, status);
+	SP--;
+
+	setStatusFlag(I, 1);
+	PC = (readData(0xFFFF) << 8) | readData(0xFFFE);
+	
+	return 0;
 }
 
 uint8_t CPU::BVC()
 {
-	return uint8_t();
+	if (getStatusFlag(V) == 0)
+	{
+		instructionCycles++;
+
+		effectiveAddr = PC + relativeAddr;
+
+		if ((effectiveAddr & 0xFF00) != (PC & 0xFF00))
+			instructionCycles++;
+
+		PC = effectiveAddr;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::BVS()
 {
-	return uint8_t();
+	if (getStatusFlag(N) == 1)
+	{
+		instructionCycles++;
+
+		effectiveAddr = PC + relativeAddr;
+
+		if ((effectiveAddr & 0xFF00) != (PC & 0xFF00))
+			instructionCycles++;
+
+		PC = effectiveAddr;
+	}
+
+	return 0;
 }
 
 uint8_t CPU::CLC()
 {
-	return uint8_t();
+	setStatusFlag(C, 0);
+
+	return 0;
 }
 
 uint8_t CPU::CLD()
 {
-	return uint8_t();
+	setStatusFlag(D, 0);
+
+	return 0;
 }
 
 uint8_t CPU::CLI()
 {
-	return uint8_t();
+	setStatusFlag(I, 0);
+
+	return 0;
 }
 
 uint8_t CPU::CLV()
 {
-	return uint8_t();
+	setStatusFlag(V, 0);
+
+	return 0;
 }
 
 uint8_t CPU::CMP()
 {
-	return uint8_t();
+	fetch();
+
+	setStatusFlag(C, A >= fetched);
+	setStatusFlag(Z, A == fetched);
+	setStatusFlag(N, (A - fetched) & 0x80);
+
+	return 1;
 }
 
 uint8_t CPU::CPX()
@@ -496,4 +686,12 @@ uint8_t CPU::TYA()
 uint8_t CPU::XXX()
 {
 	return 0;
+}
+
+uint8_t CPU::fetch()
+{
+	if (instructionsTable[currentOpcode].addressMode != &CPU::IMP)
+		fetched = readData(effectiveAddr);
+	
+	return fetched;
 }

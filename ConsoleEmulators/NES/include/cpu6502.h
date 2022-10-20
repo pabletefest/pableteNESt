@@ -12,6 +12,8 @@ public:
 	~CPU() = default;
 
 	void reset();
+	void irq();
+	void nmi();
 	void clock();
 
 public:
@@ -79,7 +81,12 @@ private:
 	uint8_t fetched = 0x00; // Operand value for the ALU
 	uint16_t effectiveAddr = 0x0000; // Address of operand
 	uint16_t relativeAddr = 0x0000; // Relative address for branch instructions
+	uint8_t currentOpcode = 0x00; // Last fetched opcode
 	uint8_t instructionCycles = 0;
+	uint64_t debugTotalCyclesElapsed = 0;
+
+	// Fetch data from the effective memory addres
+	uint8_t fetch();
 
 	struct Instruction
 	{
