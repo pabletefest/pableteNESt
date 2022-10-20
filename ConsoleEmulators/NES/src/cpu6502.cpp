@@ -1,7 +1,7 @@
 #include "cpu6502.h"
 #include "nesBus.h"
 
-constexpr uint8_t base_stack = 0x0100;
+constexpr uint8_t base_stack = (uint8_t)0x0100;
 
 CPU::CPU(NESBusSystem* nesBus) : bus(nesBus)
 {
@@ -280,9 +280,14 @@ uint8_t CPU::ASL()
 	fetch();
 
 	setStatusFlag(C, fetched & 0x80);
-	fetched << 1;
-	setStatusFlag(Z, A == 0);
-	setStatusFlag(N, A & 0x80);
+	uint8_t result  = fetched << 1;
+	setStatusFlag(Z, result == 0);
+	setStatusFlag(N, result & 0x80);
+
+	if (instructionsTable[currentOpcode].addressMode == &CPU::IMP)
+		A = result;
+	else
+		writeData(effectiveAddr, result);
 
 	return 0;
 }
@@ -495,27 +500,62 @@ uint8_t CPU::CMP()
 
 uint8_t CPU::CPX()
 {
-	return uint8_t();
+	fetch();
+
+	setStatusFlag(C, X >= fetched);
+	setStatusFlag(Z, X == fetched);
+	setStatusFlag(N, (X - fetched) & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::CPY()
 {
-	return uint8_t();
+	fetch();
+
+	setStatusFlag(C, Y >= fetched);
+	setStatusFlag(Z, Y == fetched);
+	setStatusFlag(N, (Y - fetched) & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::DEC()
 {
-	return uint8_t();
+	fetch();
+
+	uint8_t result = fetched - 1;
+
+	setStatusFlag(Z, result == 0);
+	setStatusFlag(N, result & 0x80);
+
+	writeData(relativeAddr, result);
+
+	return 0;
 }
 
 uint8_t CPU::DEX()
 {
-	return uint8_t();
+	fetch();
+
+	X -= 1;
+
+	setStatusFlag(Z, X == 0);
+	setStatusFlag(N, X & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::DEY()
 {
-	return uint8_t();
+	fetch();
+
+	Y -= 1;
+
+	setStatusFlag(Z, Y == 0);
+	setStatusFlag(N,Y & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::EOR()
