@@ -1,7 +1,7 @@
 #include "cpu6502.h"
 #include "nesBus.h"
 
-constexpr uint8_t base_stack = (uint8_t)0x0100;
+constexpr uint16_t base_stack = (uint16_t)0x0100;
 
 CPU::CPU(NESBusSystem* nesBus) : bus(nesBus)
 {
@@ -717,32 +717,73 @@ uint8_t CPU::ORA()
 
 uint8_t CPU::PHA()
 {
-	return uint8_t();
+	writeData(base_stack + SP, A);
+	SP--;
+
+	return 0;
 }
 
 uint8_t CPU::PHP()
 {
-	return uint8_t();
+	writeData(base_stack + SP, status);
+	SP--;
+
+	return 0;
 }
 
 uint8_t CPU::PLA()
 {
-	return uint8_t();
+	SP++;
+	A = readData(base_stack + SP);
+
+	setStatusFlag(Z, A == 0);
+	setStatusFlag(N, A & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::PLP()
 {
-	return uint8_t();
+	SP++;
+	status = readData(base_stack + SP);
+
+	return 0;
 }
 
 uint8_t CPU::ROL()
 {
-	return uint8_t();
+	fetch();
+
+	uint8_t result = (fetched << 1) | getStatusFlag(C);
+	setStatusFlag(C, fetched & 0x80);
+	setStatusFlag(N, result & 0x80);
+
+	if (instructionsTable[currentOpcode].addressMode == &CPU::IMP)
+		A = result;
+	else
+		writeData(effectiveAddr, result);
+
+	setStatusFlag(Z, A == 0);
+
+	return 0;
 }
 
 uint8_t CPU::ROR()
 {
-	return uint8_t();
+	fetch();
+
+	uint8_t result = (fetched >> 1) | (getStatusFlag(C) << 8);
+	setStatusFlag(C, fetched & 0x01);
+	setStatusFlag(N, result & 0x80);
+
+	if (instructionsTable[currentOpcode].addressMode == &CPU::IMP)
+		A = result;
+	else
+		writeData(effectiveAddr, result);
+
+	setStatusFlag(Z, A == 0);
+
+	return 0;
 }
 
 uint8_t CPU::RTI()
