@@ -261,6 +261,7 @@ uint8_t CPU::IZY()
 
 uint8_t CPU::ADC()
 {
+	// TODO
 	return uint8_t();
 }
 
@@ -788,17 +789,37 @@ uint8_t CPU::ROR()
 
 uint8_t CPU::RTI()
 {
-	return uint8_t();
+	SP++;
+	status = readData(base_stack + SP);
+
+	SP++;
+	uint8_t lowByte = readData(base_stack + SP);
+	SP++;
+	uint8_t highByte = readData(base_stack + SP);
+
+	PC = (highByte << 8) | lowByte;
+
+	return 0;
 }
 
 uint8_t CPU::RTS()
 {
-	return uint8_t();
+	SP++;
+	uint8_t lowByte = readData(base_stack + SP);
+	SP++;
+	uint8_t highByte = readData(base_stack + SP);
+
+	PC = (highByte << 8) | lowByte;
+	PC--;
+
+	return 0;
 }
 
 uint8_t CPU::SBC()
 {
-	return uint8_t();
+	// TODO
+
+	return 1;
 }
 
 uint8_t CPU::SEC()
