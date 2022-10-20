@@ -560,62 +560,159 @@ uint8_t CPU::DEY()
 
 uint8_t CPU::EOR()
 {
-	return uint8_t();
+	fetch();
+
+	A ^= fetched;
+
+	setStatusFlag(Z, A == 0);
+	setStatusFlag(N, A & 0x80);
+
+	return 1;
 }
 
 uint8_t CPU::INC()
 {
-	return uint8_t();
+	fetch();
+
+	uint8_t result = fetched + 1;
+
+	setStatusFlag(Z, result == 0);
+	setStatusFlag(N, result & 0x80);
+
+	writeData(relativeAddr, result);
+
+	return 0;
 }
 
 uint8_t CPU::INX()
 {
-	return uint8_t();
+	fetch();
+
+	X += 1;
+
+	setStatusFlag(Z, X == 0);
+	setStatusFlag(N, X & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::INY()
 {
-	return uint8_t();
+	fetch();
+
+	Y += 1;
+
+	setStatusFlag(Z, Y == 0);
+	setStatusFlag(N, Y & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::JMP()
 {
-	return uint8_t();
+	PC = effectiveAddr;
+
+	return 0;
 }
 
 uint8_t CPU::JSR()
 {
-	return uint8_t();
+	PC--;
+
+	writeData(base_stack + SP, (PC >> 8) & 0x00FF); // First we ensure 0s padding and we push hi byte 
+	SP--;
+	writeData(base_stack + SP, PC & 0x00FF);
+	SP--;
+
+	PC = effectiveAddr;
+
+	return 0;
 }
 
 uint8_t CPU::LDA()
 {
-	return uint8_t();
+	fetch();
+
+	A = fetched;
+
+	setStatusFlag(Z, A == 0);
+	setStatusFlag(N, A & 0x80);
+
+	return 1;
 }
 
 uint8_t CPU::LDX()
 {
-	return uint8_t();
+	fetch();
+
+	X = fetched;
+
+	setStatusFlag(Z, X == 0);
+	setStatusFlag(N, X & 0x80);
+
+	return 1;
 }
 
 uint8_t CPU::LDY()
 {
-	return uint8_t();
+	fetch();
+
+	Y = fetched;
+
+	setStatusFlag(Z, Y == 0);
+	setStatusFlag(N, Y & 0x80);
+
+	return 1;
 }
 
 uint8_t CPU::LSR()
 {
-	return uint8_t();
+	fetch();
+
+	setStatusFlag(C, fetched & 0x01);
+	uint8_t result = fetched >> 1;
+	setStatusFlag(Z, result == 0);
+	setStatusFlag(N, result & 0x80);
+
+	if (instructionsTable[currentOpcode].addressMode == &CPU::IMP)
+		A = result;
+	else
+		writeData(effectiveAddr, result);
+
+	return 0;
 }
 
 uint8_t CPU::NOP()
 {
-	return uint8_t();
+	switch (currentOpcode)
+	{
+	case 0x1C:
+		return 1;
+	case 0x3C:
+		return 1;
+	case 0x5C:
+		return 1;
+	case 0x7C:
+		return 1;
+	case 0xDC:
+		return 1;
+	case 0xFC:
+		return 1;
+	default:
+		return 0;
+	}
 }
 
 uint8_t CPU::ORA()
 {
-	return uint8_t();
+	fetch();
+
+	A |= fetched;
+
+	setStatusFlag(Z, A == 0);
+	setStatusFlag(N, A & 0x80);
+
+	return 1;
 }
 
 uint8_t CPU::PHA()
