@@ -825,7 +825,16 @@ uint8_t CPU::RTS()
 
 uint8_t CPU::SBC()
 {
-	// TODO
+	fetch();
+
+	uint16_t memVal = fetched ^ 0x00FF;
+
+	uint16_t result = A + memVal + getStatusFlag(C);
+	A = result & 0x00FF;
+	setStatusFlag(C, result > 255);
+	setStatusFlag(Z, A == 0); // Or (result & 0x00FF) == 0
+	setStatusFlag(V, (((uint16_t)A ^ result) & ~((uint16_t)A ^ (uint16_t)fetched)) & 0x0080); // I think cast to uint16_t is not needed. Also AND with 0x0080 is to get msb of low byte
+	setStatusFlag(N, A & 0x80); // Or result & 0x0080 (0x80) 
 
 	return 1;
 }
