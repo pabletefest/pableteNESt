@@ -127,12 +127,12 @@ bool CPU::isLastCompleted() const
 
 void CPU::writeData(uint16_t address, uint8_t data)
 {
-	bus->writeData(address, data);
+	bus->cpuWrite(address, data);
 }
 
 uint8_t CPU::readData(uint16_t address)
 {
-	return bus->readData(address);
+	return bus->cpuRead(address);
 }
 
 uint8_t CPU::getStatusFlag(StatusFlags flag)

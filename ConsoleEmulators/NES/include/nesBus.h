@@ -11,8 +11,8 @@ public:
 	NESBusSystem();
 	~NESBusSystem() = default;
 
-	void writeData(uint16_t address, uint8_t data);
-	uint8_t readData(uint16_t address);
+	void cpuWrite(uint16_t address, uint8_t data);
+	uint8_t cpuRead(uint16_t address);
 
 	void reset();
 	void clock();

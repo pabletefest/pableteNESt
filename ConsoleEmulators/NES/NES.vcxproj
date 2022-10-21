@@ -19,13 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\cartridge.h" />
     <ClInclude Include="include\cpu6502.h" />
     <ClInclude Include="include\nesBus.h" />
+    <ClInclude Include="include\ppu2C02.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\cartridge.cpp" />
     <ClCompile Include="src\cpu6502.cpp" />
     <ClCompile Include="src\NES.cpp" />
     <ClCompile Include="src\nesBus.cpp" />
+    <ClCompile Include="src\ppu2C02.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

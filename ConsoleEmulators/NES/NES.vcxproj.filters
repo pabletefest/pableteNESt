@@ -21,6 +21,12 @@
     <ClInclude Include="include\nesBus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\ppu2C02.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cartridge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu6502.cpp">
@@ -30,6 +36,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\nesBus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ppu2C02.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cartridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
