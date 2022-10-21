@@ -824,62 +824,101 @@ uint8_t CPU::SBC()
 
 uint8_t CPU::SEC()
 {
-	return uint8_t();
+	setStatusFlag(C, 1);
+
+	return 0;
 }
 
 uint8_t CPU::SED()
 {
-	return uint8_t();
+	setStatusFlag(D, 1);
+
+	return 0;
 }
 
 uint8_t CPU::SEI()
 {
-	return uint8_t();
+	setStatusFlag(I, 1);
+
+	return 0;
 }
 
 uint8_t CPU::STA()
 {
-	return uint8_t();
+	writeData(effectiveAddr, A);
+
+	return 0;
 }
 
 uint8_t CPU::STX()
 {
-	return uint8_t();
+	writeData(effectiveAddr, X);
+
+	return 0;
 }
 
 uint8_t CPU::STY()
 {
-	return uint8_t();
+	writeData(effectiveAddr, Y);
+
+	return 0;
 }
 
 uint8_t CPU::TAX()
 {
-	return uint8_t();
+	X = A;
+
+	setStatusFlag(Z, X ==0);
+	setStatusFlag(N, X & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::TAY()
 {
-	return uint8_t();
+	Y = A;
+
+	setStatusFlag(Z, Y == 0);
+	setStatusFlag(N, Y & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::TSX()
 {
-	return uint8_t();
+	X = SP;
+
+	setStatusFlag(Z, X == 0);
+	setStatusFlag(N, X & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::TXA()
 {
-	return uint8_t();
+	A = X;
+
+	setStatusFlag(Z, A == 0);
+	setStatusFlag(N, A & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::TXS()
 {
-	return uint8_t();
+	SP = X;
+
+	return 0;
 }
 
 uint8_t CPU::TYA()
 {
-	return uint8_t();
+	A = Y;
+
+	setStatusFlag(Z, A == 0);
+	setStatusFlag(N, A & 0x80);
+
+	return 0;
 }
 
 uint8_t CPU::XXX()
