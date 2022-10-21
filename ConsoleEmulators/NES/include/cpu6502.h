@@ -91,8 +91,8 @@ private:
 	struct Instruction
 	{
 		std::string name;
-		uint8_t (CPU::* addressMode)(void) = nullptr;
 		uint8_t (CPU::* instruction)(void) = nullptr;
+		uint8_t (CPU::* addressMode)(void) = nullptr;
 		uint8_t cyclesRequired = 0;
 	};
 

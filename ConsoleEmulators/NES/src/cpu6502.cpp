@@ -35,7 +35,7 @@ void CPU::reset()
 	status = 0x00 | U; //Initially all zeros except unused bit 5 which is always 1
 	SP = 0xFD;
 
-	effectiveAddr = 0xFFFE;
+	effectiveAddr = 0xFFFC;
 	uint8_t lowByte = readData(effectiveAddr);
 	uint8_t highByte = readData(effectiveAddr + 1);
 	PC = (highByte << 8) | lowByte;
@@ -63,12 +63,19 @@ void CPU::clock()
 		uint8_t opcode = currentOpcode = readData(PC);
 		PC++;
 
+#if _DEBUG
+		printf("\nExecuting instruction %s...\n", instructionsTable[opcode].name.c_str());
+#endif
 		instructionCycles = instructionsTable[opcode].cyclesRequired;
 
 		uint8_t possible_extra_cycle_1 = (this->*instructionsTable[opcode].addressMode)();
 		uint8_t possible_extra_cycle_2 = (this->*instructionsTable[opcode].instruction)();
 
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
+	
+#if _DEBUG
+		printf("\n%s execution done!\n", instructionsTable[opcode].name.c_str());
+#endif
 	}
 
 	instructionCycles--;
@@ -117,7 +124,7 @@ uint8_t CPU::IMP()
 
 uint8_t CPU::IMM()
 {
-	effectiveAddr = readData(PC);
+	effectiveAddr = PC;
 	PC++;
 
 	return 0;
