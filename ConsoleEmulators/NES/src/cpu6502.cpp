@@ -50,10 +50,47 @@ void CPU::reset()
 
 void CPU::irq()
 {
+	if (getStatusFlag(I) == 0)
+	{
+		writeData(base_stack + SP, (PC >> 8) & 0x00FF);
+		SP--;
+
+		writeData(base_stack + SP, PC & 0x00FF);
+		SP--;
+
+		setStatusFlag(B, 0);
+		setStatusFlag(I, 1);
+		writeData(base_stack + SP, status);
+		SP--;
+
+		effectiveAddr = 0xFFFE;
+		uint8_t lo_byte = readData(effectiveAddr);
+		uint8_t hi_byte = readData(effectiveAddr + 1);
+		PC = (hi_byte << 8) | lo_byte;
+
+		instructionCycles = 7;
+	}
 }
 
 void CPU::nmi()
 {
+	writeData(base_stack + SP, (PC >> 8) & 0x00FF);
+	SP--;
+
+	writeData(base_stack + SP, PC & 0x00FF);
+	SP--;
+
+	setStatusFlag(B, 0);
+	setStatusFlag(I, 1);
+	writeData(base_stack + SP, status);
+	SP--;
+
+	effectiveAddr = 0xFFFA;
+	uint8_t lo_byte = readData(effectiveAddr);
+	uint8_t hi_byte = readData(effectiveAddr + 1);
+	PC = (hi_byte << 8) | lo_byte;
+
+	instructionCycles = 7;
 }
 
 void CPU::clock()

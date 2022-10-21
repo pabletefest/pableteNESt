@@ -5,6 +5,8 @@
 
 class NESBusSystem;
 
+// CPU 2A03/2A07 (6502 NES console processor)
+
 class CPU
 {
 public:
