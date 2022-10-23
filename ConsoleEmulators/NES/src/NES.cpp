@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include "nesBus.h"
+#include "cartridge.h"
 
 void runTest3x10(NESBusSystem& nes)
 {
@@ -77,14 +78,36 @@ void runTest3x10(NESBusSystem& nes)
     }
 }
 
+void run_nestest(NESBusSystem& nes)
+{
+    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
+    nes.insertCardtridge(cartridge);
+
+    nes.reset();
+
+    while (true)
+    {
+        printf("\nA register value is %d", nes.cpu.A);
+        printf("\nX register value is %d", nes.cpu.X);
+        printf("\nY register value is %d", nes.cpu.Y);
+        printf("\nPC register value is %#x", nes.cpu.PC);
+        printf("\nSP register value is %#x", nes.cpu.SP);
+        printf("\nSTATUS register value is %#x\n", nes.cpu.status);
+
+        nes.clock();
+    }
+}
+
 int main()
 {
     NESBusSystem nes;
 
+    run_nestest(nes);
+
     /*std::cout << "Hello World!\n";
     std::cin.get();*/
 
-    runTest3x10(nes);
+    //runTest3x10(nes);
 
     std::cin.get();
 }
