@@ -1,7 +1,10 @@
 #include <iostream>
 #include <sstream>
+
 #include "nesBus.h"
 #include "cartridge.h"
+
+#include "SDL.h"
 
 void runTest3x10(NESBusSystem& nes)
 {
@@ -98,16 +101,33 @@ void run_nestest(NESBusSystem& nes)
     }
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    /*SDL_Window* window = nullptr;
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        std::cout << "Video Initialization Error: " << SDL_GetError() << "\n";
+        return 0;
+    }
+
+    window = SDL_CreateWindow("NES EMULATOR", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_SHOWN);
+
+    if (!window)
+    {
+        std::cout << "Window Creation Error: " << SDL_GetError() << "\n";
+        return 0;
+    }
+
+    while (true)
+        SDL_UpdateWindowSurface(window);*/
+
     NESBusSystem nes;
+    //run_nestest(nes);
 
-    run_nestest(nes);
-
-    /*std::cout << "Hello World!\n";
-    std::cin.get();*/
-
-    //runTest3x10(nes);
+    //SDL_DestroyWindow(window);
+    //SDL_Quit();
 
     std::cin.get();
+    return 0;
 }
