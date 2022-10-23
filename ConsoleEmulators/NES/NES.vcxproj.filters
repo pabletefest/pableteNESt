@@ -27,6 +27,12 @@
     <ClInclude Include="include\cartridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\mapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mapper_000.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu6502.cpp">
@@ -42,6 +48,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\cartridge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mapper_000.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

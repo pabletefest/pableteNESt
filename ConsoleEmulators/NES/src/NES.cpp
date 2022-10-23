@@ -36,18 +36,24 @@ void runTest3x10(NESBusSystem& nes)
     {
         std::string byte;
         ss >> byte;
-        nes.ram[romOffset++] = (uint8_t)std::stoul(byte, nullptr, 16);
+        nes.cpuRam[romOffset++] = (uint8_t)std::stoul(byte, nullptr, 16);
     }
 
-    nes.ram[0xFFFC] = 0x00;
-    nes.ram[0xFFFD] = 0x80;
+    //NMI Vector
+    nes.cpuRam[0xFFFA] = 0x00;
+    nes.cpuRam[0xFFFB] = 0x00;
 
-    nes.ram[0xFFFE] = 0x00;
-    nes.ram[0xFFFF] = 0x80;
+    //Reset Vector
+    nes.cpuRam[0xFFFC] = 0x00;
+    nes.cpuRam[0xFFFD] = 0x80;
+
+    //IRQ Vector
+    nes.cpuRam[0xFFFE] = 0x00;
+    nes.cpuRam[0xFFFF] = 0x80;
 
     nes.reset();
 
-    while (nes.ram[0x0002] != 0x001e)
+    while (nes.cpuRam[0x0002] != 0x001e)
     {
         do
         {
