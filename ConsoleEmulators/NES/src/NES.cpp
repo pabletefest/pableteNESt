@@ -95,7 +95,7 @@ void run_nestest(NESBusSystem& nes)
     nes.cpuRam[0x01FE] = 0xBC;
 
 
-    while (true)
+    while (nes.cpu.PC != 0xC66E)
     {
 #if 0
         printf("\nA register value is %d", nes.cpu.A);

@@ -43,6 +43,8 @@ void CPU::reset()
 	fetched = 0x00;
 	effectiveAddr = 0x0000;
 	relativeAddr = 0x0000;
+
+	setStatusFlag(I, 1);
 	
 	// Cycles it takes (some doubts about the cycles required)
 	instructionCycles = 8;
@@ -129,7 +131,8 @@ void CPU::clock()
 
 		if (instructionsTable[opcode].addressMode == &CPU::IMP)
 			numFollowingBytes = 0;
-		else if (instructionsTable[opcode].addressMode == &CPU::IMM)
+		else if (instructionsTable[opcode].addressMode == &CPU::IMM
+			|| instructionsTable[opcode].addressMode == &CPU::REL)
 			numFollowingBytes = 1;
 		else
 			numFollowingBytes = 2;
@@ -138,14 +141,14 @@ void CPU::clock()
 		{
 			uint8_t hi = effectiveAddr >> 8;
 			uint8_t lo = effectiveAddr & 0x00FF;
-			printf("%#x  %x %x %x  %s\t\tA:%x X:%x Y:%x P:%x SP:%x", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%#x  %02x %02x %02x  %s\t\tA:%x X:%x Y:%x P:%x SP:%x\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else if (numFollowingBytes == 1)
 		{
-			printf("%#x  %x %x  %s\t\tA:%x X:%x Y:%x P:%x SP:%x", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%#x  %02x %02x     %s\t\tA:%x X:%x Y:%x P:%x SP:%x\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else
-			printf("%#x  %x  %s\t\tA:%#x X:%x Y:%x P:%x SP:%x", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%#x  %02x        %s\t\tA:%#x X:%x Y:%x P:%x SP:%x\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 #endif
 	}
 
