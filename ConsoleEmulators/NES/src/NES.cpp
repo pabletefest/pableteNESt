@@ -83,20 +83,28 @@ void runTest3x10(NESBusSystem& nes)
 
 void run_nestest(NESBusSystem& nes)
 {
+    nes.cpu.PC = 0x8000;
     std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
     nes.insertCardtridge(cartridge);
 
     nes.reset();
 
+    nes.cpu.PC = 0xC000;
+    
+    nes.cpuRam[0x01FF] = 0x4A;
+    nes.cpuRam[0x01FE] = 0xBC;
+
+
     while (true)
     {
+#if 0
         printf("\nA register value is %d", nes.cpu.A);
         printf("\nX register value is %d", nes.cpu.X);
         printf("\nY register value is %d", nes.cpu.Y);
         printf("\nPC register value is %#x", nes.cpu.PC);
         printf("\nSP register value is %#x", nes.cpu.SP);
         printf("\nSTATUS register value is %#x\n", nes.cpu.status);
-
+#endif
         nes.clock();
     }
 }
@@ -123,7 +131,7 @@ int main(int argc, char* argv[])
         SDL_UpdateWindowSurface(window);*/
 
     NESBusSystem nes;
-    //run_nestest(nes);
+    run_nestest(nes);
 
     //SDL_DestroyWindow(window);
     //SDL_Quit();

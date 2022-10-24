@@ -34,5 +34,5 @@ public:
 
 	std::array<uint8_t, 2048> cpuRam; // 2KB RAM
 
-	uint64_t totalSystemClockCycles{0};
+	uint64_t totalSystemClockCycles = 0;
 };

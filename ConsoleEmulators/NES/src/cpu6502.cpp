@@ -97,21 +97,55 @@ void CPU::clock()
 {
 	if (instructionCycles == 0) // Last instruction ended, we can execute the next one
 	{
+#if _DEBUG
+		uint16_t originPC = PC; //*
+		uint16_t originA = A; //*
+		uint16_t originX = X; //*
+		uint16_t originY = Y; //*
+		uint16_t originP = status; //*
+		uint16_t originSP = SP; //*
+#endif
 		uint8_t opcode = currentOpcode = readData(PC);
 		PC++;
 
-#if _DEBUG
+#if 0
 		printf("\nExecuting instruction %s...\n", instructionsTable[opcode].name.c_str());
 #endif
 		instructionCycles = instructionsTable[opcode].cyclesRequired;
 
 		uint8_t possible_extra_cycle_1 = (this->*instructionsTable[opcode].addressMode)();
 		uint8_t possible_extra_cycle_2 = (this->*instructionsTable[opcode].instruction)();
-
+#if _DEBUG
+		uint16_t abs_addr = effectiveAddr; //*
+		std::string instName = instructionsTable[opcode].name; //*
+#endif		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
 	
-#if _DEBUG
+#if 0
 		printf("\n%s execution done!\n", instructionsTable[opcode].name.c_str());
+#endif
+#if _DEBUG
+		int numFollowingBytes = 0;
+
+		if (instructionsTable[opcode].addressMode == &CPU::IMP)
+			numFollowingBytes = 0;
+		else if (instructionsTable[opcode].addressMode == &CPU::IMM)
+			numFollowingBytes = 1;
+		else
+			numFollowingBytes = 2;
+
+		if (numFollowingBytes == 2)
+		{
+			uint8_t hi = effectiveAddr >> 8;
+			uint8_t lo = effectiveAddr & 0x00FF;
+			printf("%#x  %x %x %x  %s\t\tA:%x X:%x Y:%x P:%x SP:%x", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+		}
+		else if (numFollowingBytes == 1)
+		{
+			printf("%#x  %x %x  %s\t\tA:%x X:%x Y:%x P:%x SP:%x", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+		}
+		else
+			printf("%#x  %x  %s\t\tA:%#x X:%x Y:%x P:%x SP:%x", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 #endif
 	}
 
