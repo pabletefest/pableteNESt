@@ -174,7 +174,7 @@ uint8_t CPU::readData(uint16_t address)
 
 uint8_t CPU::getStatusFlag(StatusFlags flag)
 {
-	return status & flag;
+	return (status & flag) > 0;
 }
 
 void CPU::setStatusFlag(StatusFlags flag, bool isSet)
