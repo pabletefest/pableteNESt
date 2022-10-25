@@ -1,6 +1,10 @@
 #include "cpu6502.h"
 #include "nesBus.h"
 
+#ifdef LOG_MODE
+#include <stdio.h>
+#endif
+
 constexpr uint16_t base_stack = (uint16_t)0x0100;
 
 CPU::CPU(NESBusSystem* nesBus) : bus(nesBus)
@@ -99,7 +103,7 @@ void CPU::clock()
 {
 	if (instructionCycles == 0) // Last instruction ended, we can execute the next one
 	{
-#if _DEBUG
+#ifdef LOG_MODE
 		uint16_t originPC = PC; //*
 		uint16_t originA = A; //*
 		uint16_t originX = X; //*
@@ -110,14 +114,11 @@ void CPU::clock()
 		uint8_t opcode = currentOpcode = readData(PC);
 		PC++;
 
-#if 0
-		printf("\nExecuting instruction %s...\n", instructionsTable[opcode].name.c_str());
-#endif
 		instructionCycles = instructionsTable[opcode].cyclesRequired;
 
 		uint8_t possible_extra_cycle_1 = (this->*instructionsTable[opcode].addressMode)();
 
-#if _DEBUG
+#ifdef LOG_MODE
 		uint16_t abs_addr = effectiveAddr; //*
 		std::string instName = instructionsTable[opcode].name; //*
 		int numFollowingBytes = 0;
@@ -130,27 +131,36 @@ void CPU::clock()
 		else
 			numFollowingBytes = 2;
 
+		fopen_s(&logfile, "CPU6502.txt", "a");
+
 		if (numFollowingBytes == 2)
 		{
 			uint8_t hi = effectiveAddr >> 8;
 			uint8_t lo = effectiveAddr & 0x00FF;
 			printf("%X  %02X %02X %02X  %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+			if (logfile != nullptr)
+				fprintf(logfile, "%X  %02X %02X %02X  %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else if (numFollowingBytes == 1)
 		{
 			printf("%X  %02X %02X     %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+			if (logfile != nullptr)
+				fprintf(logfile, "%X  %02X %02X     %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else
+		{
 			printf("%X  %02X        %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+			if (logfile != nullptr)
+				fprintf(logfile, "%X  %02X        %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+		}
+
+		if (logfile)
+			fclose(logfile);
 #endif		
 		
 		uint8_t possible_extra_cycle_2 = (this->*instructionsTable[opcode].instruction)();
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
-	
-#if 0
-		printf("\n%s execution done!\n", instructionsTable[opcode].name.c_str());
-#endif
 	}
 
 	instructionCycles--;

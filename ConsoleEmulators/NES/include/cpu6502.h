@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#define LOG_MODE
+
 class NESBusSystem;
 
 // CPU 2A03/2A07 (6502 NES console processor)
@@ -99,4 +101,8 @@ private:
 	};
 
 	std::vector<Instruction> instructionsTable;
+
+#ifdef LOG_MODE
+	FILE* logfile = nullptr;
+#endif
 };
