@@ -65,7 +65,8 @@ void CPU::irq()
 		SP--;
 
 		setStatusFlag(B, 0);
-		setStatusFlag(I, 1);
+		setStatusFlag(U, 1);
+		setStatusFlag(I, 1); // Side effect
 		writeData(base_stack + SP, status);
 		SP--;
 
@@ -87,7 +88,8 @@ void CPU::nmi()
 	SP--;
 
 	setStatusFlag(B, 0);
-	setStatusFlag(I, 1);
+	setStatusFlag(U, 1);
+	setStatusFlag(I, 1); // Side effect
 	writeData(base_stack + SP, status);
 	SP--;
 
@@ -137,21 +139,21 @@ void CPU::clock()
 		{
 			uint8_t hi = effectiveAddr >> 8;
 			uint8_t lo = effectiveAddr & 0x00FF;
-			printf("%X  %02X %02X %02X  %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X %02X %02X  %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else if (numFollowingBytes == 1)
 		{
-			printf("%X  %02X %02X     %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X %02X     %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else
 		{
-			printf("%X  %02X        %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X        %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 
 		if (logfile)
@@ -516,11 +518,14 @@ uint8_t CPU::BRK()
 	writeData(base_stack + SP, PC & 0x00FF);
 	SP--;
 
+	//These always set by BRK
 	setStatusFlag(B, 1);
+	setStatusFlag(U, 1);
 	writeData(base_stack + SP, status);
 	SP--;
 
-	setStatusFlag(I, 1);
+	setStatusFlag(I, 1); // Side effect
+
 	PC = (readData(0xFFFF) << 8) | readData(0xFFFE);
 	
 	return 0;
@@ -545,7 +550,7 @@ uint8_t CPU::BVC()
 
 uint8_t CPU::BVS()
 {
-	if (getStatusFlag(N) == 1)
+	if (getStatusFlag(V) == 1)
 	{
 		instructionCycles++;
 
@@ -826,8 +831,15 @@ uint8_t CPU::PHA()
 
 uint8_t CPU::PHP()
 {
+	// These are always set by PHP
+	setStatusFlag(B, 1);
+	setStatusFlag(U, 1);
 	writeData(base_stack + SP, status);
 	SP--;
+
+	//Cleared after the push to restore it
+	setStatusFlag(B, 0);
+	//setStatusFlag(U, 0);
 
 	return 0;
 }
@@ -840,6 +852,9 @@ uint8_t CPU::PLA()
 	setStatusFlag(Z, A == 0);
 	setStatusFlag(N, A & 0x80);
 
+	// Ensure U is always 1
+	setStatusFlag(U, 1);
+
 	return 0;
 }
 
@@ -847,6 +862,8 @@ uint8_t CPU::PLP()
 {
 	SP++;
 	status = readData(base_stack + SP);
+	status &= ~B;
+	setStatusFlag(U, 1);
 
 	return 0;
 }
@@ -891,6 +908,10 @@ uint8_t CPU::RTI()
 {
 	SP++;
 	status = readData(base_stack + SP);
+
+	//Ignored
+	status &= ~B;
+	status &= ~U;
 
 	SP++;
 	uint8_t lowByte = readData(base_stack + SP);

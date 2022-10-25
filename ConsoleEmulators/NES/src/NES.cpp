@@ -6,6 +6,11 @@
 
 #include "SDL.h"
 
+#ifdef LOG_MODE
+#include <fstream>
+#include <tuple>
+#endif
+
 void runTest3x10(NESBusSystem& nes)
 {
     // Load Program (assembled at https://www.masswerk.at/6502/assembler.html)
@@ -109,6 +114,53 @@ void run_nestest(NESBusSystem& nes)
     }
 }
 
+std::tuple<std::string, std::string, uint32_t> compareWithNestestLog()
+{
+    std::vector<std::string> nestestPCVec;
+    std::vector<std::string> myTestPCVec;
+
+    std::ifstream ifs;
+    ifs.open("nestest.log");
+
+    if (ifs.is_open())
+    {
+        std::string line;
+
+        while (std::getline(ifs, line))
+        {
+            std::istringstream iss (line);
+            std::string PC;
+            iss >> PC;
+            nestestPCVec.push_back(PC);
+        }
+    }
+
+    ifs.close();
+
+    ifs.open("CPU6502.txt");
+    
+    if (ifs.is_open())
+    {
+        std::string line;
+
+        while (std::getline(ifs, line))
+        {
+            std::istringstream iss(line);
+            std::string PC;
+            iss >> PC;
+            myTestPCVec.push_back(PC);
+        }
+    }
+
+    for (uint32_t i = 0; i < nestestPCVec.size(); i++)
+    {
+        if (nestestPCVec[i] != myTestPCVec[i])
+            return std::make_tuple(nestestPCVec[i], myTestPCVec[i], i);
+    }
+
+    return {};
+}
+
 int main(int argc, char* argv[])
 {
     /*SDL_Window* window = nullptr;
@@ -131,7 +183,11 @@ int main(int argc, char* argv[])
         SDL_UpdateWindowSurface(window);*/
 
     NESBusSystem nes;
+#ifdef LOG_MODE
+    auto result = compareWithNestestLog();
+    printf("In line %d of 8991, nestest log shows %s and mine shows %s\n\n", std::get<2>(result) + 1, std::get<0>(result).c_str(), std::get<1>(result).c_str());
     run_nestest(nes);
+#endif
 
     //SDL_DestroyWindow(window);
     //SDL_Quit();
