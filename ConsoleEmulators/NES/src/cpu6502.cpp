@@ -116,17 +116,10 @@ void CPU::clock()
 		instructionCycles = instructionsTable[opcode].cyclesRequired;
 
 		uint8_t possible_extra_cycle_1 = (this->*instructionsTable[opcode].addressMode)();
-		uint8_t possible_extra_cycle_2 = (this->*instructionsTable[opcode].instruction)();
+
 #if _DEBUG
 		uint16_t abs_addr = effectiveAddr; //*
 		std::string instName = instructionsTable[opcode].name; //*
-#endif		
-		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
-	
-#if 0
-		printf("\n%s execution done!\n", instructionsTable[opcode].name.c_str());
-#endif
-#if _DEBUG
 		int numFollowingBytes = 0;
 
 		if (instructionsTable[opcode].addressMode == &CPU::IMP)
@@ -141,14 +134,22 @@ void CPU::clock()
 		{
 			uint8_t hi = effectiveAddr >> 8;
 			uint8_t lo = effectiveAddr & 0x00FF;
-			printf("%#x  %02x %02x %02x  %s\t\tA:%x X:%x Y:%x P:%x SP:%x\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X %02X %02X  %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else if (numFollowingBytes == 1)
 		{
-			printf("%#x  %02x %02x     %s\t\tA:%x X:%x Y:%x P:%x SP:%x\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X %02X     %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else
-			printf("%#x  %02x        %s\t\tA:%#x X:%x Y:%x P:%x SP:%x\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X        %s\t\tA:%X X:%X Y:%X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+#endif		
+		
+		uint8_t possible_extra_cycle_2 = (this->*instructionsTable[opcode].instruction)();
+		
+		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
+	
+#if 0
+		printf("\n%s execution done!\n", instructionsTable[opcode].name.c_str());
 #endif
 	}
 
@@ -437,7 +438,7 @@ uint8_t CPU::BIT()
 {
 	fetch();
 
-	setStatusFlag(Z, A & fetched);
+	setStatusFlag(Z, (A & fetched) == 0);
 	setStatusFlag(V, fetched & 0x40); // bit 6
 	setStatusFlag(N, fetched & 0x80); // bit 7
 
@@ -899,7 +900,8 @@ uint8_t CPU::RTS()
 	uint8_t highByte = readData(base_stack + SP);
 
 	PC = (highByte << 8) | lowByte;
-	PC--;
+
+	PC++;
 
 	return 0;
 }
