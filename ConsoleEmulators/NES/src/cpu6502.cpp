@@ -357,12 +357,12 @@ uint8_t CPU::ADC()
 {
 	fetch();
 
-	uint16_t result = A + fetched + getStatusFlag(C);
-	A = result & 0x00FF;
+	uint16_t result = (uint16_t)A + (uint16_t)fetched + getStatusFlag(C);
 	setStatusFlag(C, result > 255);
-	setStatusFlag(Z, A == 0); // Or (result & 0x00FF) == 0
-	setStatusFlag(V, (((uint16_t)A ^ result) & ~((uint16_t)A ^ (uint16_t)fetched)) & 0x0080); // I think cast to uint16_t is not needed. Also AND with 0x0080 is to get msb of low byte
-	setStatusFlag(N, A & 0x80); // Or result & 0x0080 (0x80) 
+	setStatusFlag(Z, (result & 0x00FF) == 0); // Or (result & 0x00FF) == 0
+	setStatusFlag(V, (~((uint16_t)A ^ (uint16_t)fetched) & ((uint16_t)A ^ (uint16_t)result)) & 0x0080); // I think cast to uint16_t is not needed. Also AND with 0x0080 is to get msb of low byte
+	setStatusFlag(N, result & 0x80); // Or result & 0x0080 (0x80) 
+	A = result & 0x00FF;
 	
 	return 1;
 }
