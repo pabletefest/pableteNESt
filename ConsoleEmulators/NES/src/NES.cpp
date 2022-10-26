@@ -184,8 +184,13 @@ int main(int argc, char* argv[])
 
     NESBusSystem nes;
 #ifdef LOG_MODE
-    auto result = compareWithNestestLog();
-    printf("In line %d of 8991, nestest log shows %s and mine shows %s\n\n", std::get<2>(result) + 1, std::get<0>(result).c_str(), std::get<1>(result).c_str());
+    std::ifstream ifs;
+    ifs.open("CPU6502.txt");
+    if (ifs.is_open())
+    {
+        auto result = compareWithNestestLog();
+        printf("In line %d of 8991, nestest log shows %s and mine shows %s\n\n", std::get<2>(result) + 1, std::get<0>(result).c_str(), std::get<1>(result).c_str());
+    }
     run_nestest(nes);
 #endif
 

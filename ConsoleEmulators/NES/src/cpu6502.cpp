@@ -139,21 +139,21 @@ void CPU::clock()
 		{
 			uint8_t hi = effectiveAddr >> 8;
 			uint8_t lo = effectiveAddr & 0x00FF;
-			printf("%X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else if (numFollowingBytes == 1)
 		{
-			printf("%X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else
 		{
-			printf("%X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 
 		if (logfile)
@@ -163,6 +163,9 @@ void CPU::clock()
 		uint8_t possible_extra_cycle_2 = (this->*instructionsTable[opcode].instruction)();
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
+	
+		if (originPC == 0xCEAE)
+			auto test = originPC;
 	}
 
 	instructionCycles--;
@@ -357,7 +360,7 @@ uint8_t CPU::ADC()
 {
 	fetch();
 
-	uint16_t result = (uint16_t)A + (uint16_t)fetched + getStatusFlag(C);
+	uint16_t result = (uint16_t)A + (uint16_t)fetched + (uint16_t)getStatusFlag(C);
 	setStatusFlag(C, result > 255);
 	setStatusFlag(Z, (result & 0x00FF) == 0); // Or (result & 0x00FF) == 0
 	setStatusFlag(V, (~((uint16_t)A ^ (uint16_t)fetched) & ((uint16_t)A ^ (uint16_t)result)) & 0x0080); // I think cast to uint16_t is not needed. Also AND with 0x0080 is to get msb of low byte
@@ -911,7 +914,7 @@ uint8_t CPU::RTI()
 
 	//Ignored
 	status &= ~B;
-	status &= ~U;
+	//status &= ~U;
 
 	SP++;
 	uint8_t lowByte = readData(base_stack + SP);
@@ -941,14 +944,14 @@ uint8_t CPU::SBC()
 {
 	fetch();
 
-	uint16_t memVal = fetched ^ 0x00FF;
+	uint16_t memVal = ((uint16_t)fetched) ^ 0x00FF;
 
-	uint16_t result = A + memVal + getStatusFlag(C);
+	uint16_t result = (uint16_t)A + memVal + (uint16_t)getStatusFlag(C);
+	setStatusFlag(C, result & 0xFF00); // Same as checking if > 255
+	setStatusFlag(Z, (result & 0x00FF) == 0); // Or (result & 0x00FF) == 0
+	setStatusFlag(V, (result ^ (uint16_t)A) & (result ^ memVal) & 0x0080); // I think cast to uint16_t is not needed. Also AND with 0x0080 is to get msb of low byte
+	setStatusFlag(N, result & 0x0080); // Or result & 0x0080 (0x80) 
 	A = result & 0x00FF;
-	setStatusFlag(C, result > 255);
-	setStatusFlag(Z, A == 0); // Or (result & 0x00FF) == 0
-	setStatusFlag(V, (((uint16_t)A ^ result) & ~((uint16_t)A ^ (uint16_t)fetched)) & 0x0080); // I think cast to uint16_t is not needed. Also AND with 0x0080 is to get msb of low byte
-	setStatusFlag(N, A & 0x80); // Or result & 0x0080 (0x80) 
 
 	return 1;
 }
