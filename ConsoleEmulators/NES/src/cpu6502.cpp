@@ -164,7 +164,7 @@ void CPU::clock()
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
 	
-		if (originPC == 0xCFF0)
+		if (originPC == 0xD497)
 			auto test = originPC;
 	}
 
@@ -329,8 +329,8 @@ uint8_t CPU::IZX()
 	uint16_t postZPAddr = prevZPAddr + X;
 	postZPAddr &= 0x00FF; // The result must be always a zero page address
 
-	uint8_t lowByte = readData(postZPAddr);
-	uint8_t highByte = readData(postZPAddr + 1);
+	uint8_t lowByte = readData(postZPAddr & 0x00FF); // We ANDed it to wrap around ZP
+	uint8_t highByte = readData((postZPAddr + 1) & 0x00FF);
 	effectiveAddr = (highByte << 8) | lowByte;
 
 	return 0;
