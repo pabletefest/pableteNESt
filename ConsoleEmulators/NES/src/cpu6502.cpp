@@ -164,7 +164,7 @@ void CPU::clock()
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
 	
-		if (originPC == 0xD957)
+		if (originPC == 0xDBAB)
 			auto test = originPC;
 	}
 
@@ -306,10 +306,10 @@ uint8_t CPU::IND()
 	PC++;
 	uint16_t intermediate_addr = (intermediate_hi << 8) | intermediate_lo;
 
-	if (intermediate_lo & 0x00FF)
+	if (intermediate_lo == 0x00FF)
 	{
-		uint8_t lowByte = readData(intermediate_addr & 0xFF00);
-		uint8_t highByte = readData(intermediate_addr + 1);
+		uint8_t lowByte = readData(intermediate_addr);
+		uint8_t highByte = readData(intermediate_addr & 0xFF00); // Wraps back around in the same page, hardware bug
 		effectiveAddr = (highByte << 8) | lowByte;
 	}
 	else
