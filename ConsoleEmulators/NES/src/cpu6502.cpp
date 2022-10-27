@@ -164,7 +164,7 @@ void CPU::clock()
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
 	
-		if (originPC == 0xCEAE)
+		if (originPC == 0xCFF0)
 			auto test = originPC;
 	}
 
@@ -893,7 +893,7 @@ uint8_t CPU::ROR()
 {
 	fetch();
 
-	uint8_t result = (fetched >> 1) | (getStatusFlag(C) << 8);
+	uint8_t result = (fetched >> 1) | (getStatusFlag(C) << 7);
 	setStatusFlag(C, fetched & 0x01);
 	setStatusFlag(N, result & 0x80);
 
@@ -914,6 +914,7 @@ uint8_t CPU::RTI()
 
 	//Ignored
 	status &= ~B;
+	setStatusFlag(U, 1);
 	//status &= ~U;
 
 	SP++;

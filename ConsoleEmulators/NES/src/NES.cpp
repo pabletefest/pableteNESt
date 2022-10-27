@@ -120,7 +120,7 @@ std::tuple<std::string, std::string, uint32_t> compareWithNestestLog()
     std::vector<std::string> myTestPCVec;
 
     std::ifstream ifs;
-    ifs.open("nestest.log");
+    ifs.open("nestest.txt");
 
     if (ifs.is_open())
     {
