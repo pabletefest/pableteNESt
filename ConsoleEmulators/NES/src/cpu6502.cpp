@@ -139,21 +139,21 @@ void CPU::clock()
 		{
 			uint8_t hi = effectiveAddr >> 8;
 			uint8_t lo = effectiveAddr & 0x00FF;
-			printf("%X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%04X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%04X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else if (numFollowingBytes == 1)
 		{
-			printf("%X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%04X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%04X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else
 		{
-			printf("%X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%04X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%04X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 
 		if (logfile)
@@ -164,7 +164,7 @@ void CPU::clock()
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
 	
-		if (originPC == 0xD493)
+		if (originPC == 0xD48A)
 			auto test = originPC;
 	}
 
@@ -638,7 +638,7 @@ uint8_t CPU::DEC()
 	setStatusFlag(Z, result == 0);
 	setStatusFlag(N, result & 0x80);
 
-	writeData(relativeAddr, result);
+	writeData(effectiveAddr, result);
 
 	return 0;
 }
@@ -688,7 +688,7 @@ uint8_t CPU::INC()
 	setStatusFlag(Z, result == 0);
 	setStatusFlag(N, result & 0x80);
 
-	writeData(relativeAddr, result);
+	writeData(effectiveAddr, result);
 
 	return 0;
 }
