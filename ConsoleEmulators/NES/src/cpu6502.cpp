@@ -164,7 +164,7 @@ void CPU::clock()
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
 	
-		if (originPC == 0xD48A)
+		if (originPC == 0xD957)
 			auto test = originPC;
 	}
 
@@ -338,10 +338,10 @@ uint8_t CPU::IZX()
 
 uint8_t CPU::IZY()
 {
-	uint16_t ptr_zp = readData(PC) & 0x00FF;
+	uint16_t ptr_zp = readData(PC);
 	PC++;
-	uint16_t intermediate_lo = readData(ptr_zp);
-	uint16_t intermediate_hi = readData(ptr_zp + 1);
+	uint16_t intermediate_lo = readData(ptr_zp & 0x00FF);
+	uint16_t intermediate_hi = readData((ptr_zp + 1) & 0x00FF); // Wrap around ZP
 	uint16_t intermediate_addr = (intermediate_hi << 8) | intermediate_lo;
 	bool crossPage = ((intermediate_addr + Y) & 0xFF00) != (intermediate_addr & 0xFF00);
 	effectiveAddr = intermediate_addr + Y;
