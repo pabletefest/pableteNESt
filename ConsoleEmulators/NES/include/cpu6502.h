@@ -3,7 +3,9 @@
 #include <string>
 #include <vector>
 
+#if _DEBUG
 #define LOG_MODE
+#endif
 
 class NESBusSystem;
 

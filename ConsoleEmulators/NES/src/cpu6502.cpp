@@ -5,6 +5,8 @@
 #include <stdio.h>
 #endif
 
+#include <cassert>
+
 constexpr uint16_t base_stack = (uint16_t)0x0100;
 
 CPU::CPU(NESBusSystem* nesBus) : bus(nesBus)
@@ -164,7 +166,7 @@ void CPU::clock()
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
 	
-		if (originPC == 0xDBAB)
+		if (originPC == 0xC709)
 			auto test = originPC;
 	}
 
@@ -796,18 +798,80 @@ uint8_t CPU::NOP()
 	switch (currentOpcode)
 	{
 	case 0x1C:
+		PC++;
+		PC++;
 		return 1;
 	case 0x3C:
+		PC++;
+		PC++;
 		return 1;
 	case 0x5C:
+		PC++;
+		PC++;
 		return 1;
 	case 0x7C:
+		PC++;
+		PC++;
 		return 1;
 	case 0xDC:
+		PC++;
+		PC++;
 		return 1;
 	case 0xFC:
+		PC++;
+		PC++;
 		return 1;
+	case 0x04:
+		PC++;
+		return 0;
+	case 0x44:
+		PC++;
+		return 0;
+	case 0x64:
+		PC++;
+		return 0;
+	case 0x0C:
+		PC++;
+		PC++;
+		return 1;
+	case 0x14:
+		PC++;
+		return 0;
+	case 0x34:
+		PC++;
+		return 0;
+	case 0x54:
+		PC++;
+		return 0;
+	case 0x74:
+		PC++;
+		return 0;
+	case 0xD4:
+		PC++;
+		return 0;
+	case 0xF4:
+		PC++;
+		return 0;
+	case 0x80:
+		PC++;
+		return 0;
+	case 0x1A:
+		return 0;
+	case 0x3A:
+		return 0;
+	case 0x5A:
+		return 0;
+	case 0x7A:
+		return 0;
+	case 0xDA:
+		return 0;
+	case 0xFA:
+		return 0;
+	case 0xEA: // Regular NOP
+		return 0;
 	default:
+		assert(false);
+		/*while (true);*/
 		return 0;
 	}
 }
