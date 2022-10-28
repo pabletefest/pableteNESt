@@ -166,8 +166,8 @@ void CPU::clock()
 		
 		instructionCycles += (possible_extra_cycle_1 & possible_extra_cycle_2);
 	
-		if (originPC == 0xC709)
-			auto test = originPC;
+		/*if (originPC == 0xC6BC)
+			auto test = originPC;*/
 	}
 
 	instructionCycles--;

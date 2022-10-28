@@ -183,6 +183,8 @@ int main(int argc, char* argv[])
         SDL_UpdateWindowSurface(window);*/
 
     NESBusSystem nes;
+
+#undef LOG_MODE
 #ifdef LOG_MODE
     std::ifstream ifs;
     ifs.open("CPU6502.txt");
