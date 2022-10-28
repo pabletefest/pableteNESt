@@ -5,7 +5,6 @@ ConsoleEmulators/.vs/ConsoleEmulators/v17/.suo
 *.opendb
 *.db-shm
 *.ipch
-*.log
 *.obj
 *.db-wal
 bin/
