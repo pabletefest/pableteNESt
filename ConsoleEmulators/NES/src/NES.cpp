@@ -161,9 +161,20 @@ std::tuple<std::string, std::string, uint32_t> compareWithNestestLog()
     return {};
 }
 
+uint32_t printFPS(uint32_t interval, void* params)
+{
+    auto fpsPtr = reinterpret_cast<uint32_t*>(params);
+
+    printf("Current framerate: %d\n", *fpsPtr);
+
+    *fpsPtr = 0;
+
+    return interval;
+}
+
 int main(int argc, char* argv[])
 {
-    /*SDL_Window* window = nullptr;
+    SDL_Window* window = nullptr;
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -179,8 +190,39 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    while (true)
-        SDL_UpdateWindowSurface(window);*/
+    //SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    //SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 640, 480);
+    //uint32_t* pixels = new uint32_t[640 * 480];
+    //memset(pixels, 0xFF10A57F, 640* 480);
+
+    //SDL_UpdateTexture(texture, NULL, pixels, 0);
+
+    SDL_Event event;
+    bool isRunnning = true;
+
+    uint32_t fps = 0;
+
+    SDL_AddTimer(1000, printFPS, (void*)&fps);
+
+    while (isRunnning)
+    {
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                isRunnning = false;
+            }
+        }
+
+        SDL_RenderClear(renderer);
+        //SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderPresent(renderer);
+        //SDL_UpdateWindowSurface(window);
+
+        fps++;
+    }
 
     NESBusSystem nes;
 
@@ -196,8 +238,8 @@ int main(int argc, char* argv[])
     run_nestest(nes);
 #endif
 
-    //SDL_DestroyWindow(window);
-    //SDL_Quit();
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     std::cin.get();
     return 0;

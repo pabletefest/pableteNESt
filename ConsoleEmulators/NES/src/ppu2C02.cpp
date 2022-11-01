@@ -67,10 +67,21 @@ uint8_t PPU::ppuRead(uint16_t address)
 {
     uint8_t dataRead = 0x00;
     address &= 0x3FFF; // Masking address to avoid going beyond the PPU addressable range
+
+    if (cartridge->ppuRead(address, dataRead))
+    {
+
+    }
+
     return dataRead;
 }
 
 void PPU::ppuWrite(uint16_t address, uint8_t data)
 {
     address &= 0x3FFF; // Masking address to avoid going beyond the PPU addressable range
+
+    if (cartridge->ppuWrite(address, data))
+    {
+
+    }
 }
