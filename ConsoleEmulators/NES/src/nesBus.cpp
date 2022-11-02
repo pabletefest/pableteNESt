@@ -73,5 +73,11 @@ void NESBusSystem::clock()
 		cpu.clock();
 	}
 
+	if (ppu.nmi)
+	{
+		cpu.nmi();
+		ppu.nmi = false;
+	}
+
 	totalSystemClockCycles++;
 }
