@@ -7,6 +7,8 @@
 #define LOG_MODE
 #endif
 
+#undef LOG_MODE // temp
+
 class NESBusSystem;
 
 // CPU 2A03/2A07 (6502 NES console processor)

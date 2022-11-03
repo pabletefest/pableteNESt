@@ -11,6 +11,19 @@ void PPU::connectCartridge(const std::shared_ptr<Cartridge>& cart)
 
 void PPU::clock()
 {
+    cycle++;
+
+    if (cycle >= 341)
+    {
+        cycle = 0;
+        scaneline++;
+
+        if (scaneline >= 262)
+        {
+            scaneline = -1;
+            frameCompleted = true;
+        }
+    }
 }
 
 uint8_t PPU::cpuRead(uint16_t address)

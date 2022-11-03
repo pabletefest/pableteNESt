@@ -37,7 +37,19 @@ int main(int argc, char* argv[])
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
-    //SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 640, 480);
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 640, 480);
+
+    struct Pixel
+    {
+        uint8_t A;
+        uint8_t B;
+        uint8_t G;
+        uint8_t R;
+    };
+
+    std::vector<Pixel> pixels = std::vector<Pixel>(640 * 480);
+    memset(pixels.data(), 0, sizeof(Pixel) * pixels.size());
+
     //uint32_t* pixels = new uint32_t[640 * 480];
     //memset(pixels, 0xFF10A57F, 640* 480);
 
@@ -79,9 +91,26 @@ int main(int argc, char* argv[])
                 }
             }
         }
+
+        do 
+        {
+            nes.clock();
+        } 
+        while (!nes.ppu.frameCompleted);
+
+        for (int row = 0; row < 480; row++)
+        {
+            for (int col = 0; col < 640; col++)
+            {
+                Pixel pixel{  SDL_ALPHA_OPAQUE, rand() % 256, rand() % 256, rand() % 256 };
+                pixels[row * 640 + col] = pixel;
+            }
+        }
+
+        SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(Pixel) * 640);
        
         SDL_RenderClear(renderer);
-        //SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderCopy(renderer, texture, NULL, NULL);
         SDL_RenderPresent(renderer);
         //SDL_UpdateWindowSurface(window);
 
@@ -106,6 +135,8 @@ int main(int argc, char* argv[])
     std::cin.get();
     return 0;
 }
+
+#ifdef LOG_MODE
 
 void run_nestest(NESBusSystem& nes)
 {
@@ -181,6 +212,8 @@ std::tuple<std::string, std::string, uint32_t> compareWithNestestLog()
 
     return {};
 }
+
+#endif
 
 uint32_t printFPS(uint32_t interval, void* params)
 {

@@ -23,6 +23,7 @@ public:
     void    ppuWrite(uint16_t address, uint8_t data);
 
     bool nmi = false;
+    bool frameCompleted = false;
 
 private:
     std::shared_ptr<Cartridge> cartridge;
