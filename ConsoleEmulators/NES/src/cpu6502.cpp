@@ -141,21 +141,21 @@ void CPU::clock()
 		{
 			uint8_t hi = effectiveAddr >> 8;
 			uint8_t lo = effectiveAddr & 0x00FF;
-			printf("%04X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%04X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%02X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%04X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%04X  %02X %02X %02X  %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%02X\n", originPC, opcode, lo, hi, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else if (numFollowingBytes == 1)
 		{
-			printf("%04X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%04X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%02X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%04X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%04X  %02X %02X     %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%02X\n", originPC, opcode, readData((originPC + 1)), instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 		else
 		{
-			printf("%04X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+			printf("%04X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%02X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 			if (logfile != nullptr)
-				fprintf(logfile, "%04X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
+				fprintf(logfile, "%04X  %02X        %s\t\tA:%02X X:%02X Y:%02X P:%02X SP:%02X\n", originPC, opcode, instName.c_str(), originA, originX, originY, originP, originSP);
 		}
 
 		if (logfile)
