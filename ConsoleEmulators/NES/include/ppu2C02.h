@@ -47,4 +47,6 @@ private:
     int32_t cycle = 0;
 
     std::vector<Pixel> pixelsFrameBufer;
+
+    Pixel nesPalToRGBAPalArray[0x40]; // 64 colours
 };
