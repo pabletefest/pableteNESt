@@ -1,6 +1,7 @@
 #include "ppu2C02.h"
 
-PPU::PPU()
+PPU::PPU() 
+    : pixelsFrameBufer(std::vector<Pixel>(341 * 262, Pixel()))
 {
 }
 
@@ -11,17 +12,35 @@ void PPU::connectCartridge(const std::shared_ptr<Cartridge>& cart)
 
 void PPU::clock()
 {
+    // ----- TESTING PORPOSE -----
+    if (scanline == -1) scanline++;
+
+    Pixel pixel{ 0xFF, rand() % 256, rand() % 256, rand() % 256 };
+    pixelsFrameBufer[scanline * 341 + cycle] = pixel;
+    
+    // ----- END OF TESTING ------
+
     cycle++;
 
     if (cycle >= 341)
     {
         cycle = 0;
-        scaneline++;
+        scanline++;
 
-        if (scaneline >= 262)
+        if (scanline >= 262)
         {
-            scaneline = -1;
+            scanline = -1;
             frameCompleted = true;
+
+            //// TESTING PORPOSE
+            //for (int row = 0; row < 262; row++)
+            //{
+            //    for (int col = 0; col < 341; col++)
+            //    {
+            //        Pixel pixel{ 0xFF, rand() % 256, rand() % 256, rand() % 256 };
+            //        pixelsFrameBufer[row * 341 + col] = pixel;
+            //    }
+            //}
         }
     }
 }

@@ -2,11 +2,21 @@
 #include "cartridge.h"
 
 #include <memory>
+#include <vector>
 
 // PPU 2C02 (Picture Processing Unit) of the NES console
 class PPU
 {
 public:
+
+    struct Pixel
+    {
+        uint8_t A;
+        uint8_t B;
+        uint8_t G;
+        uint8_t R;
+    };
+
     PPU();
     ~PPU() = default;
 
@@ -25,9 +35,16 @@ public:
     bool nmi = false;
     bool frameCompleted = false;
 
+    const std::vector<Pixel>& getPixelsFrameBuffer() const 
+    { 
+        return pixelsFrameBufer;
+    }
+
 private:
     std::shared_ptr<Cartridge> cartridge;
 
-    int32_t scaneline = 0;
+    int32_t scanline = 0;
     int32_t cycle = 0;
+
+    std::vector<Pixel> pixelsFrameBufer;
 };

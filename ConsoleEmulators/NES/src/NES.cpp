@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    window = SDL_CreateWindow("NES EMULATOR", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("NES EMULATOR", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 341, 262, SDL_WINDOW_SHOWN);
 
     if (!window)
     {
@@ -37,23 +37,10 @@ int main(int argc, char* argv[])
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 640, 480);
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 341, 262);
 
-    struct Pixel
-    {
-        uint8_t A;
-        uint8_t B;
-        uint8_t G;
-        uint8_t R;
-    };
-
-    std::vector<Pixel> pixels = std::vector<Pixel>(640 * 480);
-    memset(pixels.data(), 0, sizeof(Pixel) * pixels.size());
-
-    //uint32_t* pixels = new uint32_t[640 * 480];
-    //memset(pixels, 0xFF10A57F, 640* 480);
-
-    //SDL_UpdateTexture(texture, NULL, pixels, 0);
+    /*std::vector<PPU::Pixel> pixels = std::vector<PPU::Pixel>(640 * 480);
+    memset(pixels.data(), 0, sizeof(PPU::Pixel) * pixels.size());*/
 
     SDL_Event event;
     bool isRunnning = true;
@@ -86,7 +73,7 @@ int main(int argc, char* argv[])
                 case SDLK_RETURN:
                     /*uint32_t colour = SDL_MapRGB(screen->format, rand() % 256, rand() % 256, rand() % 256);
                     SDL_FillRect(screen, NULL, colour);*/
-                    SDL_SetRenderDrawColor(renderer, rand() % 256, rand() % 256, rand() % 256, rand() % 256);
+                    //SDL_SetRenderDrawColor(renderer, rand() % 256, rand() % 256, rand() % 256, rand() % 256);
                     break;
                 }
             }
@@ -98,16 +85,19 @@ int main(int argc, char* argv[])
         } 
         while (!nes.ppu.frameCompleted);
 
-        for (int row = 0; row < 480; row++)
+        nes.ppu.frameCompleted = false;
+
+        /*for (int row = 0; row < 480; row++)
         {
             for (int col = 0; col < 640; col++)
             {
-                Pixel pixel{  SDL_ALPHA_OPAQUE, rand() % 256, rand() % 256, rand() % 256 };
+                PPU::Pixel pixel{  SDL_ALPHA_OPAQUE, rand() % 256, rand() % 256, rand() % 256 };
                 pixels[row * 640 + col] = pixel;
             }
-        }
+        }*/
 
-        SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(Pixel) * 640);
+        const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
+        SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);
        
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
