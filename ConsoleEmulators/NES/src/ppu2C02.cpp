@@ -83,9 +83,11 @@ void PPU::clock()
     // ----- TESTING PORPOSE -----
     if (scanline == -1) scanline++;
 
-    Pixel pixel{ 0xFF, rand() % 256, rand() % 256, rand() % 256 };
-    pixelsFrameBufer[scanline * 341 + cycle] = pixel;
+    /*Pixel pixel{ 0xFF, rand() % 256, rand() % 256, rand() % 256 };
+    pixelsFrameBufer[scanline * 341 + cycle] = pixel;*/
     
+    pixelsFrameBufer[scanline * 341 + cycle] = nesPalToRGBAPalArray[rand() % 0x3F];
+
     // ----- END OF TESTING ------
 
     cycle++;
