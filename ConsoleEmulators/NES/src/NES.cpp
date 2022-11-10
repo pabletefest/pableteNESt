@@ -73,16 +73,6 @@ int main(int argc, char* argv[])
                 {
                 case SDLK_SPACE:
                 case SDLK_RETURN:
-                    /*do
-                    {
-                        nes.clock();
-                    }
-                    while (!nes.ppu.frameCompleted);
-
-                    nes.ppu.frameCompleted = false;
-
-                    const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
-                    SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);*/
                     break;
                 }
             }
@@ -95,15 +85,6 @@ int main(int argc, char* argv[])
         while (!nes.ppu.frameCompleted);
 
         nes.ppu.frameCompleted = false;
-
-        /*for (int row = 0; row < 480; row++)
-        {
-            for (int col = 0; col < 640; col++)
-            {
-                PPU::Pixel pixel{  SDL_ALPHA_OPAQUE, rand() % 256, rand() % 256, rand() % 256 };
-                pixels[row * 640 + col] = pixel;
-            }
-        }*/
 
         const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
         SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);
