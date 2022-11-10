@@ -38,6 +38,8 @@ int main(int argc, char* argv[])
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
     SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 341, 262);
+    //SDL_RenderSetLogicalSize(renderer, 1280, 720);
+    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
     /*std::vector<PPU::Pixel> pixels = std::vector<PPU::Pixel>(640 * 480);
     memset(pixels.data(), 0, sizeof(PPU::Pixel) * pixels.size());*/
@@ -71,9 +73,16 @@ int main(int argc, char* argv[])
                 {
                 case SDLK_SPACE:
                 case SDLK_RETURN:
-                    /*uint32_t colour = SDL_MapRGB(screen->format, rand() % 256, rand() % 256, rand() % 256);
-                    SDL_FillRect(screen, NULL, colour);*/
-                    //SDL_SetRenderDrawColor(renderer, rand() % 256, rand() % 256, rand() % 256, rand() % 256);
+                    /*do
+                    {
+                        nes.clock();
+                    }
+                    while (!nes.ppu.frameCompleted);
+
+                    nes.ppu.frameCompleted = false;
+
+                    const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
+                    SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);*/
                     break;
                 }
             }
