@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    window = SDL_CreateWindow("NES EMULATOR", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 341, 262, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("NES EMULATOR", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
 
     if (!window)
     {

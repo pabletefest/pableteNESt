@@ -49,4 +49,17 @@ private:
     std::vector<Pixel> pixelsFrameBufer;
 
     Pixel nesPalToRGBAPalArray[0x40]; // 64 colours
+
+    union
+    {
+        struct
+        {
+            uint8_t unused : 5;
+            uint8_t spriteOverflow : 1;
+            uint8_t spriteZeroHit : 1;
+            uint8_t verticalBlank : 1;
+        };
+
+        uint8_t statusReg; //Used to represent struct as uint8_t and move it around
+    }PPUSTATUS;
 };
