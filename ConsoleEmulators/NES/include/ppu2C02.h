@@ -22,6 +22,7 @@ public:
 
     void connectCartridge(const std::shared_ptr<Cartridge>& cart);
 
+    void reset();
     void clock(); // PPU tick
 
     // Communications with Main Bus
@@ -39,6 +40,9 @@ public:
     { 
         return pixelsFrameBufer;
     }
+
+private:
+    void init();
 
 private:
     std::shared_ptr<Cartridge> cartridge;

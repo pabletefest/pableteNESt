@@ -3,6 +3,7 @@
 PPU::PPU() 
     : pixelsFrameBufer(std::vector<Pixel>(341 * 262, Pixel()))
 {
+    init();
 
     nesPalToRGBAPalArray[0x00] = Pixel{ 255, 84, 84, 84 };
     nesPalToRGBAPalArray[0x01] = Pixel{ 255, 0, 30, 116 };
@@ -76,6 +77,10 @@ PPU::PPU()
 void PPU::connectCartridge(const std::shared_ptr<Cartridge>& cart)
 {
     this->cartridge = cart;
+}
+
+void PPU::reset()
+{
 }
 
 void PPU::clock()
@@ -201,4 +206,9 @@ void PPU::ppuWrite(uint16_t address, uint8_t data)
     {
 
     }
+}
+
+void PPU::init()
+{
+    PPUSTATUS.statusReg = 0xA0;
 }
