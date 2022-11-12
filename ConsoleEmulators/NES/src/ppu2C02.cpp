@@ -1,5 +1,7 @@
 #include "ppu2C02.h"
 
+constexpr uint16_t baseNameTableAddresses[4] = { 0x2000, 0x2400, 0x2800, 0x2C00 };
+
 PPU::PPU() 
     : pixelsFrameBufer(std::vector<Pixel>(341 * 262, Pixel()))
 {
@@ -85,17 +87,21 @@ void PPU::reset()
 
 void PPU::clock()
 {
-    if (cycle == 1 && scanline == 241)
-    {
-        PPUSTATUS.verticalBlank = 1;
-    }
-
-    if (cycle == 1 && scanline == 261)
+    if (cycle == 1 && scanline == -1)
     {
         PPUSTATUS.verticalBlank = 0;
         PPUSTATUS.spriteZeroHit = 0;
         PPUSTATUS.spriteOverflow = 0;
     }
+
+    if (cycle == 1 && scanline == 241)
+    {
+        PPUSTATUS.verticalBlank = 1;
+
+        if (PPUCTRL.enableNMI)
+            nmi = true;
+    }
+
 
     // ----- TESTING PORPOSE -----
     if (scanline == -1) scanline++;
@@ -114,7 +120,7 @@ void PPU::clock()
         cycle = 0;
         scanline++;
 
-        if (scanline >= 262)
+        if (scanline >= 261)
         {
             scanline = -1;
             frameCompleted = true;

@@ -54,6 +54,32 @@ private:
 
     Pixel nesPalToRGBAPalArray[0x40]; // 64 colours
 
+    // REGISTERS
+
+    union
+    {
+        struct
+        {
+            union
+            {
+                struct
+                {
+                    uint8_t nametableX : 1;
+                    uint8_t nametableY : 1;
+                };
+                uint8_t baseNameTabAddreses : 2;
+            };
+            uint8_t vramAddrInc : 1;
+            uint8_t sprPatternTabAddr : 1;
+            uint8_t backgroundPatternTabAddr : 1;
+            uint8_t sprSize : 1;
+            uint8_t ppuMasterSlaveSelect : 1;
+            uint8_t enableNMI : 1;
+        };
+
+        uint8_t controlReg;
+    }PPUCTRL;
+   
     union
     {
         struct
