@@ -77,9 +77,26 @@ private:
             uint8_t enableNMI : 1;
         };
 
-        uint8_t controlReg;
+        uint8_t controlReg; //Used to represent struct as uint8_t and move it around
     }PPUCTRL;
    
+    union
+    {
+        struct
+        {
+            uint8_t greyscale : 1;
+            uint8_t bgLeftmostScreen : 1;
+            uint8_t sprLeftmostScreen : 1;
+            uint8_t showBackground : 1;
+            uint8_t showSprites : 1;
+            uint8_t emphasizeRed : 1;
+            uint8_t emphasizeGreen : 1;
+            uint8_t emphasizeBlue : 1;
+        };
+
+        uint8_t maskReg; //Used to represent struct as uint8_t and move it around
+    }PPUMASK;
+
     union
     {
         struct

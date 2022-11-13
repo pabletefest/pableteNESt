@@ -83,6 +83,8 @@ void PPU::connectCartridge(const std::shared_ptr<Cartridge>& cart)
 
 void PPU::reset()
 {
+    PPUCTRL.controlReg = 0x00;
+    PPUMASK.maskReg = 0x00;
 }
 
 void PPU::clock()
@@ -105,9 +107,6 @@ void PPU::clock()
 
     // ----- TESTING PORPOSE -----
     if (scanline == -1) scanline++;
-
-    /*Pixel pixel{ 0xFF, rand() % 256, rand() % 256, rand() % 256 };
-    pixelsFrameBufer[scanline * 341 + cycle] = pixel;*/
     
     pixelsFrameBufer[scanline * 341 + cycle] = nesPalToRGBAPalArray[rand() % 0x3F];
 
@@ -124,16 +123,6 @@ void PPU::clock()
         {
             scanline = -1;
             frameCompleted = true;
-
-            //// TESTING PORPOSE
-            //for (int row = 0; row < 262; row++)
-            //{
-            //    for (int col = 0; col < 341; col++)
-            //    {
-            //        Pixel pixel{ 0xFF, rand() % 256, rand() % 256, rand() % 256 };
-            //        pixelsFrameBufer[row * 341 + col] = pixel;
-            //    }
-            //}
         }
     }
 }
@@ -173,8 +162,10 @@ void PPU::cpuWrite(uint16_t address, uint8_t data)
     switch (address)
     {
     case 0x0000: // Control
+        PPUCTRL.controlReg = data;
         break;
     case 0x0001: // Mask
+        PPUMASK.maskReg = data;
         break;
     case 0x0002: // Status
         break;
@@ -216,5 +207,7 @@ void PPU::ppuWrite(uint16_t address, uint8_t data)
 
 void PPU::init()
 {
+    PPUCTRL.controlReg = 0x00;
+    PPUMASK.maskReg = 0x00;
     PPUSTATUS.statusReg = 0xA0;
 }

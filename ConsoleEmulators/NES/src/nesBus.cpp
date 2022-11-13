@@ -60,6 +60,7 @@ void NESBusSystem::insertCardtridge(const std::shared_ptr<Cartridge>& cart)
 
 void NESBusSystem::reset()
 {
+	ppu.reset();
 	cpu.reset();
 	totalSystemClockCycles = 0;
 }
