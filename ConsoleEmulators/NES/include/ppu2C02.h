@@ -50,6 +50,9 @@ private:
     int32_t scanline = 0;
     int32_t cycle = 0;
 
+    uint32_t framesElapsed = 0;
+    uint32_t totalCycles = 0;
+
     std::vector<Pixel> pixelsFrameBufer;
 
     Pixel nesPalToRGBAPalArray[0x40]; // 64 colours

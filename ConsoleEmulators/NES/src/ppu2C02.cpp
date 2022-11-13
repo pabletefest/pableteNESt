@@ -123,8 +123,11 @@ void PPU::clock()
         {
             scanline = -1;
             frameCompleted = true;
+            framesElapsed++;
         }
     }
+
+    totalCycles++;
 }
 
 uint8_t PPU::cpuRead(uint16_t address)
