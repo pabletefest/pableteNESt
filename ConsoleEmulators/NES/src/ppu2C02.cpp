@@ -166,6 +166,8 @@ void PPU::cpuWrite(uint16_t address, uint8_t data)
     {
     case 0x0000: // Control
         PPUCTRL.controlReg = data;
+        loopyV.coarseXScroll = PPUCTRL.nametableX;
+        loopyV.coarseYScroll = PPUCTRL.nametableY;
         break;
     case 0x0001: // Mask
         PPUMASK.maskReg = data;

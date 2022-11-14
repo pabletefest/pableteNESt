@@ -112,4 +112,20 @@ private:
 
         uint8_t statusReg; //Used to represent struct as uint8_t and move it around
     }PPUSTATUS;
+    
+    union loopy_register
+    {
+        struct
+        {
+            uint16_t coarseXScroll : 5;
+            uint16_t coarseYScroll : 5;
+            uint16_t nametableSelect : 2;
+            uint16_t fineYScroll : 3;
+            uint16_t unused : 1;
+        };
+        uint16_t loopyReg;
+    };
+
+    loopy_register loopyV;
+    loopy_register loopyT;
 };
