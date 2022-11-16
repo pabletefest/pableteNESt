@@ -60,47 +60,12 @@ int main(int argc, char* argv[])
 
     NESBusSystem nes;
 
-    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
+    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
+    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Donkey Kong.nes");
     nes.insertCardtridge(cartridge);
     nes.reset();
 
     std::vector<PPU::Pixel> pixels2 = std::vector<PPU::Pixel>(128 * 128);
-
-    // Iterate over sprites indeces
-    for (int indexTileX = 0; indexTileX < 16; indexTileX++)
-    {
-        for (int indexTileY = 0; indexTileY < 16; indexTileY++)
-        {
-            int tileOffset = indexTileY * 256 + indexTileX * 16;
-
-            // Iterate over sprite rows
-            for (int sprRow = 0; sprRow < 8; sprRow++)
-            {
-                //Each tile is 16 bytes, each row is 2 bytes separated each one in two blocks of 8 bytes (LSB and MSB, each one separated 8 bytes)
-                uint8_t LSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0000);
-                uint8_t MSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0008);
-
-                // Iterate over sprite column from a row using LSB and MSB
-                for (int sprCol = 0; sprCol < 8; sprCol++)
-                {
-                    uint8_t lsb = (LSB & 0x80) >> 7;
-                    uint8_t msb = (MSB & 0x80) >> 7;
-
-                    uint8_t pixel = (msb << 1) | lsb;
-                    
-                    uint8_t nesColour = nes.ppu.ppuRead(0x3F00 + (1 * 4 + pixel));
-                    if (nesColour != 0x00)
-                        printf("");
-                    pixels2[(indexTileY * 8 + sprRow) + (indexTileX * 8 + sprCol)] = nes.ppu.getRGBAFromNesColour(nesColour);
-
-                    lsb <<= 1;
-                    msb <<= 1;
-                }
-            }
-        }
-    }
-
-    nes.ppu.ppuRead(0);
 
     while (isRunnning)
     {
@@ -130,6 +95,38 @@ int main(int argc, char* argv[])
         while (!nes.ppu.frameCompleted);
 
         nes.ppu.frameCompleted = false;
+
+        // Iterate over sprites indeces
+        for (int indexTileX = 0; indexTileX < 16; indexTileX++)
+        {
+            for (int indexTileY = 0; indexTileY < 16; indexTileY++)
+            {
+                int tileOffset = indexTileY * 256 + indexTileX * 16;
+
+                // Iterate over sprite rows
+                for (int sprRow = 0; sprRow < 8; sprRow++)
+                {
+                    //Each tile is 16 bytes, each row is 2 bytes separated each one in two blocks of 8 bytes (LSB and MSB, each one separated 8 bytes)
+                    uint8_t LSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0000);
+                    uint8_t MSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0008);
+
+                    // Iterate over sprite column from a row using LSB and MSB
+                    for (int sprCol = 0; sprCol < 8; sprCol++)
+                    {
+                        uint8_t lsb = (LSB & 0x80) >> 7;
+                        uint8_t msb = (MSB & 0x80) >> 7;
+
+                        uint8_t pixel = (msb << 1) | lsb;
+
+                        uint8_t nesColour = nes.ppu.ppuRead(0x3F00 + (1 * 4 + pixel));
+                        pixels2[(indexTileY * 8 + sprRow) + (indexTileX * 8 + sprCol)] = nes.ppu.getRGBAFromNesColour(nesColour);
+
+                        lsb <<= 1;
+                        msb <<= 1;
+                    }
+                }
+            }
+        }
 
         //const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
         //SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);
