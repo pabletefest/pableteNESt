@@ -16,6 +16,13 @@ std::tuple<std::string, std::string, uint32_t> compareWithNestestLog();
 uint32_t printFPS(uint32_t interval, void* params);
 
 static SDL_Window* window = nullptr;
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+
+#define PPU_SCANLINE_DOTS 341
+#define PPU_NUM_SCANLINES 262
+
+constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 
 int main(int argc, char* argv[])
 {
@@ -25,7 +32,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    window = SDL_CreateWindow("NES EMULATOR", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow(APP_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
     if (!window)
     {
@@ -37,7 +44,7 @@ int main(int argc, char* argv[])
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 341, 262);
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
     //SDL_RenderSetLogicalSize(renderer, 1280, 720);
     //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
@@ -87,7 +94,7 @@ int main(int argc, char* argv[])
         nes.ppu.frameCompleted = false;
 
         const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
-        SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);
+        SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * PPU_SCANLINE_DOTS);
        
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -201,7 +208,7 @@ uint32_t printFPS(uint32_t interval, void* params)
 
     printf("Current framerate: %d\n", *fpsPtr);
     char windowTitleStr[100];
-    sprintf_s(windowTitleStr, "NES EMULATOR - FPS: %02d", *fpsPtr);
+    sprintf_s(windowTitleStr, "%s - FPS: %02d", APP_TITLE, *fpsPtr);
     SDL_SetWindowTitle(window, windowTitleStr);
 
     *fpsPtr = 0;

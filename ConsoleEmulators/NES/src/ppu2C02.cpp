@@ -143,7 +143,7 @@ uint8_t PPU::cpuRead(uint16_t address)
     case 0x0002: // Status
         dataRead = PPUSTATUS.statusReg;
         PPUSTATUS.verticalBlank = 0;
-
+        addressLatch = 0x00;
         break;
     case 0x0003: // OAM Address
         break;

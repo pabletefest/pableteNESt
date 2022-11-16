@@ -129,5 +129,5 @@ private:
     loopy_register loopyV;
     loopy_register loopyT;
 
-    uint16_t addressLatch = 0x0000;
+    uint8_t addressLatch = 0x00;
 };
