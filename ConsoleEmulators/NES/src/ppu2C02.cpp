@@ -143,7 +143,7 @@ uint8_t PPU::cpuRead(uint16_t address)
     case 0x0002: // Status
         dataRead = PPUSTATUS.statusReg;
         PPUSTATUS.verticalBlank = 0;
-        addressLatch = 0x00;
+        addressLatchToggle = false; //Reset
         break;
     case 0x0003: // OAM Address
         break;
@@ -154,6 +154,17 @@ uint8_t PPU::cpuRead(uint16_t address)
     case 0x0006: // PPU Address
         break;
     case 0x0007: // PPU Data
+        if (vramAddrPtr >= 0x0000 && vramAddrPtr <= 0x3EFF)
+        {
+            dataRead = internalReadBuffer;
+            internalReadBuffer = ppuRead(vramAddrPtr);
+        }
+        else if (vramAddrPtr >= 0x3F00 && vramAddrPtr <= 0x3FFF)
+        {
+            dataRead = ppuRead(vramAddrPtr);
+        }
+
+        vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
         break;
     }
 
@@ -181,8 +192,16 @@ void PPU::cpuWrite(uint16_t address, uint8_t data)
     case 0x0005: // Scroll
         break;
     case 0x0006: // PPU Address
+        if (!addressLatchToggle)
+            vramAddrPtr = (data << 8) & 0xFF00; // We treat the addr as big endian (i.e. hi_byte is provided first)
+        else
+            vramAddrPtr |= data & 0x00FF;
+
+        addressLatchToggle = !addressLatchToggle; // Invert latch
         break;
     case 0x0007: // PPU Data
+        ppuWrite(vramAddrPtr, data);
+        vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
         break;
     }
 }

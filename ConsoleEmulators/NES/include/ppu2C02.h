@@ -129,5 +129,7 @@ private:
     loopy_register loopyV;
     loopy_register loopyT;
 
-    uint8_t addressLatch = 0x00;
+    bool addressLatchToggle = false;
+    uint16_t vramAddrPtr = 0x0000;
+    uint8_t internalReadBuffer = 0x00;
 };
