@@ -41,6 +41,11 @@ public:
         return pixelsFrameBufer;
     }
 
+    PPU::Pixel getRGBAFromNesColour(uint8_t nesColour) const
+    {
+        return nesPalToRGBAPalArray[nesColour];
+    }
+
 private:
     void init();
 
