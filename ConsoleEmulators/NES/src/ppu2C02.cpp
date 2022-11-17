@@ -243,6 +243,12 @@ void PPU::ppuWrite(uint16_t address, uint8_t data)
     }
 }
 
+PPU::Pixel PPU::getRGBAFromNesPalette(uint8_t paletteIndex, uint8_t pixelIndex)
+{
+    uint8_t nesColour = ppuRead(0x3F00 + (paletteIndex * 4 + pixelIndex));
+    return nesPalToRGBAPalArray[nesColour];
+}
+
 void PPU::init()
 {
     PPUCTRL.controlReg = 0x00;

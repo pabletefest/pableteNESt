@@ -60,8 +60,9 @@ int main(int argc, char* argv[])
 
     NESBusSystem nes;
 
-    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
-    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Donkey Kong.nes");
+    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
+    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Donkey Kong.nes");
+    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Super Mario Bros.nes");
     nes.insertCardtridge(cartridge);
     nes.reset();
 
@@ -118,13 +119,12 @@ int main(int argc, char* argv[])
 
                         uint8_t pixel = (msb << 1) | lsb;
 
-                        uint8_t nesColour = nes.ppu.ppuRead(0x3F00 + (0 * 4 + pixel));
                         uint16_t x = indexTileX * 8 + (sprCol);
                         uint16_t y = indexTileY * 8 + sprRow;
 
                         //printf("X is %d and Y is %d\n", x ,y);
 
-                        pixels2[y * 128 + x] = nes.ppu.getRGBAFromNesColour(nesColour);
+                        pixels2[y * 128 + x] = nes.ppu.getRGBAFromNesPalette(0, pixel);
 
                         MSB <<= 1;
                         LSB <<= 1;
