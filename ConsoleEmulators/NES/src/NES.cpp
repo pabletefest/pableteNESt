@@ -61,12 +61,54 @@ int main(int argc, char* argv[])
     NESBusSystem nes;
 
     //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
-    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Donkey Kong.nes");
-    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Super Mario Bros.nes");
+    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Donkey Kong.nes");
+    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Super Mario Bros.nes");
     nes.insertCardtridge(cartridge);
     nes.reset();
 
     std::vector<PPU::Pixel> pixels2(128 * 128);
+
+    uint32_t counter = 0;
+    for (uint32_t i = 0; i < 32; i++)
+    {
+        nes.ppu.ppuWrite(0x3F00 + i, ((counter << 4) | 0x0d) & 0x3d);
+        counter++;
+    }
+    // Iterate over sprites indeces
+    for (int indexTileY = 0; indexTileY < 16; indexTileY++)
+    {
+        for (int indexTileX = 0; indexTileX < 16; indexTileX++)
+        {
+            int tileOffset = indexTileY * 256 + indexTileX * 16;
+
+            // Iterate over sprite rows
+            for (int sprRow = 0; sprRow < 8; sprRow++)
+            {
+                //Each tile is 16 bytes, each row is 2 bytes separated each one in two blocks of 8 bytes (LSB and MSB, each one separated 8 bytes)
+                uint8_t LSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0000);
+                uint8_t MSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0008);
+
+                // Iterate over sprite column from a row using LSB and MSB
+                for (int sprCol = 0; sprCol < 8; sprCol++)
+                {
+                    uint8_t lsb = (LSB & 0x80) >> 7;
+                    uint8_t msb = (MSB & 0x80) >> 7;
+
+                    uint8_t pixel = (msb << 1) | lsb;
+
+                    uint16_t x = indexTileX * 8 + (sprCol);
+                    uint16_t y = indexTileY * 8 + sprRow;
+
+                    //printf("X is %d and Y is %d\n", x ,y);
+
+                    pixels2[y * 128 + x] = nes.ppu.getRGBAFromNesPalette(0, pixel);
+
+                    MSB <<= 1;
+                    LSB <<= 1;
+                }
+            }
+        }
+    }
 
     while (isRunnning)
     {
@@ -96,42 +138,6 @@ int main(int argc, char* argv[])
         while (!nes.ppu.frameCompleted);
 
         nes.ppu.frameCompleted = false;
-
-        // Iterate over sprites indeces
-        for (int indexTileY = 0; indexTileY < 16; indexTileY++)
-        {
-            for (int indexTileX = 0; indexTileX < 16; indexTileX++)
-            {
-                int tileOffset = indexTileY * 256 + indexTileX * 16;
-
-                // Iterate over sprite rows
-                for (int sprRow = 0; sprRow < 8; sprRow++)
-                {
-                    //Each tile is 16 bytes, each row is 2 bytes separated each one in two blocks of 8 bytes (LSB and MSB, each one separated 8 bytes)
-                    uint8_t LSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0000);
-                    uint8_t MSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0008);
-
-                    // Iterate over sprite column from a row using LSB and MSB
-                    for (int sprCol = 0; sprCol < 8; sprCol++)
-                    {
-                        uint8_t lsb = (LSB & 0x80) >> 7;
-                        uint8_t msb = (MSB & 0x80) >> 7;
-
-                        uint8_t pixel = (msb << 1) | lsb;
-
-                        uint16_t x = indexTileX * 8 + (sprCol);
-                        uint16_t y = indexTileY * 8 + sprRow;
-
-                        //printf("X is %d and Y is %d\n", x ,y);
-
-                        pixels2[y * 128 + x] = nes.ppu.getRGBAFromNesPalette(0, pixel);
-
-                        MSB <<= 1;
-                        LSB <<= 1;
-                    }
-                }
-            }
-        }
 
         //const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
         //SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);
