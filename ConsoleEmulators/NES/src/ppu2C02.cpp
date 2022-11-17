@@ -154,17 +154,17 @@ uint8_t PPU::cpuRead(uint16_t address)
     case 0x0006: // PPU Address
         break;
     case 0x0007: // PPU Data
-        if (vramAddrPtr >= 0x0000 && vramAddrPtr <= 0x3EFF)
+        if (loopyV.vramAddrPtr <= 0x3EFF)
         {
             dataRead = internalReadBuffer;
-            internalReadBuffer = ppuRead(vramAddrPtr);
+            internalReadBuffer = ppuRead(loopyV.vramAddrPtr);
         }
-        else if (vramAddrPtr >= 0x3F00 && vramAddrPtr <= 0x3FFF)
+        else if (loopyV.vramAddrPtr >= 0x3F00)
         {
-            dataRead = ppuRead(vramAddrPtr);
+            dataRead = ppuRead(loopyV.vramAddrPtr);
         }
 
-        vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
+        loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
         break;
     }
 
@@ -193,15 +193,15 @@ void PPU::cpuWrite(uint16_t address, uint8_t data)
         break;
     case 0x0006: // PPU Address
         if (!addressLatchToggle)
-            vramAddrPtr = (data << 8) & 0xFF00; // We treat the addr as big endian (i.e. hi_byte is provided first)
+            loopyV.vramAddrPtr = (data << 8) & 0xFF00; // We treat the addr as big endian (i.e. hi_byte is provided first)
         else
-            vramAddrPtr |= data & 0x00FF;
+            loopyV.vramAddrPtr |= data & 0x00FF;
 
         addressLatchToggle = !addressLatchToggle; // Invert latch
         break;
     case 0x0007: // PPU Data
-        ppuWrite(vramAddrPtr, data);
-        vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
+        ppuWrite(loopyV.vramAddrPtr, data);
+        loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
         break;
     }
 }
@@ -215,6 +215,11 @@ uint8_t PPU::ppuRead(uint16_t address)
     {
 
     }
+    else if (address >= 0x3F00)
+    {
+        address &= 0x001F;
+        dataRead = paletteRam[address];
+    }
 
     return dataRead;
 }
@@ -226,6 +231,15 @@ void PPU::ppuWrite(uint16_t address, uint8_t data)
     if (cartridge->ppuWrite(address, data))
     {
 
+    }
+    else if (address >= 0x3F00) // Palette RAM indexes
+    {
+        address &= 0x001F;
+
+        if ((address & 0x000F) % 0x04 == 0) // Multiples of 4 are mirrors of 0x3F00 (last colour of a palette mirrors to background colour at 0x3F00)
+            address &= 0x000F; // Addres with 0x3F1X multiples of 4 are mirrors of 0x3F0X equivalents
+
+        paletteRam[address] = data;
     }
 }
 

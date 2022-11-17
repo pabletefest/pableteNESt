@@ -52,6 +52,9 @@ private:
 private:
     std::shared_ptr<Cartridge> cartridge;
 
+    uint8_t nameTables[2][1024];
+    uint8_t paletteRam[32];
+
     int32_t scanline = 0;
     int32_t cycle = 0;
 
@@ -128,13 +131,12 @@ private:
             uint16_t fineYScroll : 3;
             uint16_t unused : 1;
         };
-        uint16_t loopyReg;
+        uint16_t vramAddrPtr;
     };
 
-    loopy_register loopyV;
-    loopy_register loopyT;
+    loopy_register loopyV; // (V)ram Address
+    loopy_register loopyT; // (T)emporary Address
 
     bool addressLatchToggle = false;
-    uint16_t vramAddrPtr = 0x0000;
     uint8_t internalReadBuffer = 0x00;
 };

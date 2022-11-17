@@ -19,8 +19,8 @@ static SDL_Window* window = nullptr;
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
-#define PPU_SCANLINE_DOTS 341
-#define PPU_NUM_SCANLINES 262
+#define PPU_SCANLINE_DOTS 256
+#define PPU_NUM_SCANLINES 240
 
 constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 128, 128);
     //SDL_RenderSetLogicalSize(renderer, 1280, 720);
     //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
@@ -60,12 +60,12 @@ int main(int argc, char* argv[])
 
     NESBusSystem nes;
 
-    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
-    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Donkey Kong.nes");
+    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
+    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Donkey Kong.nes");
     nes.insertCardtridge(cartridge);
     nes.reset();
 
-    std::vector<PPU::Pixel> pixels2 = std::vector<PPU::Pixel>(128 * 128);
+    std::vector<PPU::Pixel> pixels2(128 * 128);
 
     while (isRunnning)
     {
@@ -97,9 +97,9 @@ int main(int argc, char* argv[])
         nes.ppu.frameCompleted = false;
 
         // Iterate over sprites indeces
-        for (int indexTileX = 0; indexTileX < 16; indexTileX++)
+        for (int indexTileY = 0; indexTileY < 16; indexTileY++)
         {
-            for (int indexTileY = 0; indexTileY < 16; indexTileY++)
+            for (int indexTileX = 0; indexTileX < 16; indexTileX++)
             {
                 int tileOffset = indexTileY * 256 + indexTileX * 16;
 
@@ -118,11 +118,16 @@ int main(int argc, char* argv[])
 
                         uint8_t pixel = (msb << 1) | lsb;
 
-                        uint8_t nesColour = nes.ppu.ppuRead(0x3F00 + (1 * 4 + pixel));
-                        pixels2[(indexTileY * 8 + sprRow) + (indexTileX * 8 + sprCol)] = nes.ppu.getRGBAFromNesColour(nesColour);
+                        uint8_t nesColour = nes.ppu.ppuRead(0x3F00 + (0 * 4 + pixel));
+                        uint16_t x = indexTileX * 8 + (sprCol);
+                        uint16_t y = indexTileY * 8 + sprRow;
 
-                        lsb <<= 1;
-                        msb <<= 1;
+                        //printf("X is %d and Y is %d\n", x ,y);
+
+                        pixels2[y * 128 + x] = nes.ppu.getRGBAFromNesColour(nesColour);
+
+                        MSB <<= 1;
+                        LSB <<= 1;
                     }
                 }
             }
@@ -131,7 +136,13 @@ int main(int argc, char* argv[])
         //const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
         //SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);
         SDL_UpdateTexture(texture, nullptr, pixels2.data(), sizeof(PPU::Pixel) * 128);
-       
+
+        SDL_Rect pos;
+        pos.w = SCREEN_WIDTH;
+        pos.h = SCREEN_HEIGHT;
+        pos.x = 0;
+        pos.y = 0;
+
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
         SDL_RenderPresent(renderer);
