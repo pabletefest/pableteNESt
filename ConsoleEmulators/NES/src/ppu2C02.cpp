@@ -249,6 +249,47 @@ PPU::Pixel PPU::getRGBAFromNesPalette(uint8_t paletteIndex, uint8_t pixelIndex)
     return nesPalToRGBAPalArray[nesColour];
 }
 
+std::vector<PPU::Pixel> PPU::getPatternTableBuffer(uint8_t patternIndex, uint8_t paletteIndex)
+{
+    std::vector<PPU::Pixel> buffer = std::vector<PPU::Pixel>(128 * 128); // 128 by 128 pixels wide
+
+    // Iterate over sprites indeces
+    for (int indexTileY = 0; indexTileY < 16; indexTileY++)
+    {
+        for (int indexTileX = 0; indexTileX < 16; indexTileX++)
+        {
+            int tileOffset = indexTileY * 256 + indexTileX * 16;
+
+            // Iterate over sprite rows
+            for (int sprRow = 0; sprRow < 8; sprRow++)
+            {
+                //Each tile is 16 bytes, each row is 2 bytes separated each one in two blocks of 8 bytes (LSB and MSB, each one separated 8 bytes)
+                uint8_t LSB = ppuRead(patternIndex * 0x1000 + tileOffset + sprRow + 0x0000);
+                uint8_t MSB = ppuRead(patternIndex * 0x1000 + tileOffset + sprRow + 0x0008);
+
+                // Iterate over sprite column from a row using LSB and MSB
+                for (int sprCol = 0; sprCol < 8; sprCol++)
+                {
+                    uint8_t lsb = (LSB & 0x80) >> 7;
+                    uint8_t msb = (MSB & 0x80) >> 7;
+
+                    uint8_t pixel = (msb << 1) | lsb;
+
+                    uint16_t x = indexTileX * 8 + (sprCol);
+                    uint16_t y = indexTileY * 8 + sprRow;
+
+                    buffer[y * 128 + x] = getRGBAFromNesPalette(0, pixel);
+
+                    MSB <<= 1;
+                    LSB <<= 1;
+                }
+            }
+        }
+    }
+
+    return buffer;
+}
+
 void PPU::init()
 {
     PPUCTRL.controlReg = 0x00;

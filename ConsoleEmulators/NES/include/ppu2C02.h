@@ -43,6 +43,8 @@ public:
 
     PPU::Pixel getRGBAFromNesPalette(uint8_t paletteIndex, uint8_t pixelIndex);
 
+    std::vector<PPU::Pixel> getPatternTableBuffer(uint8_t patternIndex, uint8_t paletteIndex);
+
 private:
     void init();
 

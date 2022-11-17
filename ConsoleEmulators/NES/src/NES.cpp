@@ -16,11 +16,14 @@ std::tuple<std::string, std::string, uint32_t> compareWithNestestLog();
 uint32_t printFPS(uint32_t interval, void* params);
 
 static SDL_Window* window = nullptr;
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
 
 #define PPU_SCANLINE_DOTS 256
 #define PPU_NUM_SCANLINES 240
+
+#define PATTERN_TABLE_WIDTH 128
+#define PATTERN_TABLE_HEIGHT 128
 
 constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 
@@ -44,7 +47,9 @@ int main(int argc, char* argv[])
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 128, 128);
+    SDL_Texture* gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
+    SDL_Texture* sprTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
+    SDL_Texture* bgTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
     //SDL_RenderSetLogicalSize(renderer, 1280, 720);
     //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
@@ -66,49 +71,15 @@ int main(int argc, char* argv[])
     nes.insertCardtridge(cartridge);
     nes.reset();
 
-    std::vector<PPU::Pixel> pixels2(128 * 128);
-
     uint32_t counter = 0;
     for (uint32_t i = 0; i < 32; i++)
     {
         nes.ppu.ppuWrite(0x3F00 + i, ((counter << 4) | 0x0d) & 0x3d);
         counter++;
     }
-    // Iterate over sprites indeces
-    for (int indexTileY = 0; indexTileY < 16; indexTileY++)
-    {
-        for (int indexTileX = 0; indexTileX < 16; indexTileX++)
-        {
-            int tileOffset = indexTileY * 256 + indexTileX * 16;
 
-            // Iterate over sprite rows
-            for (int sprRow = 0; sprRow < 8; sprRow++)
-            {
-                //Each tile is 16 bytes, each row is 2 bytes separated each one in two blocks of 8 bytes (LSB and MSB, each one separated 8 bytes)
-                uint8_t LSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0000);
-                uint8_t MSB = nes.ppu.ppuRead(0x0000 + tileOffset + sprRow + 0x0008);
-
-                // Iterate over sprite column from a row using LSB and MSB
-                for (int sprCol = 0; sprCol < 8; sprCol++)
-                {
-                    uint8_t lsb = (LSB & 0x80) >> 7;
-                    uint8_t msb = (MSB & 0x80) >> 7;
-
-                    uint8_t pixel = (msb << 1) | lsb;
-
-                    uint16_t x = indexTileX * 8 + (sprCol);
-                    uint16_t y = indexTileY * 8 + sprRow;
-
-                    //printf("X is %d and Y is %d\n", x ,y);
-
-                    pixels2[y * 128 + x] = nes.ppu.getRGBAFromNesPalette(0, pixel);
-
-                    MSB <<= 1;
-                    LSB <<= 1;
-                }
-            }
-        }
-    }
+    std::vector<PPU::Pixel> sprPatternTable = nes.ppu.getPatternTableBuffer(0, 0);
+    std::vector<PPU::Pixel> bgPatternTable = nes.ppu.getPatternTableBuffer(1, 0);
 
     while (isRunnning)
     {
@@ -139,18 +110,33 @@ int main(int argc, char* argv[])
 
         nes.ppu.frameCompleted = false;
 
-        //const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
-        //SDL_UpdateTexture(texture, nullptr, pixels.data(), sizeof(PPU::Pixel) * 341);
-        SDL_UpdateTexture(texture, nullptr, pixels2.data(), sizeof(PPU::Pixel) * 128);
+        const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
+        SDL_UpdateTexture(gameTexture, nullptr, pixels.data(), sizeof(PPU::Pixel) * PPU_SCANLINE_DOTS);
+        SDL_UpdateTexture(sprTexture, nullptr, sprPatternTable.data(), sizeof(PPU::Pixel) * PATTERN_TABLE_WIDTH);
+        SDL_UpdateTexture(bgTexture, nullptr, bgPatternTable.data(), sizeof(PPU::Pixel) * PATTERN_TABLE_WIDTH);
 
-        SDL_Rect pos;
-        pos.w = SCREEN_WIDTH;
-        pos.h = SCREEN_HEIGHT;
-        pos.x = 0;
-        pos.y = 0;
+        SDL_Rect gameViewport;
+        gameViewport.w = PPU_SCANLINE_DOTS * 3;
+        gameViewport.h = PPU_NUM_SCANLINES * 3;
+        gameViewport.x = 0;
+        gameViewport.y = 0;
+
+        SDL_Rect sprViewport;
+        sprViewport.w = SCREEN_WIDTH - gameViewport.w;
+        sprViewport.h = gameViewport.h / 2;
+        sprViewport.x = gameViewport.w;
+        sprViewport.y = 0;
+
+        SDL_Rect bgViewport;
+        bgViewport.w = SCREEN_WIDTH - gameViewport.w;
+        bgViewport.h = gameViewport.h / 2;
+        bgViewport.x = gameViewport.w;
+        bgViewport.y = sprViewport.h;
 
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderCopy(renderer, gameTexture, NULL, &gameViewport);
+        SDL_RenderCopy(renderer, sprTexture, NULL, &sprViewport);
+        SDL_RenderCopy(renderer, bgTexture, NULL, &bgViewport);
         SDL_RenderPresent(renderer);
         //SDL_UpdateWindowSurface(window);
 
