@@ -71,11 +71,27 @@ int main(int argc, char* argv[])
     nes.insertCardtridge(cartridge);
     nes.reset();
 
-    uint32_t counter = 0;
-    for (uint32_t i = 0; i < 32; i++)
+    // Fill palette ram with a greyscale for debugging windows
+    for (uint32_t i = 0; i < 0x32; i++)
     {
-        nes.ppu.ppuWrite(0x3F00 + i, ((counter << 4) | 0x0d) & 0x3d);
-        counter++;
+        uint16_t addr = 0x3F00 + i;
+        if ((addr & 0x0F) == 0 || ((addr & 0x0F) % 4) == 0)
+            nes.ppu.ppuWrite(addr, 0x0d);
+        else
+        {
+            switch ((addr & 0x00FF) % 4)
+            {
+            case 0:
+                nes.ppu.ppuWrite(addr, 0x00);
+                break;
+            case 1:
+                nes.ppu.ppuWrite(addr, 0x10);
+                break;
+            case 2:
+                nes.ppu.ppuWrite(addr, 0x20);
+                break;
+            }
+        }
     }
 
     std::vector<PPU::Pixel> sprPatternTable = nes.ppu.getPatternTableBuffer(0, 0);
