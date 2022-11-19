@@ -311,6 +311,11 @@ std::vector<PPU::Pixel> PPU::getPatternTableBuffer(uint8_t patternIndex, uint8_t
     return buffer;
 }
 
+void* PPU::getNametable(int8_t selectNT)
+{
+    return nameTables[selectNT];
+}
+
 void PPU::init()
 {
     PPUCTRL.controlReg = 0x00;

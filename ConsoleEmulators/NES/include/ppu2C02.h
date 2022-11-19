@@ -45,6 +45,9 @@ public:
 
     std::vector<PPU::Pixel> getPatternTableBuffer(uint8_t patternIndex, uint8_t paletteIndex);
 
+    // If selectNT is -1, a pointer the both NT is returned
+    void* getNametable(int8_t selectNT);
+
 private:
     void init();
 

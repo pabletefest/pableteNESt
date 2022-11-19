@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 #include "nesBus.h"
 #include "cartridge.h"
@@ -13,8 +14,29 @@
 #endif
 
 void run_nestest(NESBusSystem& nes);
+
 std::tuple<std::string, std::string, uint32_t> compareWithNestestLog();
+
 uint32_t printFPS(uint32_t interval, void* params);
+
+template<typename T>
+std::string getTextFromBuffer(T* nametable, uint16_t bufferSize)
+{
+    std::stringstream text;
+
+    for (uint16_t i = 0; i < bufferSize; i++)
+    {
+        if (i % 32 == 0)
+            text << "\n";
+
+        char chr[4];
+        sprintf_s(chr, 4, "%02X", nametable[i]);
+        text << std::setw(3) << std::setfill(' ') << chr;
+        //text << std::hex << std::to_string(nametable[i]); // Get nametable as text (nestest show fine)
+    }
+
+    return text.str();
+}
 
 static SDL_Window* window = nullptr;
 #define SCREEN_WIDTH 1280
@@ -103,8 +125,6 @@ int main(int argc, char* argv[])
     TTF_Init();
     TTF_Font* pixelEmulatorFont = TTF_OpenFont("fonts/PixelEmulator.ttf", 20);
     SDL_Color whiteColour = { 255, 255, 255 };
-    SDL_Surface* messageSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, "202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020", whiteColour, 1000);
-    SDL_Texture* messageTexture = SDL_CreateTextureFromSurface(renderer, messageSurface);
 
     while (isRunnning)
     {
@@ -159,10 +179,17 @@ int main(int argc, char* argv[])
         bgViewport.y = sprViewport.h;
 
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, messageTexture, NULL, &gameViewport);
         //SDL_RenderCopy(renderer, gameTexture, NULL, &gameViewport);
         SDL_RenderCopy(renderer, sprTexture, NULL, &sprViewport);
         SDL_RenderCopy(renderer, bgTexture, NULL, &bgViewport);
+
+        uint8_t* nameTable = reinterpret_cast<uint8_t*>(nes.ppu.getNametable(0));
+        SDL_Surface* messageSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
+        SDL_Texture* messageTexture = SDL_CreateTextureFromSurface(renderer, messageSurface);
+        SDL_RenderCopy(renderer, messageTexture, NULL, &gameViewport);
+        SDL_FreeSurface(messageSurface);
+        SDL_DestroyTexture(messageTexture);
+
         SDL_RenderPresent(renderer);
         //SDL_UpdateWindowSurface(window);
 
@@ -180,9 +207,7 @@ int main(int argc, char* argv[])
     }
     run_nestest(nes);
 #endif
-
-    SDL_FreeSurface(messageSurface);
-    SDL_DestroyTexture(messageTexture);
+    TTF_CloseFont(pixelEmulatorFont);
     TTF_Quit();
     SDL_DestroyTexture(gameTexture);
     SDL_DestroyTexture(sprTexture);
