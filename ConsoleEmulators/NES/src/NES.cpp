@@ -26,7 +26,7 @@ std::string getTextFromBuffer(T* nametable, uint16_t bufferSize)
 
     for (uint16_t i = 0; i < bufferSize; i++)
     {
-        if (i % 32 == 0)
+        if (i % 32 == 0 && i != 0)
             text << "\n";
 
         char chr[4];
