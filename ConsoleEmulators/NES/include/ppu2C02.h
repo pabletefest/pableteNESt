@@ -38,7 +38,7 @@ public:
 
     const std::vector<Pixel>& getPixelsFrameBuffer() const 
     { 
-        return pixelsFrameBufer;
+        return pixelsFrameBufer; 
     }
 
     PPU::Pixel getRGBAFromNesPalette(uint8_t paletteIndex, uint8_t pixelIndex);

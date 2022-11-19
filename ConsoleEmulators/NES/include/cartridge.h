@@ -9,6 +9,15 @@
 class Cartridge
 {
 public:
+
+	enum class Mirroring
+	{
+		VERTICAL,
+		HORIZONTAL,
+		ONE_SCREEN,
+		FOUR_SCREEN
+	};
+
     Cartridge(const std::string& filename);
     ~Cartridge() = default;
 
@@ -20,6 +29,11 @@ public:
 	bool ppuRead(uint16_t addr, uint8_t& data);
 	bool ppuWrite(uint16_t addr, uint8_t data);
 
+	Mirroring getNTMirroring() const 
+	{ 
+		return mirroring; 
+	}
+
 private:
 	uint8_t nMapperID = 0;
 	uint8_t nPRGBanks = 0;
@@ -27,6 +41,8 @@ private:
 
 	std::vector<uint8_t> vPRGMemory;
 	std::vector<uint8_t> vCHRMemory;
+
+	Mirroring mirroring;
 
 	std::shared_ptr<Mapper> pMapper;
 };

@@ -142,6 +142,7 @@ uint8_t PPU::cpuRead(uint16_t address)
         break;
     case 0x0002: // Status
         dataRead = PPUSTATUS.statusReg;
+        //dataRedd = (PPUSTATUS.statusReg & 0xE0) | (internalReadBuffer & 0x1F); Put lower 5 bits of noise into the read data, check if needed later
         PPUSTATUS.verticalBlank = 0;
         addressLatchToggle = false; //Reset
         break;
@@ -231,6 +232,26 @@ void PPU::ppuWrite(uint16_t address, uint8_t data)
     if (cartridge->ppuWrite(address, data))
     {
 
+    }
+    else if (address >= 0x2000 && address <= 0x2FFF)
+    {
+        if (cartridge->getNTMirroring() == Cartridge::Mirroring::VERTICAL)
+        {
+            if (address >= 0x2800 && address <= 0x2BFF)
+                address &= 0x23FF;
+            else if (address >= 0x2C00 && address <= 0x2FFF)
+                address &= 0x27FF;
+
+        }
+        else if (cartridge->getNTMirroring() == Cartridge::Mirroring::HORIZONTAL)
+        {
+            if (address <= 0x27FF)
+                address &= 0x23FF;
+            else if (address >= 0x2C00)
+                address &= 0x2BFF;
+        }
+
+        nameTables[(address & 0x0F00) >> 16][address & 0x03FF] = data;
     }
     else if (address >= 0x3F00) // Palette RAM indexes
     {
