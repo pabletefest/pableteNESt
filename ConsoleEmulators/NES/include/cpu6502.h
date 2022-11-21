@@ -7,7 +7,7 @@
 #define LOG_MODE
 #endif
 
-//#undef LOG_MODE // temp
+#undef LOG_MODE // temp
 
 class NESBusSystem;
 

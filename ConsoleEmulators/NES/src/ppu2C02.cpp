@@ -191,6 +191,16 @@ void PPU::cpuWrite(uint16_t address, uint8_t data)
     case 0x0004: // OAM Data
         break;
     case 0x0005: // Scroll
+        if (!addressLatchToggle)
+        {
+
+        }
+        else
+        {
+
+        }
+
+        addressLatchToggle = !addressLatchToggle;
         break;
     case 0x0006: // PPU Address
         if (!addressLatchToggle)
