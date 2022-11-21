@@ -184,11 +184,11 @@ int main(int argc, char* argv[])
         SDL_RenderCopy(renderer, bgTexture, NULL, &bgViewport);
 
         uint8_t* nameTable = reinterpret_cast<uint8_t*>(nes.ppu.getNametable(0));
-        SDL_Surface* messageSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
-        SDL_Texture* messageTexture = SDL_CreateTextureFromSurface(renderer, messageSurface);
-        SDL_RenderCopy(renderer, messageTexture, NULL, &gameViewport);
-        SDL_FreeSurface(messageSurface);
-        SDL_DestroyTexture(messageTexture);
+        SDL_Surface* nameTableSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
+        SDL_Texture* nameTableTexture = SDL_CreateTextureFromSurface(renderer, nameTableSurface);
+        SDL_RenderCopy(renderer, nameTableTexture, NULL, &gameViewport);
+        SDL_FreeSurface(nameTableSurface);
+        SDL_DestroyTexture(nameTableTexture);
 
         SDL_RenderPresent(renderer);
         //SDL_UpdateWindowSurface(window);
