@@ -32,7 +32,7 @@ std::string getTextFromBuffer(T* nametable, uint16_t bufferSize)
         char chr[4];
         sprintf_s(chr, 4, "%02X", nametable[i]);
         text << std::setw(3) << std::setfill(' ') << chr;
-        //text << std::hex << std::to_string(nametable[i]); // Get nametable as text (nestest show fine)
+        //text << std::hex << std::to_string(nametable[i]); // Get nametable as text (nestest shows fine)
     }
 
     return text.str();
