@@ -89,6 +89,9 @@ void PPU::reset()
 
 void PPU::clock()
 {
+    //if (!PPUMASK.showBackground && !PPUMASK.showSprites) // Rendering disabled
+    //    return;
+
     if (cycle == 1 && scanline == -1)
     {
         PPUSTATUS.verticalBlank = 0;
