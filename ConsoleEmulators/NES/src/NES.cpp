@@ -13,7 +13,7 @@
 #include <tuple>
 #endif
 
-void run_nestest(NESBusSystem& nes);
+void run_nestest(SystemBus& nes);
 
 std::tuple<std::string, std::string, uint32_t> compareWithNestestLog();
 
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     //SDL_RenderSetLogicalSize(renderer, 1280, 720);
     //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-    /*std::vector<PPU::Pixel> pixels = std::vector<PPU::Pixel>(640 * 480);
+    /*std::vector<nes::PPU::Pixel> pixels = std::vector<PPU::Pixel>(640 * 480);
     memset(pixels.data(), 0, sizeof(PPU::Pixel) * pixels.size());*/
 
     SDL_Event event;
@@ -86,12 +86,12 @@ int main(int argc, char* argv[])
 
     SDL_AddTimer(1000, printFPS, (void*)&fps);
 
-    NESBusSystem nes;
+    nes::SystemBus nes;
 
-    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
-    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Donkey Kong.nes");
-    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Super Mario Bros.nes");
-    //std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("roms/Pac-Man.nes");
+    //std::shared_ptr<Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/nestest.nes");
+    //std::shared_ptr<Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
+    //std::shared_ptr<Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Pac-Man.nes");
 
     nes.insertCardtridge(cartridge);
     nes.reset();
@@ -119,8 +119,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::vector<PPU::Pixel> sprPatternTable = nes.ppu.getPatternTableBuffer(0, 0);
-    std::vector<PPU::Pixel> bgPatternTable = nes.ppu.getPatternTableBuffer(1, 0);
+    std::vector<nes::PPU::Pixel> sprPatternTable = nes.ppu.getPatternTableBuffer(0, 0);
+    std::vector<nes::PPU::Pixel> bgPatternTable = nes.ppu.getPatternTableBuffer(1, 0);
 
     TTF_Init();
     TTF_Font* pixelEmulatorFont = TTF_OpenFont("fonts/PixelEmulator.ttf", 20);
@@ -155,10 +155,10 @@ int main(int argc, char* argv[])
 
         nes.ppu.frameCompleted = false;
 
-        const std::vector<PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
-        SDL_UpdateTexture(gameTexture, nullptr, pixels.data(), sizeof(PPU::Pixel) * PPU_SCANLINE_DOTS);
-        SDL_UpdateTexture(sprTexture, nullptr, sprPatternTable.data(), sizeof(PPU::Pixel) * PATTERN_TABLE_WIDTH);
-        SDL_UpdateTexture(bgTexture, nullptr, bgPatternTable.data(), sizeof(PPU::Pixel) * PATTERN_TABLE_WIDTH);
+        const std::vector<nes::PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
+        SDL_UpdateTexture(gameTexture, nullptr, pixels.data(), sizeof(nes::PPU::Pixel) * PPU_SCANLINE_DOTS);
+        SDL_UpdateTexture(sprTexture, nullptr, sprPatternTable.data(), sizeof(nes::PPU::Pixel) * PATTERN_TABLE_WIDTH);
+        SDL_UpdateTexture(bgTexture, nullptr, bgPatternTable.data(), sizeof(nes::PPU::Pixel) * PATTERN_TABLE_WIDTH);
 
         SDL_Rect gameViewport;
         gameViewport.w = PPU_SCANLINE_DOTS * 3;
@@ -221,10 +221,10 @@ int main(int argc, char* argv[])
 
 #ifdef LOG_MODE
 
-void run_nestest(NESBusSystem& nes)
+void run_nestest(nes::SystemBus& nes)
 {
     nes.cpu.PC = 0x8000;
-    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<Cartridge>("tests/nestest.nes");
     nes.insertCardtridge(cartridge);
 
     nes.reset();
