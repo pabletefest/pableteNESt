@@ -271,7 +271,7 @@ void PPU::ppuWrite(uint16_t address, uint8_t data)
         address &= 0x001F;
 
         if ((address & 0x000F) % 0x04 == 0) // Multiples of 4 are mirrors of 0x3F00 (last colour of a palette mirrors to background colour at 0x3F00)
-            address &= 0x000F; // Addres with 0x3F1X multiples of 4 are mirrors of 0x3F0X equivalents
+            address &= 0x000F; // Addresses with 0x3F1X multiples of 4 are mirrors of 0x3F0X equivalents (i.e. 10, 14, 18, 1C)
 
         paletteRam[address] = data;
     }
