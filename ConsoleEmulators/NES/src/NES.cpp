@@ -13,7 +13,7 @@
 #include <tuple>
 #endif
 
-void run_nestest(SystemBus& nes);
+void run_nestest(nes::SystemBus& nes);
 
 std::tuple<std::string, std::string, uint32_t> compareWithNestestLog();
 

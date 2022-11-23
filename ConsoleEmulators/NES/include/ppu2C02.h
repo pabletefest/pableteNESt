@@ -75,15 +75,7 @@ namespace nes
         {
             struct
             {
-                /*union
-                {
-                    struct
-                    {
-                        uint8_t nametableX : 1;
-                        uint8_t nametableY : 1;
-                    };
-                    uint8_t baseNameTabAddreses : 2;
-                };*/
+                // Bits 0 and 1 can be baseNameTabAddreses
                 uint8_t nametableX : 1;
                 uint8_t nametableY : 1;
                 uint8_t vramAddrInc : 1;

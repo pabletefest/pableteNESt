@@ -9,10 +9,10 @@
 
 #undef LOG_MODE // temp
 
-class SystemBus;
-
 namespace nes
 {
+	class SystemBus;
+
 	// CPU 2A03/2A07 (6502 NES console processor)
 	class CPU
 	{
