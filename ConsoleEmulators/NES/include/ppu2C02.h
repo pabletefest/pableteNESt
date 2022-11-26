@@ -132,10 +132,10 @@ namespace nes
             uint16_t vramAddrPtr;
         };
 
-        loopy_register loopyV; // (V)ram Address
-        loopy_register loopyT; // (T)emporary Address
+        loopy_register loopyV; // (V)ram Address (v register)
+        loopy_register loopyT; // (T)emporary Address (t register)
 
-        bool addressLatchToggle = false;
+        bool addressLatchToggle = false; // (w register)
         uint8_t internalReadBuffer = 0x00;
     };
 }
