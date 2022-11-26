@@ -209,9 +209,12 @@ namespace nes
             break;
         case 0x0006: // PPU Address
             if (!addressLatchToggle)
-                loopyV.vramAddrPtr = (data << 8) & 0xFF00; // We treat the addr as big endian (i.e. hi_byte is provided first)
+                loopyT.vramAddrPtr = (data << 8) & 0xFF00; // We treat the addr as big endian (i.e. hi_byte is provided first)
             else
-                loopyV.vramAddrPtr |= data & 0x00FF;
+            {
+                loopyT.vramAddrPtr |= data & 0x00FF;
+                loopyV = loopyT;
+            }
 
             addressLatchToggle = !addressLatchToggle; // Invert latch
             break;
