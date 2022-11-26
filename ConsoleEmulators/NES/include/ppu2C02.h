@@ -132,10 +132,12 @@ namespace nes
             uint16_t vramAddrPtr;
         };
 
+        // Internal PPU registers (yyyNNYYYYYXXXXX format)
         loopy_register loopyV; // (V)ram Address (v register)
         loopy_register loopyT; // (T)emporary Address (t register)
-
+        uint8_t fineXScroll = 0x00; 
         bool addressLatchToggle = false; // (w register)
+
         uint8_t internalReadBuffer = 0x00;
     };
 }

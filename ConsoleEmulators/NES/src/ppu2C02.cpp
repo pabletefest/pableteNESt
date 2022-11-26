@@ -183,8 +183,8 @@ namespace nes
         {
         case 0x0000: // Control
             PPUCTRL.controlReg = data;
-            loopyV.coarseXScroll = PPUCTRL.nametableX;
-            loopyV.coarseYScroll = PPUCTRL.nametableY;
+            loopyT.coarseXScroll = PPUCTRL.nametableX;
+            loopyT.coarseYScroll = PPUCTRL.nametableY;
             break;
         case 0x0001: // Mask
             PPUMASK.maskReg = data;
@@ -196,21 +196,24 @@ namespace nes
         case 0x0004: // OAM Data
             break;
         case 0x0005: // Scroll
-            if (!addressLatchToggle)
+            if (!addressLatchToggle) // XXXXXxxx, Top 5 bits become XXXXX of "T", low 3 bits become the fine X scroll(updated immediately).
             {
-
+                loopyT.coarseXScroll = ((data & 0xF8) >> 3) & 0x001F; // Top 5 bits of data become the lower 5 bits of T
+                fineXScroll = data & 0x07; // Low 3 bits of data become fine X scroll
             }
-            else
+            else // YYYYYyyy, Top 5 bits become YYYYY of "T", low 3 bits become yyy of "T" (fine Y scroll)
             {
-
+                loopyT.coarseYScroll = ((data & 0xF8) >> 3) & 0x001F;
+                loopyT.fineYScroll = data & 0x07;
             }
 
             addressLatchToggle = !addressLatchToggle;
             break;
         case 0x0006: // PPU Address
-            if (!addressLatchToggle)
-                loopyT.vramAddrPtr = (data << 8) & 0xFF00; // We treat the addr as big endian (i.e. hi_byte is provided first)
-            else
+            if (!addressLatchToggle) // 00yyNNYY, sets the top 8 bits in "T".The top bit of fine Y scroll gets corrupted to 0 here, so we do a $2005 second write to make up for that
+                // We treat the addr as big endian (i.e. hi_byte is provided first)
+                loopyT.vramAddrPtr = (data << 8) & 0x3F00; // High bit of fine Y scroll is corrupted to 0. We emulate this hardware behaviour
+            else // YYYXXXXX, Sets the low 8 bits of "T", which includes the coarse X, and low 3 bits of coarse y. After doing this, "T" is copied to "V", allowing mid-screen vertical scrolling
             {
                 loopyT.vramAddrPtr |= data & 0x00FF;
                 loopyV = loopyT;
