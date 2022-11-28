@@ -149,7 +149,7 @@ namespace nes
             dataRead = PPUSTATUS.statusReg;
             //dataRedd = (PPUSTATUS.statusReg & 0xE0) | (internalReadBuffer & 0x1F); Put lower 5 bits of noise into the read data, check if needed later
             PPUSTATUS.verticalBlank = 0;
-            addressLatchToggle = false; //Reset
+            addressLatchToggle = false; //Reset -> w = 0
             break;
         case 0x0003: // OAM Address
             break;
@@ -212,8 +212,10 @@ namespace nes
             break;
         case 0x0006: // PPU Address
             if (!addressLatchToggle) // 00yyNNYY, sets the top 8 bits in "T".The top bit of fine Y scroll gets corrupted to 0 here, so we do a $2005 second write to make up for that
+            {
                 // We treat the addr as big endian (i.e. hi_byte is provided first)
                 loopyT.vramAddrPtr = (data << 8) & 0x3F00; // High bit of fine Y scroll is corrupted to 0. We emulate this hardware behaviour
+            }
             else // YYYXXXXX, Sets the low 8 bits of "T", which includes the coarse X, and low 3 bits of coarse y. After doing this, "T" is copied to "V", allowing mid-screen vertical scrolling
             {
                 loopyT.vramAddrPtr |= data & 0x00FF;
