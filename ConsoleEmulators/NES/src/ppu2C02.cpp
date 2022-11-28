@@ -183,8 +183,9 @@ namespace nes
         {
         case 0x0000: // Control
             PPUCTRL.controlReg = data;
-            loopyT.coarseXScroll = PPUCTRL.nametableX;
-            loopyT.coarseYScroll = PPUCTRL.nametableY;
+            /*loopyT.coarseXScroll = PPUCTRL.nametableX;
+            loopyT.coarseYScroll = PPUCTRL.nametableY;*/
+            loopyT.nametableSelect = (PPUCTRL.nametableY << 1) | PPUCTRL.nametableX;
             break;
         case 0x0001: // Mask
             PPUMASK.maskReg = data;
