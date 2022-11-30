@@ -125,7 +125,8 @@ namespace nes
             {
                 uint16_t coarseXScroll : 5;
                 uint16_t coarseYScroll : 5;
-                uint16_t nametableSelect : 2;
+                uint16_t nametableSelectX : 1;
+                uint16_t nametableSelectY : 1;
                 uint16_t fineYScroll : 3;
                 uint16_t unused : 1;
             };
