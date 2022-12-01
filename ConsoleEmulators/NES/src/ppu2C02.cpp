@@ -94,12 +94,24 @@ namespace nes
         //if (!PPUMASK.showBackground && !PPUMASK.showSprites) // Rendering disabled
         //    return;
 
-        if (cycle == 1 && scanline == -1)
+        //// Odd frame skipped cycle (if rendering enabled)
+        //if ((PPUMASK.showBackground || PPUMASK.showSprites))
+        //{
+        //    if (cycle == 0 && scanline == 0 && framesElapsed % 2 == 1)
+        //        cycle = 1;
+        //}
+
+        // Everything that happens on visible scanlines and pre-render scanline goes here
+        if (scanline >= -1 && scanline < 240)
         {
-            PPUSTATUS.verticalBlank = 0;
-            PPUSTATUS.spriteZeroHit = 0;
-            PPUSTATUS.spriteOverflow = 0;
+            if (cycle == 1 && scanline == -1)
+            {
+                PPUSTATUS.verticalBlank = 0;
+                PPUSTATUS.spriteZeroHit = 0;
+                PPUSTATUS.spriteOverflow = 0;
+            }
         }
+        
 
         if (cycle == 1 && scanline == 241)
         {
@@ -109,9 +121,19 @@ namespace nes
                 nmi = true;
         }
 
+        if (scanline == 240)
+        {
+            // Post-render scanline, PPU idles
+        }
+
 
         // ----- TESTING PORPOSE -----
         if (scanline == -1) scanline++;
+
+        /*if (cycle == 0)
+        {
+            return;
+        }*/
 
         pixelsFrameBufer[scanline * 341 + cycle] = nesPalToRGBAPalArray[rand() % 0x3F];
 

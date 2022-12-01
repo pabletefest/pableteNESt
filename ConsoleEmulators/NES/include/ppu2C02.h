@@ -60,7 +60,7 @@ namespace nes
         uint8_t paletteRam[32];
 
         int32_t scanline = 0;
-        int32_t cycle = 0;
+        int32_t cycle = 0; // Scanline cycle (reset after each scanline)
 
         uint32_t framesElapsed = 0;
         uint32_t totalCycles = 0;
