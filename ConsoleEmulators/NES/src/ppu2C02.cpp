@@ -110,6 +110,16 @@ namespace nes
                 PPUSTATUS.spriteZeroHit = 0;
                 PPUSTATUS.spriteOverflow = 0;
             }
+
+            if (cycle >= 1 && cycle <= 256)
+            {
+
+            }
+
+            if (cycle >= 321 && cycle <= 336)
+            {
+
+            }
         }
         
 
