@@ -111,14 +111,27 @@ namespace nes
                 PPUSTATUS.spriteOverflow = 0;
             }
 
-            if (cycle >= 1 && cycle <= 256)
+            if (scanline >= 0)
             {
+                if (cycle >= 1 && cycle <= 256)
+                {
 
-            }
+                }
 
-            if (cycle >= 321 && cycle <= 336)
-            {
+                if (cycle >= 257 && cycle <= 320)
+                {
 
+                }
+
+                if (cycle >= 321 && cycle <= 336)
+                {
+
+                }
+
+                if (cycle >= 337 && cycle <= 340)
+                {
+
+                }
             }
         }
         
