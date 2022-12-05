@@ -5,7 +5,7 @@ namespace nes
     constexpr uint16_t baseNameTableAddresses[4] = { 0x2000, 0x2400, 0x2800, 0x2C00 };
 
     PPU::PPU()
-        : pixelsFrameBufer(std::vector<Pixel>(341 * 262, Pixel()))
+        : pixelsFrameBufer(std::vector<Pixel>(256 * 240, Pixel()))
     {
         init();
 
@@ -91,6 +91,14 @@ namespace nes
 
     void PPU::clock()
     {
+
+        auto updateShiftRegisters = [&]() {
+            low_pattern_shifter |= (fetchedLowBytePT << 8);
+            high_pattern_shifter |= (fetchedHighBytePT << 8);
+
+            low_attribute_shifter = fetchedByteAT;
+            high_attribute_shifter = fetchedByteAT;
+        };
         //if (!PPUMASK.showBackground && !PPUMASK.showSprites) // Rendering disabled
         //    return;
 
@@ -111,13 +119,60 @@ namespace nes
                 PPUSTATUS.spriteOverflow = 0;
             }
 
+            if (cycle >= 2 && cycle <= 257)
+            {
+                switch ((cycle - 1) % 8) // Every 8 cycles we repeat this
+                {
+                case 0:
+                    // Every 8 cyles (case 0), the shifter register get updated (1 to 257 on odd cycles)
+                    updateShiftRegisters();
+
+                    fetchedByteNT = ppuRead(0x2000 | (loopyV.vramAddrPtr & 0x0FFF));
+                    break;
+                case 2:
+                    uint16_t attribOffset = loopyV.nametableSelectY << 11
+                        | loopyV.nametableSelectX << 10 | loopyV.coarseYScroll >> 4
+                        | loopyV.coarseXScroll >> 2;
+
+                    fetchedByteAT = ppuRead(0x23C0 | attribOffset);
+                    break;
+                case 4:
+                    /*
+                        0HRRRR CCCCPTTT
+                        |||||| |||||+++- T: Fine Y offset, the row number within a tile
+                        |||||| ||||+---- P: Bit plane (0: "lower"; 1: "upper")
+                        |||||| ++++----- C: Tile column
+                        ||++++---------- R: Tile row
+                        |+-------------- H: Half of pattern table (0: "left"; 1: "right")
+                        +--------------- 0: Pattern table is at $0000-$1FFF
+                    */
+                    uint16_t lowByteAddr = PPUCTRL.backgroundPatternTabAddr << 12 | fetchedByteNT << 4 
+                        | 0 << 3 | loopyV.fineYScroll; // 0 << 3 == + 0 (low tile byte)
+
+                    fetchedLowBytePT = ppuRead(lowByteAddr);
+                    break;
+                case 6:
+                    /*
+                        0HRRRR CCCCPTTT
+                        |||||| |||||+++- T: Fine Y offset, the row number within a tile
+                        |||||| ||||+---- P: Bit plane (0: "lower"; 1: "upper")
+                        |||||| ++++----- C: Tile column
+                        ||++++---------- R: Tile row
+                        |+-------------- H: Half of pattern table (0: "left"; 1: "right")
+                        +--------------- 0: Pattern table is at $0000-$1FFF
+                    */
+                    uint16_t highByteAddr = PPUCTRL.backgroundPatternTabAddr << 12 | fetchedByteNT << 4
+                        | 1 << 3 | loopyV.fineYScroll; // 1 << 3 == + 8 (high tile byte)
+
+                    fetchedHighBytePT = ppuRead(highByteAddr);
+                    break;
+                case 7:
+                    break;
+                }
+            }
+
             if (scanline >= 0)
             {
-                if (cycle >= 1 && cycle <= 256)
-                {
-
-                }
-
                 if (cycle >= 257 && cycle <= 320)
                 {
 
@@ -150,17 +205,28 @@ namespace nes
         }
 
 
-        // ----- TESTING PORPOSE -----
-        if (scanline == -1) scanline++;
+        //// ----- TESTING PORPOSE -----
+        //if (scanline == -1) scanline++;
 
-        /*if (cycle == 0)
+        ///*if (cycle == 0)
+        //{
+        //    return;
+        //}*/
+
+        //pixelsFrameBufer[scanline * 341 + cycle] = nesPalToRGBAPalArray[rand() % 0x3F];
+
+        //// ----- END OF TESTING ------
+
+        // RENDERING A PIXEL
+        if (scanline <= 0 && scanline >= 239)
         {
-            return;
-        }*/
 
-        pixelsFrameBufer[scanline * 341 + cycle] = nesPalToRGBAPalArray[rand() % 0x3F];
 
-        // ----- END OF TESTING ------
+            low_pattern_shifter >>= 1;
+            high_pattern_shifter >>= 1;
+            low_attribute_shifter >>= 1;
+            high_attribute_shifter >>= 1;
+        }
 
         cycle++;
 
