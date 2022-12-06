@@ -53,6 +53,11 @@ namespace nes
     private:
         void init();
 
+        void incrementScrollXloopyV();
+        void incrementScrollYloopyV();
+        void copyXvaluesFromTtoVloopyRegs();
+        void copyYvaluesFromTtoVloopyRegs();
+
     private:
         std::shared_ptr<Cartridge> cartridge;
 

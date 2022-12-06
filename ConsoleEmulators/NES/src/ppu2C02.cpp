@@ -92,12 +92,14 @@ namespace nes
     void PPU::clock()
     {
 
-        auto updateShiftRegisters = [&]() {
-            low_pattern_shifter |= (fetchedLowBytePT << 8);
-            high_pattern_shifter |= (fetchedHighBytePT << 8);
+        auto updateDataShiftRegisters = [&]() {
+            // Load to lower part of the reg so that fetching is done from the upper part
+            low_pattern_shifter = (low_pattern_shifter & 0xFF00) | fetchedLowBytePT;
+            high_pattern_shifter = (high_pattern_shifter & 0xFF00) | fetchedHighBytePT;
 
-            low_attribute_shifter = fetchedByteAT;
-            high_attribute_shifter = fetchedByteAT;
+            // If bit is 1 then all 1s, 0s otherwise
+            low_attribute_shifter = (fetchedByteAT & 0b01) ? 0xFF : 0x00; // Low bit
+            high_attribute_shifter = (fetchedByteAT & 0b10) ? 0xFF : 0x00; // High bit
         };
         //if (!PPUMASK.showBackground && !PPUMASK.showSprites) // Rendering disabled
         //    return;
@@ -119,22 +121,37 @@ namespace nes
                 PPUSTATUS.spriteOverflow = 0;
             }
 
-            if (cycle >= 2 && cycle <= 257)
+            if ((cycle >= 2 && cycle <= 257) || (cycle >= 321 && cycle <= 336))
             {
+                // Shift registers every cycle
+                low_pattern_shifter <<= 1;
+                high_pattern_shifter <<= 1;
+                low_attribute_shifter <<= 1;
+                high_attribute_shifter <<= 1;
+
                 switch ((cycle - 1) % 8) // Every 8 cycles we repeat this
                 {
                 case 0:
                     // Every 8 cyles (case 0), the shifter register get updated (1 to 257 on odd cycles)
-                    updateShiftRegisters();
+                    updateDataShiftRegisters();
 
                     fetchedByteNT = ppuRead(0x2000 | (loopyV.vramAddrPtr & 0x0FFF));
                     break;
                 case 2:
-                    uint16_t attribOffset = loopyV.nametableSelectY << 11
-                        | loopyV.nametableSelectX << 10 | loopyV.coarseYScroll >> 4
-                        | loopyV.coarseXScroll >> 2;
+                    {
+                        uint16_t attribOffset = loopyV.nametableSelectY << 11
+                            | loopyV.nametableSelectX << 10 | loopyV.coarseYScroll >> 4
+                            | loopyV.coarseXScroll >> 2;
 
-                    fetchedByteAT = ppuRead(0x23C0 | attribOffset);
+                        fetchedByteAT = ppuRead(0x23C0 | attribOffset);
+
+                        if (loopyV.coarseYScroll & 0x02) // Bottom half else top half
+                            fetchedByteAT >>= 4;
+                        if (loopyV.coarseXScroll & 0x02) // Right half else left half
+                            fetchedByteAT >>= 2;
+
+                        fetchedByteAT &= 0x03; // After all we only get the low 2 bits for the tile
+                    }
                     break;
                 case 4:
                     /*
@@ -146,10 +163,12 @@ namespace nes
                         |+-------------- H: Half of pattern table (0: "left"; 1: "right")
                         +--------------- 0: Pattern table is at $0000-$1FFF
                     */
-                    uint16_t lowByteAddr = PPUCTRL.backgroundPatternTabAddr << 12 | fetchedByteNT << 4 
-                        | 0 << 3 | loopyV.fineYScroll; // 0 << 3 == + 0 (low tile byte)
+                    {
+                        uint16_t lowByteAddr = PPUCTRL.backgroundPatternTabAddr << 12 | fetchedByteNT << 4
+                            | 0 << 3 | loopyV.fineYScroll; // 0 << 3 == + 0 (low tile byte)
 
-                    fetchedLowBytePT = ppuRead(lowByteAddr);
+                        fetchedLowBytePT = ppuRead(lowByteAddr);
+                    }
                     break;
                 case 6:
                     /*
@@ -161,10 +180,12 @@ namespace nes
                         |+-------------- H: Half of pattern table (0: "left"; 1: "right")
                         +--------------- 0: Pattern table is at $0000-$1FFF
                     */
-                    uint16_t highByteAddr = PPUCTRL.backgroundPatternTabAddr << 12 | fetchedByteNT << 4
-                        | 1 << 3 | loopyV.fineYScroll; // 1 << 3 == + 8 (high tile byte)
+                    {
+                        uint16_t highByteAddr = PPUCTRL.backgroundPatternTabAddr << 12 | fetchedByteNT << 4
+                            | 1 << 3 | loopyV.fineYScroll; // 1 << 3 == + 8 (high tile byte)
 
-                    fetchedHighBytePT = ppuRead(highByteAddr);
+                        fetchedHighBytePT = ppuRead(highByteAddr);
+                    }
                     break;
                 case 7:
                     break;
@@ -455,6 +476,56 @@ namespace nes
         PPUCTRL.controlReg = 0x00;
         PPUMASK.maskReg = 0x00;
         PPUSTATUS.statusReg = 0xA0;
+
+        loopyV.coarseXScroll = 31;
+        loopyV.coarseXScroll++;
+
+        loopyV.coarseYScroll = 31;
+        loopyV.coarseYScroll++;
     }
 
+    void PPU::incrementScrollXloopyV()
+    {
+        if (loopyV.coarseXScroll == 31)
+        {
+            loopyV.nametableSelectX = ~loopyV.nametableSelectX;
+        }
+
+        loopyV.coarseXScroll++;
+    }
+
+    void PPU::incrementScrollYloopyV()
+    {
+        if (loopyV.fineYScroll < 7)
+        {
+            loopyV.fineYScroll++;
+        }
+        else
+        {
+            loopyV.fineYScroll = 0;
+
+            if (loopyV.coarseYScroll == 29)
+            {
+                loopyV.coarseYScroll = 0;
+                loopyV.nametableSelectY = ~loopyV.nametableSelectY;
+            }
+            else
+            {
+                loopyV.coarseYScroll++; // Case Y scroll == 31 handled here as incrementing wraps around 0
+            }
+        }
+    }
+
+    void PPU::copyXvaluesFromTtoVloopyRegs()
+    {
+        loopyV.coarseXScroll = loopyT.coarseXScroll;
+        loopyV.nametableSelectX = loopyT.nametableSelectX;
+    }
+
+    void PPU::copyYvaluesFromTtoVloopyRegs()
+    {
+        loopyV.coarseYScroll = loopyT.coarseYScroll;
+        loopyV.nametableSelectY = loopyT.nametableSelectY;
+        loopyV.fineYScroll = loopyT.fineYScroll;
+    }
 }
