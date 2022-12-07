@@ -98,8 +98,8 @@ namespace nes
             high_pattern_shifter = (high_pattern_shifter & 0xFF00) | fetchedHighBytePT;
 
             // If bit is 1 then all 1s, 0s otherwise
-            low_attribute_shifter = (fetchedByteAT & 0b01) ? 0xFF : 0x00; // Low bit
-            high_attribute_shifter = (fetchedByteAT & 0b10) ? 0xFF : 0x00; // High bit
+            low_attribute_shifter = (low_attribute_shifter & 0xFF00) | ((fetchedByteAT & 0b01) ? 0xFF : 0x00); // Low bit
+            high_attribute_shifter = (high_attribute_shifter & 0xFF00) | ((fetchedByteAT & 0b10) ? 0xFF : 0x00); // High bit
         };
         //if (!PPUMASK.showBackground && !PPUMASK.showSprites) // Rendering disabled
         //    return;
@@ -114,6 +114,13 @@ namespace nes
         // Everything that happens on visible scanlines and pre-render scanline goes here
         if (scanline >= -1 && scanline < 240)
         {
+            // Odd frame skipped cycle (if rendering enabled)
+            if ((PPUMASK.showBackground || PPUMASK.showSprites))
+            {
+                if (cycle == 0 && scanline == 0 /*&& framesElapsed % 2 == 1*/)
+                    cycle = 1;
+            }
+
             if (cycle == 1 && scanline == -1)
             {
                 PPUSTATUS.verticalBlank = 0;
@@ -121,7 +128,7 @@ namespace nes
                 PPUSTATUS.spriteOverflow = 0;
             }
 
-            if ((cycle >= 2 && cycle <= 257) || (cycle >= 321 && cycle <= 336))
+            if ((cycle >= 1 && cycle <= 257) || (cycle >= 321 && cycle <= 336))
             {
                 // Shift registers every cycle
                 low_pattern_shifter <<= 1;
@@ -139,9 +146,13 @@ namespace nes
                     break;
                 case 2:
                     {
-                        uint16_t attribOffset = loopyV.nametableSelectY << 11
-                            | loopyV.nametableSelectX << 10 | loopyV.coarseYScroll >> 4
-                            | loopyV.coarseXScroll >> 2;
+                    uint16_t attribOffset = (loopyV.vramAddrPtr & 0x0C00)
+                        | ((loopyV.vramAddrPtr >> 4) & 0x38)
+                        | ((loopyV.vramAddrPtr >> 2) & 0x07);
+                        
+                        /*uint16_t attribOffset = loopyV.nametableSelectY << 11
+                            | loopyV.nametableSelectX << 10 | (loopyV.coarseYScroll >> 4) << 3
+                            | loopyV.coarseXScroll >> 2;*/
 
                         fetchedByteAT = ppuRead(0x23C0 | attribOffset);
 
@@ -188,18 +199,33 @@ namespace nes
                     }
                     break;
                 case 7:
+                    if (PPUMASK.showBackground ||PPUMASK.showSprites)
+                        incrementScrollXloopyV();
                     break;
                 }
+
+                if (cycle == 256)
+                {
+                    if (PPUMASK.showBackground || PPUMASK.showSprites)
+                        incrementScrollYloopyV();
+                }
+
+                if (cycle == 257)
+                {
+                    if (PPUMASK.showBackground || PPUMASK.showSprites)
+                        copyXvaluesFromTtoVloopyRegs();
+                }
+            }
+
+            if (scanline == -1 && cycle >= 280 && cycle <= 304)
+            {
+                if (PPUMASK.showBackground || PPUMASK.showSprites)
+                    copyYvaluesFromTtoVloopyRegs();
             }
 
             if (scanline >= 0)
             {
                 if (cycle >= 257 && cycle <= 320)
-                {
-
-                }
-
-                if (cycle >= 321 && cycle <= 336)
                 {
 
                 }
@@ -239,14 +265,23 @@ namespace nes
         //// ----- END OF TESTING ------
 
         // RENDERING A PIXEL
-        if (scanline <= 0 && scanline >= 239)
+        uint8_t bgPixel = 0x00;
+        uint8_t bgPalette = 0x00;
+
+        if (PPUMASK.showBackground)
         {
+            uint16_t multiplexerBitSelector = 0x8000 >> fineXScroll;
 
+            uint8_t bgPixelLow = (low_pattern_shifter & multiplexerBitSelector) > 0;
+            uint8_t bgPixelHigh = (high_pattern_shifter & multiplexerBitSelector) > 0;
+            bgPixel = (bgPixelHigh << 1) | bgPixelLow;
 
-            low_pattern_shifter >>= 1;
-            high_pattern_shifter >>= 1;
-            low_attribute_shifter >>= 1;
-            high_attribute_shifter >>= 1;
+            uint8_t bgPaletteLow = (low_attribute_shifter & multiplexerBitSelector) > 0;
+            uint8_t bgPaletteHigh = (high_attribute_shifter & multiplexerBitSelector) > 0;
+            bgPalette = (bgPaletteHigh << 1) | bgPaletteLow;
+            
+            if (scanline >= 0 && scanline <= 239 && cycle >= 0 && cycle <= 255)
+                pixelsFrameBufer[scanline * 256 + cycle] = getRGBAFromNesPalette(bgPalette, bgPixel);
         }
 
         cycle++;
@@ -371,6 +406,26 @@ namespace nes
         {
 
         }
+        else if (address >= 0x2000 && address <= 0x2FFF)
+        {
+            if (cartridge->getNTMirroring() == Cartridge::Mirroring::VERTICAL)
+            {
+                if (address >= 0x2800 && address <= 0x2BFF)
+                    address &= 0x23FF;
+                else if (address >= 0x2C00 && address <= 0x2FFF)
+                    address &= 0x27FF;
+
+            }
+            else if (cartridge->getNTMirroring() == Cartridge::Mirroring::HORIZONTAL)
+            {
+                if (address <= 0x27FF)
+                    address &= 0x23FF;
+                else if (address >= 0x2C00)
+                    address &= 0x2BFF;
+            }
+
+            dataRead = nameTables[(address & 0x0F00) >> 16][address & 0x03FF];
+        }
         else if (address >= 0x3F00)
         {
             address &= 0x001F;
@@ -476,12 +531,6 @@ namespace nes
         PPUCTRL.controlReg = 0x00;
         PPUMASK.maskReg = 0x00;
         PPUSTATUS.statusReg = 0xA0;
-
-        loopyV.coarseXScroll = 31;
-        loopyV.coarseXScroll++;
-
-        loopyV.coarseYScroll = 31;
-        loopyV.coarseYScroll++;
     }
 
     void PPU::incrementScrollXloopyV()

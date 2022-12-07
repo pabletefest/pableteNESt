@@ -148,8 +148,8 @@ namespace nes
 
         uint16_t low_pattern_shifter = 0x0000;
         uint16_t high_pattern_shifter = 0x0000;
-        uint8_t low_attribute_shifter = 0x00;
-        uint8_t high_attribute_shifter = 0x00;
+        uint16_t low_attribute_shifter = 0x0000;
+        uint16_t high_attribute_shifter = 0x0000;
 
         // Latches for fetched data (NT byte, AT byte and low and high bytes from PT)
         uint8_t fetchedByteNT = 0x00;

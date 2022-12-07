@@ -89,8 +89,8 @@ int main(int argc, char* argv[])
     nes::SystemBus nes;
 
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/nestest.nes");
-    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
-    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Pac-Man.nes");
 
     nes.insertCardtridge(cartridge);
@@ -179,16 +179,16 @@ int main(int argc, char* argv[])
         bgViewport.y = sprViewport.h;
 
         SDL_RenderClear(renderer);
-        //SDL_RenderCopy(renderer, gameTexture, NULL, &gameViewport);
+        SDL_RenderCopy(renderer, gameTexture, NULL, &gameViewport);
         SDL_RenderCopy(renderer, sprTexture, NULL, &sprViewport);
         SDL_RenderCopy(renderer, bgTexture, NULL, &bgViewport);
 
-        uint8_t* nameTable = reinterpret_cast<uint8_t*>(nes.ppu.getNametable(0));
-        SDL_Surface* nameTableSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
-        SDL_Texture* nameTableTexture = SDL_CreateTextureFromSurface(renderer, nameTableSurface);
-        SDL_RenderCopy(renderer, nameTableTexture, NULL, &gameViewport);
-        SDL_FreeSurface(nameTableSurface);
-        SDL_DestroyTexture(nameTableTexture);
+        //uint8_t* nameTable = reinterpret_cast<uint8_t*>(nes.ppu.getNametable(0));
+        //SDL_Surface* nameTableSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
+        //SDL_Texture* nameTableTexture = SDL_CreateTextureFromSurface(renderer, nameTableSurface);
+        //SDL_RenderCopy(renderer, nameTableTexture, NULL, &gameViewport);
+        //SDL_FreeSurface(nameTableSurface);
+        //SDL_DestroyTexture(nameTableTexture);
 
         SDL_RenderPresent(renderer);
         //SDL_UpdateWindowSurface(window);
