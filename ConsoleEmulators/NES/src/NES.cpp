@@ -70,9 +70,9 @@ int main(int argc, char* argv[])
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
-    SDL_Texture* gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
-    SDL_Texture* sprTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
-    SDL_Texture* bgTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
+    SDL_Texture* gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
+    SDL_Texture* sprTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
+    SDL_Texture* bgTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
     //SDL_RenderSetLogicalSize(renderer, 1280, 720);
     //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 

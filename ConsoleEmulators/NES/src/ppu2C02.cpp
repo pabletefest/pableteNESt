@@ -146,13 +146,13 @@ namespace nes
                     break;
                 case 2:
                     {
-                    uint16_t attribOffset = (loopyV.vramAddrPtr & 0x0C00)
-                        | ((loopyV.vramAddrPtr >> 4) & 0x38)
-                        | ((loopyV.vramAddrPtr >> 2) & 0x07);
+                        /*uint16_t attribOffset = (loopyV.vramAddrPtr & 0x0C00)
+                            | ((loopyV.vramAddrPtr >> 4) & 0x38)
+                            | ((loopyV.vramAddrPtr >> 2) & 0x07);*/
                         
-                        /*uint16_t attribOffset = loopyV.nametableSelectY << 11
-                            | loopyV.nametableSelectX << 10 | (loopyV.coarseYScroll >> 4) << 3
-                            | loopyV.coarseXScroll >> 2;*/
+                        uint16_t attribOffset = ((loopyV.nametableSelectY << 11)
+                            | (loopyV.nametableSelectX << 10) | ((loopyV.coarseYScroll >> 2) << 3)
+                            | (loopyV.coarseXScroll >> 2));
 
                         fetchedByteAT = ppuRead(0x23C0 | attribOffset);
 
@@ -280,7 +280,7 @@ namespace nes
             uint8_t bgPaletteHigh = (high_attribute_shifter & multiplexerBitSelector) > 0;
             bgPalette = (bgPaletteHigh << 1) | bgPaletteLow;
             
-            if (scanline >= 0 && scanline <= 239 && cycle >= 0 && cycle <= 255)
+            if (scanline >= 0 && scanline <= 239 && cycle >= 1 && cycle <= 255)
                 pixelsFrameBufer[scanline * 256 + cycle] = getRGBAFromNesPalette(bgPalette, bgPixel);
         }
 
