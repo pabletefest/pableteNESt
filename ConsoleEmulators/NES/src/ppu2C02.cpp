@@ -204,17 +204,17 @@ namespace nes
                     break;
                 }
 
-                if (cycle == 256)
-                {
-                    if (PPUMASK.showBackground || PPUMASK.showSprites)
-                        incrementScrollYloopyV();
-                }
-
                 if (cycle == 257)
                 {
                     if (PPUMASK.showBackground || PPUMASK.showSprites)
                         copyXvaluesFromTtoVloopyRegs();
                 }
+            }
+
+            if (cycle == 256)
+            {
+                if (PPUMASK.showBackground || PPUMASK.showSprites)
+                    incrementScrollYloopyV();
             }
 
             if (scanline == -1 && cycle >= 280 && cycle <= 304)
@@ -424,7 +424,7 @@ namespace nes
                     address &= 0x2BFF;
             }
 
-            dataRead = nameTables[(address & 0x0F00) >> 16][address & 0x03FF];
+            dataRead = nameTables[(address & 0x0F00) > 0x0400][address & 0x03FF];
         }
         else if (address >= 0x3F00)
         {
@@ -461,7 +461,7 @@ namespace nes
                     address &= 0x2BFF;
             }
 
-            nameTables[(address & 0x0F00) >> 16][address & 0x03FF] = data;
+            nameTables[(address & 0x0F00) > 0x0400][address & 0x03FF] = data;
         }
         else if (address >= 0x3F00) // Palette RAM indexes
         {
@@ -558,6 +558,10 @@ namespace nes
                 loopyV.coarseYScroll = 0;
                 loopyV.nametableSelectY = ~loopyV.nametableSelectY;
             }
+            //else if (loopyV.coarseYScroll == 31)
+            //{
+            //    loopyV.coarseYScroll = 0;
+            //}
             else
             {
                 loopyV.coarseYScroll++; // Case Y scroll == 31 handled here as incrementing wraps around 0

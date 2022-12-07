@@ -70,9 +70,10 @@ int main(int argc, char* argv[])
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
-    SDL_Texture* gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
-    SDL_Texture* sprTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
-    SDL_Texture* bgTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
+    SDL_Texture* gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
+    SDL_Texture* sprTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
+    SDL_Texture* bgTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
+    //SDL_Texture* bgTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
     //SDL_RenderSetLogicalSize(renderer, 1280, 720);
     //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
@@ -89,9 +90,10 @@ int main(int argc, char* argv[])
     nes::SystemBus nes;
 
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/nestest.nes");
-    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Pac-Man.nes");
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Ice Climber.nes");
 
     nes.insertCardtridge(cartridge);
     nes.reset();
@@ -183,12 +185,12 @@ int main(int argc, char* argv[])
         SDL_RenderCopy(renderer, sprTexture, NULL, &sprViewport);
         SDL_RenderCopy(renderer, bgTexture, NULL, &bgViewport);
 
-        //uint8_t* nameTable = reinterpret_cast<uint8_t*>(nes.ppu.getNametable(0));
-        //SDL_Surface* nameTableSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
-        //SDL_Texture* nameTableTexture = SDL_CreateTextureFromSurface(renderer, nameTableSurface);
-        //SDL_RenderCopy(renderer, nameTableTexture, NULL, &gameViewport);
-        //SDL_FreeSurface(nameTableSurface);
-        //SDL_DestroyTexture(nameTableTexture);
+        /*uint8_t* nameTable = reinterpret_cast<uint8_t*>(nes.ppu.getNametable(1));
+        SDL_Surface* nameTableSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
+        SDL_Texture* nameTableTexture = SDL_CreateTextureFromSurface(renderer, nameTableSurface);
+        SDL_RenderCopy(renderer, nameTableTexture, NULL, &gameViewport);
+        SDL_FreeSurface(nameTableSurface);
+        SDL_DestroyTexture(nameTableTexture);*/
 
         SDL_RenderPresent(renderer);
         //SDL_UpdateWindowSurface(window);
