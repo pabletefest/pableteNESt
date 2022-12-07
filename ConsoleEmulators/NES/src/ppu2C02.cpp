@@ -204,17 +204,17 @@ namespace nes
                     break;
                 }
 
+                if (cycle == 256)
+                {
+                    if (PPUMASK.showBackground || PPUMASK.showSprites)
+                        incrementScrollYloopyV();
+                }
+
                 if (cycle == 257)
                 {
                     if (PPUMASK.showBackground || PPUMASK.showSprites)
                         copyXvaluesFromTtoVloopyRegs();
                 }
-            }
-
-            if (cycle == 256)
-            {
-                if (PPUMASK.showBackground || PPUMASK.showSprites)
-                    incrementScrollYloopyV();
             }
 
             if (scanline == -1 && cycle >= 280 && cycle <= 304)
@@ -251,17 +251,8 @@ namespace nes
             // Post-render scanline, PPU idles
         }
 
-
-        //// ----- TESTING PORPOSE -----
-        //if (scanline == -1) scanline++;
-
-        ///*if (cycle == 0)
-        //{
-        //    return;
-        //}*/
-
+        //// ----- TESTING -------------
         //pixelsFrameBufer[scanline * 341 + cycle] = nesPalToRGBAPalArray[rand() % 0x3F];
-
         //// ----- END OF TESTING ------
 
         // RENDERING A PIXEL
