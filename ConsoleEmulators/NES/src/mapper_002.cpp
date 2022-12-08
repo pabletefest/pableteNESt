@@ -1,13 +1,13 @@
-#include "mapper_000.h"
+#include "mapper_002.h"
 
 namespace nes
 {
-	Mapper_000::Mapper_000(uint8_t prgBanks, uint8_t chrBanks)
+	Mapper_002::Mapper_002(uint8_t prgBanks, uint8_t chrBanks)
 		: Mapper(prgBanks, chrBanks)
 	{
 	}
 
-	bool Mapper_000::cpuMapRead(uint16_t addr, uint32_t& mapped_addr)
+	bool Mapper_002::cpuMapRead(uint16_t addr, uint32_t& mapped_addr)
 	{
 		// if PRGROM is 16KB
 		//     CPU Address Bus          PRG ROM
@@ -25,10 +25,13 @@ namespace nes
 		return false;
 	}
 
-	bool Mapper_000::cpuMapWrite(uint16_t addr, uint32_t& mapped_addr, uint8_t data)
+	bool Mapper_002::cpuMapWrite(uint16_t addr, uint32_t& mapped_addr, uint8_t data)
 	{
 		if (addr >= 0x8000 && addr <= 0xFFFF)
 		{
+
+
+			// Mapper 2 usually does not contain PRG RAM so this is placeholder code line.
 			mapped_addr = addr & (nPRGBanks > 1 ? 0x7FFF : 0x3FFF);
 			return true;
 		}
@@ -36,10 +39,10 @@ namespace nes
 		return false;
 	}
 
-	bool Mapper_000::ppuMapRead(uint16_t addr, uint32_t& mapped_addr)
+	bool Mapper_002::ppuMapRead(uint16_t addr, uint32_t& mapped_addr)
 	{
 		// There is no mapping required for PPU
-		// PPU Address Bus          CHR ROM
+		// PPU Address Bus          CHR ROM/RAM
 		// 0x0000 -> 0x1FFF: Map    0x0000 -> 0x1FFF
 		if (addr >= 0x0000 && addr <= 0x1FFF)
 		{
@@ -50,7 +53,7 @@ namespace nes
 		return false;
 	}
 
-	bool Mapper_000::ppuMapWrite(uint16_t addr, uint32_t& mapped_addr)
+	bool Mapper_002::ppuMapWrite(uint16_t addr, uint32_t& mapped_addr)
 	{
 		if (addr >= 0x0000 && addr <= 0x1FFF)
 		{
