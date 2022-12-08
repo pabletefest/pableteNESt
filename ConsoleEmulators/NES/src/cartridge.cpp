@@ -72,7 +72,7 @@ namespace nes
 				break;
 			case 2:
 				pMapper = std::make_shared<Mapper_002>(nPRGBanks, nCHRBanks);
-				vCHRMemory.reserve(8192);
+				vCHRMemory.resize(8192);
 				break;
 			}
 

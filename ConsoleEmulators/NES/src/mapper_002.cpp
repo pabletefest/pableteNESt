@@ -8,17 +8,19 @@ namespace nes
 	}
 
 	bool Mapper_002::cpuMapRead(uint16_t addr, uint32_t& mapped_addr)
-	{
-		// if PRGROM is 16KB
-		//     CPU Address Bus          PRG ROM
-		//     0x8000 -> 0xBFFF: Map    0x0000 -> 0x3FFF
-		//     0xC000 -> 0xFFFF: Mirror 0x0000 -> 0x3FFF
-		// if PRGROM is 32KB
-		//     CPU Address Bus          PRG ROM
-		//     0x8000 -> 0xFFFF: Map    0x0000 -> 0x7FFF	
+	{	
 		if (addr >= 0x8000 && addr <= 0xFFFF)
 		{
-			mapped_addr = addr & (nPRGBanks > 1 ? 0x7FFF : 0x3FFF);
+			// Each PRG ROM bank is 16KB
+			if (nPRGBanks == 1)
+				mapped_addr = 0x0000;
+			else if (addr >= 0xC000 && nPRGBanks > 1) // Last bank hard-wired from 0xC000 to 0xFFFF
+				mapped_addr = (nPRGBanks - 1) * 0x4000;
+			else // Bank switch from 0x8000 to 0xBFFF
+				mapped_addr = bankNumber * 0x4000;
+
+			mapped_addr += (addr & 0x3FFF);
+
 			return true;
 		}
 
@@ -29,11 +31,12 @@ namespace nes
 	{
 		if (addr >= 0x8000 && addr <= 0xFFFF)
 		{
+			// Obtain selected bank number
+			bankNumber = (data & 0x0F);
 
-
-			// Mapper 2 usually does not contain PRG RAM so this is placeholder code line.
+			//Mapper 2 usually does not contain PRG RAM so this is placeholder code line.
 			mapped_addr = addr & (nPRGBanks > 1 ? 0x7FFF : 0x3FFF);
-			return true;
+			return false;
 		}
 
 		return false;

@@ -34,10 +34,7 @@ namespace nes
 	uint8_t SystemBus::cpuRead(uint16_t address)
 	{
 		uint8_t dataRead = 0x00;
-		if (address == 0x4ABC)
-		{
-			dataRead = 0;
-		}
+
 		if (cartridge->cpuRead(address, dataRead))
 		{
 			// Cartridge Address Range
