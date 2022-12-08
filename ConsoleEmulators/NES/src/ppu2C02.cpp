@@ -92,7 +92,7 @@ namespace nes
     void PPU::clock()
     {
 
-        auto updateDataShiftRegisters = [&]() {
+        auto updateDataShiftRegisters = [&]() -> void {
             // Load to lower part of the reg so that fetching is done from the upper part
             low_pattern_shifter = (low_pattern_shifter & 0xFF00) | fetchedLowBytePT;
             high_pattern_shifter = (high_pattern_shifter & 0xFF00) | fetchedHighBytePT;
@@ -415,7 +415,7 @@ namespace nes
                     address &= 0x2BFF;
             }
 
-            dataRead = nameTables[(address & 0x0F00) > 0x0400][address & 0x03FF];
+            dataRead = nameTables[(address & 0x0F00) >= 0x0400][address & 0x03FF];
         }
         else if (address >= 0x3F00)
         {
@@ -452,7 +452,7 @@ namespace nes
                     address &= 0x2BFF;
             }
 
-            nameTables[(address & 0x0F00) > 0x0400][address & 0x03FF] = data;
+            nameTables[(address & 0x0F00) >= 0x0400][address & 0x03FF] = data;
         }
         else if (address >= 0x3F00) // Palette RAM indexes
         {
