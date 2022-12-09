@@ -156,5 +156,13 @@ namespace nes
         uint8_t fetchedByteAT = 0x00;
         uint8_t fetchedLowBytePT = 0x00;
         uint8_t fetchedHighBytePT = 0x00;
+
+        struct SpriteOAM
+        {
+            uint8_t posY;
+            uint8_t tileIndex;
+            uint8_t attributes;
+            uint8_t posX;
+        }OAMbuffer[64];
     };
 }
