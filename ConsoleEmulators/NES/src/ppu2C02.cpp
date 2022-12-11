@@ -312,6 +312,10 @@ namespace nes
         case 0x0003: // OAM Address
             break;
         case 0x0004: // OAM Data
+            dataRead = OAMptr[OAMaddr];
+
+            if (!PPUSTATUS.verticalBlank)
+                dataRead++;
             break;
         case 0x0005: // Scroll
             break;
@@ -350,8 +354,10 @@ namespace nes
         case 0x0002: // Status
             break;
         case 0x0003: // OAM Address
+            OAMaddr = data;
             break;
         case 0x0004: // OAM Data
+            OAMptr[OAMaddr++] = data;
             break;
         case 0x0005: // Scroll
             if (!addressLatchToggle) // XXXXXxxx, Top 5 bits become XXXXX of "T", low 3 bits become the fine X scroll(updated immediately).
@@ -522,6 +528,8 @@ namespace nes
         PPUCTRL.controlReg = 0x00;
         PPUMASK.maskReg = 0x00;
         PPUSTATUS.statusReg = 0xA0;
+
+        OAMptr = reinterpret_cast<uint8_t*>(OAMbuffer);
     }
 
     void PPU::incrementScrollXloopyV()

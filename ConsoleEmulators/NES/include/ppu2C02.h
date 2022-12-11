@@ -164,5 +164,10 @@ namespace nes
             uint8_t attributes;
             uint8_t posX;
         }OAMbuffer[64];
+
+        uint8_t OAMaddr = 0x00;
+
+        public:
+            uint8_t* OAMptr = nullptr;
     };
 }
