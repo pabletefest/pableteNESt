@@ -4,6 +4,15 @@ namespace nes
 {
     constexpr uint16_t baseNameTableAddresses[4] = { 0x2000, 0x2400, 0x2800, 0x2C00 };
 
+    enum BG_FETCHING_STEP
+    {
+        FETCH_NT_BYTE = 0,
+        FETCH_AT_BYTE = 2,
+        FETCH_PT_LOW_BYTE = 4,
+        FETCH_PT_HIGH_BYTE = 6,
+        INC_X_SCROLL_V = 7
+    };
+
     PPU::PPU()
         : pixelsFrameBufer(std::vector<Pixel>(256 * 240, Pixel()))
     {
@@ -138,13 +147,13 @@ namespace nes
 
                 switch ((cycle - 1) % 8) // Every 8 cycles we repeat this
                 {
-                case 0:
+                case FETCH_NT_BYTE: // 0
                     // Every 8 cyles (case 0), the shifter register get updated (1 to 257 on odd cycles)
                     updateDataShiftRegisters();
 
                     fetchedByteNT = ppuRead(0x2000 | (loopyV.vramAddrPtr & 0x0FFF));
                     break;
-                case 2:
+                case FETCH_AT_BYTE: // 2
                     {
                         /*uint16_t attribOffset = (loopyV.vramAddrPtr & 0x0C00)
                             | ((loopyV.vramAddrPtr >> 4) & 0x38)
@@ -164,7 +173,7 @@ namespace nes
                         fetchedByteAT &= 0x03; // After all we only get the low 2 bits for the tile
                     }
                     break;
-                case 4:
+                case FETCH_PT_LOW_BYTE: // 4
                     /*
                         0HRRRR CCCCPTTT
                         |||||| |||||+++- T: Fine Y offset, the row number within a tile
@@ -181,7 +190,7 @@ namespace nes
                         fetchedLowBytePT = ppuRead(lowByteAddr);
                     }
                     break;
-                case 6:
+                case FETCH_PT_HIGH_BYTE: // 6
                     /*
                         0HRRRR CCCCPTTT
                         |||||| |||||+++- T: Fine Y offset, the row number within a tile
@@ -198,7 +207,7 @@ namespace nes
                         fetchedHighBytePT = ppuRead(highByteAddr);
                     }
                     break;
-                case 7:
+                case INC_X_SCROLL_V: // 7
                     if (PPUMASK.showBackground ||PPUMASK.showSprites)
                         incrementScrollXloopyV();
                     break;
