@@ -50,7 +50,7 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
-ConsoleEmulators/[Rr]oms/
+ConsoleEmulators/**/[Rr]om/s
 ConsoleEmulators/[Ll]ib/
 
 # Visual Studio 2015/2017 cache/options directory
