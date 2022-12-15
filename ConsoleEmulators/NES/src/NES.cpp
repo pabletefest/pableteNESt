@@ -143,6 +143,8 @@ int main(int argc, char* argv[])
 
     while (isRunnning)
     {
+        nes.controllers[0] = 0x00; // Reset every frame
+
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)
@@ -158,7 +160,63 @@ int main(int argc, char* argv[])
                 case SDLK_SPACE:
                 case SDLK_RETURN:
                     break;
+                case SDLK_x:
+                    nes.controllers[0] |= 0x80;
+                    break;
+                case SDLK_z:
+                    nes.controllers[0] |= 0x40;
+                    break;
+                case SDLK_a:
+                    nes.controllers[0] |= 0x20;
+                    break;
+                case SDLK_s:
+                    nes.controllers[0] |= 0x10;
+                    break;
+                case SDLK_UP:
+                    nes.controllers[0] |= 0x08;
+                    break;
+                case SDLK_DOWN:
+                    nes.controllers[0] |= 0x04;
+                    break;
+                case SDLK_RIGHT:
+                    nes.controllers[0] |= 0x02;
+                    break;
+                case SDLK_LEFT:
+                    nes.controllers[0] |= 0x01;
+                    break;
                 }
+            }
+            else if (event.type == SDL_KEYUP)
+            {
+                SDL_Keycode keyCode = event.key.keysym.sym;
+
+                switch (keyCode)
+                {
+                case SDLK_x:
+                    nes.controllers[0] |= 0x00;
+                    break;
+                case SDLK_z:
+                    nes.controllers[0] |= 0x00;
+                    break;
+                case SDLK_a:
+                    nes.controllers[0] |= 0x00;
+                    break;
+                case SDLK_s:
+                    nes.controllers[0] |= 0x00;
+                    break;
+                case SDLK_UP:
+                    nes.controllers[0] |= 0x00;
+                    break;
+                case SDLK_DOWN:
+                    nes.controllers[0] |= 0x00;
+                    break;
+                case SDLK_RIGHT:
+                    nes.controllers[0] |= 0x00;
+                    break;
+                case SDLK_LEFT:
+                    nes.controllers[0] |= 0x00;
+                    break;
+                }          
             }
         }
 

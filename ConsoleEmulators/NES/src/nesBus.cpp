@@ -29,6 +29,10 @@ namespace nes
 		{
 			ppu.cpuWrite(address & 0x0007, data);
 		}
+		else if (address >= 0x4016 && address <= 0x4017)
+		{
+			controllersCache[address & 0x0001] = controllers[address & 0x0001];
+		}
 	}
 
 	uint8_t SystemBus::cpuRead(uint16_t address)
@@ -46,6 +50,11 @@ namespace nes
 		else if (address >= 0x2000 && address <= 0x3FFF)
 		{
 			dataRead = ppu.cpuRead(address & 0x0007);
+		}
+		else if (address >= 0x4016 && address <= 0x4017)
+		{
+			dataRead = (controllersCache[address & 0x0001] & 0x80) > 0;
+			controllersCache[address & 0x0001] <<= 1;
 		}
 
 		return dataRead;

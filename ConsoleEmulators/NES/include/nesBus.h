@@ -37,5 +37,10 @@ namespace nes
 		std::array<uint8_t, 2048> cpuRam; // 2KB RAM
 
 		uint64_t totalSystemClockCycles = 0;
+
+		uint8_t controllers[2];
+
+	private:
+		uint8_t controllersCache[2]; // Internal keep state
 	};
 }
