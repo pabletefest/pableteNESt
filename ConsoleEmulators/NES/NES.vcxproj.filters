@@ -36,6 +36,9 @@
     <ClInclude Include="include\mapper_002.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\emu_typedefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu6502.cpp">
