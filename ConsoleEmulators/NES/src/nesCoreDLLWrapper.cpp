@@ -20,7 +20,7 @@ extern "C" __declspec(dllexport) void ResetEmulator(nes::SystemBus * nesSystem)
     nesSystem->reset();
 }
 
-extern "C" __declspec(dllexport) void LoadROMCartridge(nes::SystemBus* nesSystem, std::string filename)
+extern "C" __declspec(dllexport) void LoadROMCartridge(nes::SystemBus* nesSystem, const char* filename)
 {
     if (!nesSystem) return;
 
