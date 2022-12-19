@@ -62,5 +62,8 @@
     <ClCompile Include="src\mapper_002.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\nesCoreDLLWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
