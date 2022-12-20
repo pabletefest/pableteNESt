@@ -161,28 +161,28 @@ int main(int argc, char* argv[])
                 case SDLK_RETURN:
                     break;
                 case SDLK_x:
-                    nes.controllers[0] |= 0x80;
+                    nes.controllers[0] |= 0x80; // A
                     break;
                 case SDLK_z:
-                    nes.controllers[0] |= 0x40;
+                    nes.controllers[0] |= 0x40; // B
                     break;
                 case SDLK_a:
-                    nes.controllers[0] |= 0x20;
+                    nes.controllers[0] |= 0x20; // Select
                     break;
                 case SDLK_s:
-                    nes.controllers[0] |= 0x10;
+                    nes.controllers[0] |= 0x10; // Start
                     break;
                 case SDLK_UP:
-                    nes.controllers[0] |= 0x08;
+                    nes.controllers[0] |= 0x08; // UP ARROW
                     break;
                 case SDLK_DOWN:
-                    nes.controllers[0] |= 0x04;
-                    break;
-                case SDLK_RIGHT:
-                    nes.controllers[0] |= 0x02;
+                    nes.controllers[0] |= 0x04; // DOWN ARROW
                     break;
                 case SDLK_LEFT:
-                    nes.controllers[0] |= 0x01;
+                    nes.controllers[0] |= 0x02; // LEFT ARROW
+                    break;
+                case SDLK_RIGHT:
+                    nes.controllers[0] |= 0x01; // RIGHT ARROW
                     break;
                 }
             }
@@ -210,10 +210,10 @@ int main(int argc, char* argv[])
                 case SDLK_DOWN:
                     nes.controllers[0] |= 0x00;
                     break;
-                case SDLK_RIGHT:
+                case SDLK_LEFT:
                     nes.controllers[0] |= 0x00;
                     break;
-                case SDLK_LEFT:
+                case SDLK_RIGHT:
                     nes.controllers[0] |= 0x00;
                     break;
                 }          
