@@ -26,84 +26,12 @@
 
 constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 
-class RenderingWidget : public QWidget
-{
-public:
-    RenderingWidget(nes::SystemBus& nesRef, QWidget* parent = nullptr) : nes(nesRef), QWidget(parent){}
-    ~RenderingWidget() override = default;
-
-protected:
-    void keyPressEvent(QKeyEvent* event) override
-    {
-        switch (event->key())
-        {
-        case Qt::Key_X:
-            nes.controllers[0] |= 0x80; // A
-            break;
-        case Qt::Key_Z:
-            nes.controllers[0] |= 0x40; // B
-            break;
-        case Qt::Key_A:
-            nes.controllers[0] |= 0x20; // A
-            break;
-        case Qt::Key_S:
-            nes.controllers[0] |= 0x10; // A
-            break;
-        case Qt::Key_Up:
-            nes.controllers[0] |= 0x08; // A
-            break;
-        case Qt::Key_Down:
-            nes.controllers[0] |= 0x04; // A
-            break;
-        case Qt::Key_Left:
-            nes.controllers[0] |= 0x02; // A
-            break;
-        case Qt::Key_Right:
-            nes.controllers[0] |= 0x01; // A
-            break;
-        }
-    }
-
-    void keyReleaseEvent(QKeyEvent* event) override
-    {
-        switch (event->key())
-        {
-        case Qt::Key_X:
-            nes.controllers[0] |= 0x00; // A
-            break;
-        case Qt::Key_Z:
-            nes.controllers[0] |= 0x00; // B
-            break;
-        case Qt::Key_A:
-            nes.controllers[0] |= 0x00; // A
-            break;
-        case Qt::Key_S:
-            nes.controllers[0] |= 0x00; // A
-            break;
-        case Qt::Key_Up:
-            nes.controllers[0] |= 0x00; // A
-            break;
-        case Qt::Key_Down:
-            nes.controllers[0] |= 0x00; // A
-            break;
-        case Qt::Key_Left:
-            nes.controllers[0] |= 0x00; // A
-            break;
-        case Qt::Key_Right:
-            nes.controllers[0] |= 0x00; // A
-            break;
-        }
-    }
-
-private:
-    nes::SystemBus& nes;
-};
-
 EmulatorsMainWindow::EmulatorsMainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setupGUI();
 
+    renderTimer.setTimerType(Qt::PreciseTimer);
     renderTimer.setInterval(1000 / 60); // 1000 / 60 -> 60 fps
     connect(&renderTimer, SIGNAL(timeout()), this, SLOT(onRenderFrame()));
 
@@ -156,6 +84,8 @@ void EmulatorsMainWindow::InitSDLRendering()
 
 void EmulatorsMainWindow::keyPressEvent(QKeyEvent* event)
 {
+    nes.controllers[0] = 0x00;
+
     switch (event->key())
     {
     case Qt::Key_X:
@@ -187,6 +117,8 @@ void EmulatorsMainWindow::keyPressEvent(QKeyEvent* event)
 
 void EmulatorsMainWindow::keyReleaseEvent(QKeyEvent* event)
 {
+    nes.controllers[0] = 0x00;
+
     switch (event->key())
     {
     case Qt::Key_X:
@@ -295,7 +227,7 @@ void EmulatorsMainWindow::onWindowTitleUpdate(QString newTitle)
 
 void EmulatorsMainWindow::onRenderFrame()
 {
-    nes.controllers[0] = 0x00; // Reset every frame
+    //nes.controllers[0] = 0x00; // Reset every frame
 
     nes.runFrame();
 
