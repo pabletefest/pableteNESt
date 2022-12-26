@@ -25,7 +25,7 @@ namespace nes
 
 		void reset();
 		void clock();
-
+		void runFrame();
 
 	public:
 		CPU cpu;

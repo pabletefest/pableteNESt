@@ -1,18 +1,31 @@
+#pragma once
 #include "emulatorsMainWindow.h"
-
-// EMU_CORE NES
-#include <nesBus.h>
 
 // Qt
 #include <QtWidgets/QApplication>
 
-int main(int argc, char *argv[])
+//SDL
+#include <SDL.h>
+
+//STL
+#include <iostream>
+
+int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        std::cout << "Video Initialization Error: " << SDL_GetError() << "\n";
+        return 0;
+    }
+
     EmulatorsMainWindow mainWindow;
     mainWindow.show();
 
-    nes::SystemBus nes;
+    int retVal = app.exec();
 
-    return app.exec();
+    SDL_Quit();
+
+    return retVal;
 }

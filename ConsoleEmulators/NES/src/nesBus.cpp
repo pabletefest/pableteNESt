@@ -90,4 +90,14 @@ namespace nes
 
 		totalSystemClockCycles++;
 	}
+
+	void SystemBus::runFrame()
+	{
+		do
+		{
+			this->clock();
+		} while (!ppu.frameCompleted);
+
+		ppu.frameCompleted = false;
+	}
 }

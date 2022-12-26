@@ -131,4 +131,9 @@ namespace nes
 		else
 			return false;
 	}
+
+	bool Cartridge::isValidROM() const
+	{
+		return pMapper.operator bool(); // If mapper is not initialized something went wrong when reading .nes file
+	}
 }

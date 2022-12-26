@@ -36,6 +36,8 @@ namespace nes
 			return mirroring;
 		}
 
+		bool isValidROM() const;
+
 	private:
 		uint8_t nMapperID = 0;
 		uint8_t nPRGBanks = 0;
