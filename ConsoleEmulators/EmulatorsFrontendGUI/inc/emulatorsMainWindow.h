@@ -77,6 +77,8 @@ private slots:
     void onRenderFrame();
     void onOpenROM();
     void onWindowTitleUpdate(QString newTitle);
+    void openNametablesViewer();
+    void openPatternTablesViewer();
 
 private:
     Ui::EmulatorsFrontendGUIClass ui;

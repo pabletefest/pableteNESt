@@ -112,6 +112,12 @@
     <QtRcc Include="emulatorsfrontendgui.qrc" />
     <QtUic Include="emulatorsfrontendgui.ui" />
     <QtMoc Include="inc\emulatorsMainWindow.h" />
+    <ClCompile Include="src\debuggingWindows.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="src\emulatorsMainWindow.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -119,6 +125,9 @@
     <ProjectReference Include="..\NES\NES.vcxproj">
       <Project>{056840a2-4e03-4c20-a26b-a8d953241f61}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="inc\debuggingWindows.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

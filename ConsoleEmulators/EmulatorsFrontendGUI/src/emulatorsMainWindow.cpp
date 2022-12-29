@@ -1,4 +1,6 @@
 #include "emulatorsMainWindow.h"
+#include <debuggingWindows.h>
+
 #include <iostream>
 #include <filesystem>
 
@@ -163,9 +165,15 @@ void EmulatorsMainWindow::setupGUI()
     centralWidget()->setFocusPolicy(Qt::NoFocus);
 
     QMenu* fileMenu = menuBar()->addMenu("File");
-
     QAction* openROMAction = fileMenu->addAction("Open ROM");
     connect(openROMAction, SIGNAL(triggered()), this, SLOT(onOpenROM()));
+
+    QMenu* toolsMenu = menuBar()->addMenu("Tools");
+    QMenu* debuggingMenu = toolsMenu->addMenu("Debugging");
+    QAction* openNametablesViewerAction = debuggingMenu->addAction("Nametables Viewer");
+    connect(openNametablesViewerAction, SIGNAL(triggered()), this, SLOT(openNametablesViewer()));
+    QAction* openPatternTablesViewerAction = debuggingMenu->addAction("Pattern tables Viewer");
+    connect(openPatternTablesViewerAction, SIGNAL(triggered()), this, SLOT(openPatternTablesViewer()));
 }
 
 void EmulatorsMainWindow::initEmulator()
@@ -223,6 +231,34 @@ void EmulatorsMainWindow::onOpenROM()
 void EmulatorsMainWindow::onWindowTitleUpdate(QString newTitle)
 {
     setWindowTitle(newTitle);
+}
+
+void EmulatorsMainWindow::openNametablesViewer()
+{
+    if (!nes.cartridge || !nes.cartridge->isValidROM())
+    {
+        QMessageBox::warning(nullptr, "ROM detection error", "Please load first a valid ROM to debug the game");
+        return;
+    }
+
+    NametablesPreviewWidget* nametablesViewer = new NametablesPreviewWidget(nes);
+    nametablesViewer->setWindowTitle("PPU & Graphics Debugging: Nametables");
+    nametablesViewer->setAttribute(Qt::WA_DeleteOnClose);
+    nametablesViewer->open();
+}
+
+void EmulatorsMainWindow::openPatternTablesViewer()
+{
+    if (!nes.cartridge || !nes.cartridge->isValidROM())
+    {
+        QMessageBox::warning(nullptr, "ROM detection error", "Please load first a valid ROM to debug the game");
+        return;
+    }
+
+    CHRMemoryPreviewWidget* patternMemoryViewer = new CHRMemoryPreviewWidget(nes);
+    patternMemoryViewer->setWindowTitle("PPU & Graphics Debugging: Pattern Tables");
+    patternMemoryViewer->setAttribute(Qt::WA_DeleteOnClose);
+    patternMemoryViewer->open();
 }
 
 void EmulatorsMainWindow::onRenderFrame()
