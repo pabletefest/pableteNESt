@@ -2,11 +2,11 @@
 #include <debuggingWindows.h>
 
 #include <iostream>
-#include <filesystem>
-
-// WinApi
-#include <tchar.h>
-#include <Windows.h>
+//#include <filesystem>
+//
+//// WinApi
+//#include <tchar.h>
+//#include <Windows.h>
 
 // SDL
 //#include <SDL_syswm.h>
