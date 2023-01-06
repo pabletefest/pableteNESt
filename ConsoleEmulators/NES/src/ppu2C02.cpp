@@ -128,6 +128,13 @@ namespace nes
             {
                 if (cycle == 0 && scanline == 0 /*&& framesElapsed % 2 == 1*/)
                     cycle = 1;
+
+                /*if (cycle == 339 && scanline == -1 && framesElapsed % 2 == 1)
+                {
+                    cycle = 0;
+                    scanline = 0;
+                    return;
+                }*/
             }
 
             if (cycle == 1 && scanline == -1)
