@@ -40,7 +40,7 @@ namespace nes
 
         const std::vector<Pixel>& getPixelsFrameBuffer() const
         {
-            return pixelsFrameBufer;
+            return pixelsFrameBuffer;
         }
 
         PPU::Pixel getRGBAFromNesPalette(uint8_t paletteIndex, uint8_t pixelIndex);
@@ -66,11 +66,12 @@ namespace nes
 
         int32_t scanline = 0;
         int32_t cycle = 0; // Scanline cycle (reset after each scanline)
+        uint8_t currentXpixelBG = 0;
 
         uint32_t framesElapsed = 0;
         uint32_t totalCycles = 0;
 
-        std::vector<Pixel> pixelsFrameBufer;
+        std::vector<Pixel> pixelsFrameBuffer;
 
         Pixel nesPalToRGBAPalArray[0x40]; // 64 colours
 

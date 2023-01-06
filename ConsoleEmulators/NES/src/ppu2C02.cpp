@@ -14,7 +14,7 @@ namespace nes
     };
 
     PPU::PPU()
-        : pixelsFrameBufer(std::vector<Pixel>(256 * 240, Pixel()))
+        : pixelsFrameBuffer(std::vector<Pixel>(256 * 240, Pixel()))
     {
         init();
 
@@ -126,8 +126,11 @@ namespace nes
             // Odd frame skipped cycle (if rendering enabled)
             if ((PPUMASK.showBackground || PPUMASK.showSprites))
             {
-                if (cycle == 0 && scanline == 0 /*&& framesElapsed % 2 == 1*/)
+                if (cycle == 0 && scanline == 0 && framesElapsed % 2 == 1)
+                {
                     cycle = 1;
+                    return;
+                }
 
                 /*if (cycle == 339 && scanline == -1 && framesElapsed % 2 == 1)
                 {
@@ -268,7 +271,7 @@ namespace nes
         }
 
         //// ----- TESTING -------------
-        //pixelsFrameBufer[scanline * 341 + cycle] = nesPalToRGBAPalArray[rand() % 0x3F];
+        //pixelsFrameBuffer[scanline * 341 + cycle] = nesPalToRGBAPalArray[rand() % 0x3F];
         //// ----- END OF TESTING ------
 
         // RENDERING A PIXEL
@@ -287,9 +290,15 @@ namespace nes
             uint8_t bgPaletteHigh = (high_attribute_shifter & multiplexerBitSelector) > 0;
             bgPalette = (bgPaletteHigh << 1) | bgPaletteLow;
             
-            if (scanline >= 0 && scanline <= 239 && cycle >= 1 && cycle <= 255)
-                pixelsFrameBufer[scanline * 256 + cycle] = getRGBAFromNesPalette(bgPalette, bgPixel);
+            if (scanline >= 0 && scanline <= 239 && cycle >= 0 && cycle <= 255)
+                pixelsFrameBuffer[scanline * 256 + currentXpixelBG] = getRGBAFromNesPalette(bgPalette, bgPixel);
         }
+
+
+        if (cycle == 0)
+            currentXpixelBG = 0;
+        else if (cycle > 0 && cycle <= 256)
+            currentXpixelBG++;
 
         cycle++;
 
