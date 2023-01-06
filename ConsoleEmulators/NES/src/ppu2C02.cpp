@@ -129,7 +129,7 @@ namespace nes
                 if (cycle == 0 && scanline == 0 && framesElapsed % 2 == 1)
                 {
                     cycle = 1;
-                    return;
+                    //return;
                 }
 
                 /*if (cycle == 339 && scanline == -1 && framesElapsed % 2 == 1)
@@ -290,15 +290,15 @@ namespace nes
             uint8_t bgPaletteHigh = (high_attribute_shifter & multiplexerBitSelector) > 0;
             bgPalette = (bgPaletteHigh << 1) | bgPaletteLow;
             
-            if (scanline >= 0 && scanline <= 239 && cycle >= 0 && cycle <= 255)
-                pixelsFrameBuffer[scanline * 256 + currentXpixelBG] = getRGBAFromNesPalette(bgPalette, bgPixel);
+            if (scanline >= 0 && scanline <= 239 && cycle >= 1 && cycle <= 256)
+                pixelsFrameBuffer[scanline * 256 + (cycle - 1)] = getRGBAFromNesPalette(bgPalette, bgPixel);
         }
 
 
-        if (cycle == 0)
+        /*if (cycle == 0)
             currentXpixelBG = 0;
         else if (cycle > 0 && cycle <= 256)
-            currentXpixelBG++;
+            currentXpixelBG++;*/
 
         cycle++;
 
