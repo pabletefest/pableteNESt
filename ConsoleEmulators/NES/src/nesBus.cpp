@@ -33,6 +33,11 @@ namespace nes
 		{
 			controllersCache[address & 0x0001] = controllers[address & 0x0001];
 		}
+		else if (address == 0x4014)
+		{
+			dmaPageHiAddr = data;
+			dmaTransferInterrupt = true;
+		}
 	}
 
 	uint8_t SystemBus::cpuRead(uint16_t address)
@@ -79,7 +84,36 @@ namespace nes
 
 		if (totalSystemClockCycles % 3 == 0)
 		{
-			cpu.clock();
+			if (dmaTransferInterrupt)
+			{
+				if (waitForEvenCPUCycle && !cpu.isOddCycle())
+					waitForEvenCPUCycle = false;
+
+				if (!waitForEvenCPUCycle)
+				{
+					if (!cpu.isOddCycle())
+					{
+						// Read DMA cycle
+						dmaReadData = cpuRead(dmaPageHiAddr << 8 | dmaInternalLoAddr);
+					}
+					else
+					{
+						cpuWrite(0x2004, dmaReadData); // Write OAM data via ppu reg $2004
+						dmaInternalLoAddr++;
+
+						// Write DMA cycle
+						if (dmaInternalLoAddr == 0x00) // Wrap around, 256 read/write pairs performed
+						{
+							waitForEvenCPUCycle = true;
+							dmaTransferInterrupt = false;
+						}
+					}
+				}
+			}
+			else
+			{
+				cpu.clock();
+			}
 		}
 
 		if (ppu.nmi)

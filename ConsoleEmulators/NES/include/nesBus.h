@@ -40,6 +40,12 @@ namespace nes
 
 		uint8_t controllers[2];
 
+		uint8_t dmaPageHiAddr = 0x00;
+		uint8_t dmaInternalLoAddr = 0x00;
+		uint8_t dmaReadData = 0x00;
+		bool dmaTransferInterrupt = false;
+		bool waitForEvenCPUCycle = true;
+
 	private:
 		uint8_t controllersCache[2]; // Internal keep state
 	};

@@ -47,6 +47,7 @@ namespace nes
 		};
 
 		bool isLastCompleted() const;
+		auto isOddCycle() const -> bool { return debugTotalCyclesElapsed % 2 == 1; };
 
 	private:
 

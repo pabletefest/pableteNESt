@@ -90,6 +90,8 @@ int main(int argc, char* argv[])
 
     nes::SystemBus nes;
 
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/instr_test_v5/16-special.nes");
+
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/nestest.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");

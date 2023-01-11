@@ -340,7 +340,7 @@ namespace nes
             dataRead = OAMptr[OAMaddr];
 
             if (!PPUSTATUS.verticalBlank)
-                dataRead++;
+                OAMaddr++;
             break;
         case 0x0005: // Scroll
             break;

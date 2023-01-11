@@ -66,7 +66,7 @@ namespace nes
 
         int32_t scanline = 0;
         int32_t cycle = 0; // Scanline cycle (reset after each scanline)
-        uint8_t currentXpixelBG = 0;
+        uint8_t currentXpixelBG = 0; // Keeps track of current dot (X position) in current scanline
 
         uint32_t framesElapsed = 0;
         uint32_t totalCycles = 0;
