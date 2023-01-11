@@ -86,10 +86,10 @@ namespace nes
 		{
 			if (dmaTransferInterrupt)
 			{
-				if (waitForEvenCPUCycle && (totalSystemClockCycles % 2 == 0))
-					waitForEvenCPUCycle = false;
+				if (waitForEvenCycle && (totalSystemClockCycles % 2 == 0))
+					waitForEvenCycle = false;
 
-				if (!waitForEvenCPUCycle)
+				if (!waitForEvenCycle)
 				{
 					if (totalSystemClockCycles % 2 == 0)
 					{
@@ -104,7 +104,7 @@ namespace nes
 						// Write DMA cycle
 						if (dmaInternalLoAddr == 0x00) // Wrap around, 256 read/write pairs performed
 						{
-							waitForEvenCPUCycle = true;
+							waitForEvenCycle = true;
 							dmaTransferInterrupt = false;
 						}
 					}
