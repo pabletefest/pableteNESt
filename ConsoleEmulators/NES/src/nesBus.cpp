@@ -86,12 +86,12 @@ namespace nes
 		{
 			if (dmaTransferInterrupt)
 			{
-				if (waitForEvenCPUCycle && !cpu.isOddCycle())
+				if (waitForEvenCPUCycle && (totalSystemClockCycles % 2 == 0))
 					waitForEvenCPUCycle = false;
 
 				if (!waitForEvenCPUCycle)
 				{
-					if (!cpu.isOddCycle())
+					if (totalSystemClockCycles % 2 == 0)
 					{
 						// Read DMA cycle
 						dmaReadData = cpuRead(dmaPageHiAddr << 8 | dmaInternalLoAddr);

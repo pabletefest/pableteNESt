@@ -525,7 +525,7 @@ namespace nes
 		writeData(base_stack + SP, PC & 0x00FF);
 		SP--;
 
-		//These always set by BRK
+		//These are always set by BRK
 		setStatusFlag(B, 1);
 		setStatusFlag(U, 1);
 		writeData(base_stack + SP, status);
