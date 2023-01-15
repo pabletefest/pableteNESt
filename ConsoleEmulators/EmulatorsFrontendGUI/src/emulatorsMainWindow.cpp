@@ -221,16 +221,22 @@ void EmulatorsMainWindow::onOpenROM()
         //resetRendererBackground();
         return;
     }
-
+    
     nes.insertCardtridge(cartridge);
     nes.reset();
+
+    currentGame = filePath.split("/").last();
+    setWindowTitle(QString(windowTitle() + " - %1").arg(currentGame));
 
     renderTimer.start();
 }
 
 void EmulatorsMainWindow::onWindowTitleUpdate(QString newTitle)
 {
-    setWindowTitle(newTitle);
+    if (currentGame.isEmpty())
+        setWindowTitle(newTitle);
+    else
+        setWindowTitle(QString(newTitle + " - %1").arg(currentGame));
 }
 
 void EmulatorsMainWindow::openNametablesViewer()

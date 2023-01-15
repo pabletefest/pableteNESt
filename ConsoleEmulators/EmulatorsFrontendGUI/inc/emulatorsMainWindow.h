@@ -93,4 +93,6 @@ private:
 
     QTimer renderTimer;
     uint32_t fps = 0;
+
+    QString currentGame;
 };
