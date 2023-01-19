@@ -170,9 +170,9 @@ void EmulatorsMainWindow::setupGUI()
 
     QMenu* toolsMenu = menuBar()->addMenu("Tools");
     QMenu* debuggingMenu = toolsMenu->addMenu("Debugging");
-    QAction* openNametablesViewerAction = debuggingMenu->addAction("Nametables Viewer");
+    QAction* openNametablesViewerAction = debuggingMenu->addAction("Nametables Viewer (PPU VRAM)");
     connect(openNametablesViewerAction, SIGNAL(triggered()), this, SLOT(openNametablesViewer()));
-    QAction* openPatternTablesViewerAction = debuggingMenu->addAction("Pattern tables Viewer");
+    QAction* openPatternTablesViewerAction = debuggingMenu->addAction("Pattern tables Viewer (CHR memory data)");
     connect(openPatternTablesViewerAction, SIGNAL(triggered()), this, SLOT(openPatternTablesViewer()));
 }
 
