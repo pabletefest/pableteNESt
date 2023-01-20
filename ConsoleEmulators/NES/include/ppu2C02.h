@@ -169,6 +169,8 @@ namespace nes
         uint8_t OAMaddr = 0x00;
 
         SpriteOAM scanlineSecondaryOAM[8];
+        uint8_t numSprFound = 0x00;
+        //uint8_t
 
         public:
             uint8_t* OAMptr = nullptr;

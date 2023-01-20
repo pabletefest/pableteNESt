@@ -244,10 +244,32 @@ namespace nes
 
             if (scanline >= 0)
             {
+                // ----- SPRITE REGION ---------
+
+                if (cycle >= 1 && cycle <= 64)
+                {
+                    // Refactor later on to be more accurate, we clear secondary OAM in last cycle for now
+                    if (cycle == 64) 
+                        std::memset(scanlineSecondaryOAM, 0xFF, sizeof(scanlineSecondaryOAM));
+                }
+                
+                // Sprites evaluation
+                if (cycle >= 65 && cycle <= 256)
+                {
+                    // Later on this could be refactored to be more accurate, for now we perform the evaluation all at oncec in the last cycle
+                    if (cycle == 256) 
+                    {
+
+                    }
+                }
+
+                // Sprites rendering
                 if (cycle >= 257 && cycle <= 320)
                 {
 
                 }
+
+                // ----- END SPRITE REGION -----
 
                 if (cycle >= 337 && cycle <= 340)
                 {
@@ -341,6 +363,9 @@ namespace nes
 
             if (!PPUSTATUS.verticalBlank)
                 OAMaddr++;
+
+            if (scanline >= 0 && scanline <= 239 && cycle >= 1 && cycle <= 64)
+                dataRead = 0xFF;
             break;
         case 0x0005: // Scroll
             break;

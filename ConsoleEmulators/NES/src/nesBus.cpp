@@ -6,7 +6,7 @@ namespace nes
 	SystemBus::SystemBus() : cpu(this)
 	{
 		for (auto& elem : cpuRam)
-			elem = 0x00;
+			elem = 0x00; // Can be randomized with rand() & 0xFF
 	}
 
 	void SystemBus::cpuWrite(uint16_t address, uint8_t data)
