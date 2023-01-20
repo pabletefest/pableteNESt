@@ -245,6 +245,8 @@ namespace nes
             if (scanline >= 0)
             {
                 // ----- SPRITE REGION ---------
+                
+                // Sprite evaluation can be refactored in a future to be more accurate with how the real hardware does it
 
                 if (cycle >= 1 && cycle <= 64)
                 {
