@@ -295,7 +295,19 @@ namespace nes
                 // Sprites rendering
                 if (cycle >= 257 && cycle <= 320)
                 {
-
+                    switch ((cycle - 1) % 8)
+                    {
+                    case 0: // Garbage NT fetch
+                        break;
+                    case 2: // Garbage NT fetch and sprite attribute byte loading (from 2nd OAM to respective latch)
+                        break;
+                    case 3: // Sprite X position byte loading (from 2nd OAM to respective counter)
+                        break;
+                    case 4: // Sprite pattern table tile low byte
+                        break;
+                    case 6: // Sprite Pattern table tile high byte
+                        break;
+                    }
                 }
 
                 // ----- END SPRITE REGION -----
