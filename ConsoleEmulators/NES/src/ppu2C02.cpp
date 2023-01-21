@@ -261,6 +261,7 @@ namespace nes
                     // Later on this could be refactored to be more accurate, for now we perform the evaluation all at oncec in the last cycle
                     if (cycle == 256) 
                     {
+                        numSprFound = 0;
                         uint8_t* secondOAMPtr = reinterpret_cast<uint8_t*>(scanlineSecondaryOAM);
 
                         // Check for 2nd OAM full or main OAM wrapped around
@@ -283,8 +284,13 @@ namespace nes
                                 secondOAMPtr[secondOamIndex * SIZE_OAM_SPR + 1] = OAMptr[oamIndex * SIZE_OAM_SPR + 1];
                                 secondOAMPtr[secondOamIndex * SIZE_OAM_SPR + 2] = OAMptr[oamIndex * SIZE_OAM_SPR + 2];
                                 secondOAMPtr[secondOamIndex * SIZE_OAM_SPR + 3] = OAMptr[oamIndex * SIZE_OAM_SPR + 3];
+
+                                numSprFound++;
+                                secondOamIndex++;
                             }
                         }
+
+                        printf("");
                     }
                 }
 

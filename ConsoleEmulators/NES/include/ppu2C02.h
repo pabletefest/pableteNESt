@@ -172,7 +172,11 @@ namespace nes
 
         SpriteOAM scanlineSecondaryOAM[8];
         uint8_t numSprFound = 0x00;
-        //uint8_t
+        
+        uint8_t spritesLowBytePatternShifters[8];
+        uint8_t spritesHighBytePatternShifters[8];
+        uint8_t spritesAttributesLatches[8];
+        uint8_t spritesXpositionCounter[8];
 
         public:
             uint8_t* OAMptr = nullptr;
