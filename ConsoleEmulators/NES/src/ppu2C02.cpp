@@ -289,8 +289,6 @@ namespace nes
                                 secondOamIndex++;
                             }
                         }
-
-                        printf("");
                     }
                 }
 
