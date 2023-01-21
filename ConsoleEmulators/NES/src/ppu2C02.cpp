@@ -272,7 +272,7 @@ namespace nes
 
                             uint8_t spriteSize = PPUCTRL.sprSize ? 16 : 8;
                             
-                            if (oamIndex == 252) secondOamIndex = 32;
+                            //if (oamIndex == 252) secondOamIndex = 32;
 
                             // Used current scanline instead of next scanline as PPU uses current one to deal with offset of 1 in Y coordinate
                             // It compares Y to current scanline for next scanline sprite
