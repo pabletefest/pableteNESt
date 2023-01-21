@@ -168,6 +168,8 @@ namespace nes
 
         uint8_t OAMaddr = 0x00;
 
+        static constexpr size_t SIZE_OAM_SPR = sizeof(SpriteOAM);
+
         SpriteOAM scanlineSecondaryOAM[8];
         uint8_t numSprFound = 0x00;
         //uint8_t

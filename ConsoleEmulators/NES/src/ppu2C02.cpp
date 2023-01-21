@@ -261,7 +261,30 @@ namespace nes
                     // Later on this could be refactored to be more accurate, for now we perform the evaluation all at oncec in the last cycle
                     if (cycle == 256) 
                     {
+                        uint8_t* secondOAMPtr = reinterpret_cast<uint8_t*>(scanlineSecondaryOAM);
 
+                        // Check for 2nd OAM full or main OAM wrapped around
+                        for (uint8_t oamIndex = 0, secondOamIndex = 0; oamIndex < 64 && secondOamIndex < 8; oamIndex += 4) 
+                        {
+                            uint8_t spriteY = OAMptr[oamIndex * SIZE_OAM_SPR + 0];
+
+                            secondOAMPtr[secondOamIndex * SIZE_OAM_SPR + 0] = spriteY;
+
+                            uint8_t spriteSize = PPUCTRL.sprSize ? 16 : 8;
+                            
+                            if (oamIndex == 252) secondOamIndex = 32;
+
+                            // Used current scanline instead of next scanline as PPU uses current one to deal with offset of 1 in Y coordinate
+                            // It compares Y to current scanline for next scanline sprite
+                            if (scanline >= spriteY && scanline <= spriteY + spriteSize) 
+                            {
+                                // Copy the rest of the OAM Sprite fields (tileIndex, Attributes and X position)
+                                //std::memcpy(secondOAMPtr + secondOamIndex * SIZE_OAM_SPR + 1, OAMptr + oamIndex * SIZE_OAM_SPR + 1, 3);
+                                secondOAMPtr[secondOamIndex * SIZE_OAM_SPR + 1] = OAMptr[oamIndex * SIZE_OAM_SPR + 1];
+                                secondOAMPtr[secondOamIndex * SIZE_OAM_SPR + 2] = OAMptr[oamIndex * SIZE_OAM_SPR + 2];
+                                secondOAMPtr[secondOamIndex * SIZE_OAM_SPR + 3] = OAMptr[oamIndex * SIZE_OAM_SPR + 3];
+                            }
+                        }
                     }
                 }
 
