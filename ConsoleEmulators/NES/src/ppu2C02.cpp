@@ -145,6 +145,8 @@ namespace nes
                 PPUSTATUS.verticalBlank = 0;
                 PPUSTATUS.spriteZeroHit = 0;
                 PPUSTATUS.spriteOverflow = 0;
+
+                std::memset(spriteRenderingCounters, 8, 8);
             }
 
             if ((cycle >= 1 && cycle <= 257) || (cycle >= 321 && cycle <= 336))
@@ -265,7 +267,7 @@ namespace nes
                         uint8_t* secondOAMPtr = reinterpret_cast<uint8_t*>(scanlineSecondaryOAM);
 
                         // Check for 2nd OAM full or main OAM wrapped around
-                        for (uint8_t oamIndex = 0, secondOamIndex = 0; oamIndex < 64 && secondOamIndex < 8; oamIndex += 4) 
+                        for (uint8_t oamIndex = 0, secondOamIndex = 0; oamIndex < 64 && secondOamIndex < 8; oamIndex++) 
                         {
                             uint8_t spriteY = OAMptr[oamIndex * SIZE_OAM_SPR + 0];
 
@@ -273,8 +275,6 @@ namespace nes
 
                             uint8_t spriteSize = PPUCTRL.sprSize ? 16 : 8;
                             
-                            //if (oamIndex == 252) secondOamIndex = 32;
-
                             // Used current scanline instead of next scanline as PPU uses current one to deal with offset of 1 in Y coordinate
                             // It compares Y to current scanline for next scanline sprite
                             if (scanline >= spriteY && scanline <= spriteY + spriteSize) 
@@ -289,8 +289,20 @@ namespace nes
                                 secondOamIndex++;
                             }
                         }
-                    }
+
+                        /*for (int remainingSlotStart = numSprFound; remainingSlotStart < 8; remainingSlotStart++)
+                            std::memset(&scanlineSecondaryOAM[numSprFound], 0xFF, (8 - numSprFound) * SIZE_OAM_SPR);
+                    */}
                 }
+
+                // Pretty famous bit-flipper: https://stackoverflow.com/questions/2602823/in-c-c-whats-the-simplest-way-to-reverse-the-order-of-bits-in-a-byte
+                auto FlipBits = [](uint8_t byte) {
+                    byte = ((byte & 0xF0) >> 4) | ((byte & 0x0F) << 4);
+                    byte = ((byte & 0xCC) >> 2) | ((byte & 0x33) << 2);
+                    byte = ((byte & 0xAA) >> 1) | ((byte & 0x55) << 1);
+                    return byte;
+
+                };
 
                 // Sprites rendering
                 if (cycle >= 257 && cycle <= 320)
@@ -301,7 +313,7 @@ namespace nes
                     {
                     case 0: // Garbage NT fetch and sprite Y coordinate fetch
                         (void)ppuRead(0x2000 | (loopyV.vramAddrPtr & 0x0FFF));
-                        (void)scanlineSecondaryOAM[spriteIndex].posY;
+                        fetchedSprY = scanlineSecondaryOAM[spriteIndex].posY;
                         break;
                     case 1: // Sprite tileIndex fetch
                         fetchedSprTileIndex = scanlineSecondaryOAM[spriteIndex].tileIndex;
@@ -313,17 +325,60 @@ namespace nes
                     case 3: // Sprite X position byte loading (from 2nd OAM to respective counter)
                         spritesXpositionCounters[spriteIndex] = scanlineSecondaryOAM[spriteIndex].posX;
                         break;
-                    case 4: // Sprite pattern table tile low byte                        
-                        uint16_t lowByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
-                            | 0 << 3; // 0 << 3 == + 0 (low tile byte)
-                        
-                        spritesLowBytePatternShifters[spriteIndex] = ppuRead(lowByteAddr);
+                    case 4: // Sprite pattern table tile low byte
+                        {
+                            uint16_t lowByteAddr = 0x0000;
+                            
+                            if (spritesAttributesLatches[spriteIndex] & 0x80) // Flip vertically)
+                            {
+                                lowByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+                                    | 0 << 3 | ((7 - (scanline - fetchedSprY)) & 0x07); // 0 << 3 == + 0 (low tile byte)
+                            }
+                            else
+                            {
+                                lowByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+                                    | 0 << 3 | ((scanline - fetchedSprY) & 0x07); // 0 << 3 == + 0 (low tile byte)
+                            }
+                           
+                            uint8_t lowByte = ppuRead(lowByteAddr);
+
+                            if (spritesAttributesLatches[spriteIndex] & 0x40) // Flip horizontally
+                                lowByte = FlipBits(lowByte);
+
+                            spritesLowBytePatternShifters[spriteIndex] = lowByte;
+
+                            if (spriteIndex >= numSprFound)
+                                spritesLowBytePatternShifters[spriteIndex] = 0x00;
+                        }
                         break;
                     case 6: // Sprite Pattern table tile high byte
-                        uint16_t highByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
-                            | 1 << 3; // 0 << 3 == + 0 (high tile byte)
+                        {
+                            uint16_t highByteAddr = 0x0000;
 
-                        spritesLowBytePatternShifters[spriteIndex] = ppuRead(highByteAddr);
+                            if (spritesAttributesLatches[spriteIndex] & 0x80) // Flip vertically)
+                            {
+                                highByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+                                    | 1 << 3 | ((7 -(scanline - fetchedSprY)) & 0x07); // 0 << 3 == + 0 (high tile byte)
+                            }
+                            else
+                            {
+                                highByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+                                    | 1 << 3 | ((scanline - fetchedSprY) & 0x07); // 0 << 3 == + 0 (high tile byte)
+                            }
+
+                            uint8_t highByte = ppuRead(highByteAddr);
+
+                            if (spritesAttributesLatches[spriteIndex] & 0x40) // Flip horizontally
+                                highByte = FlipBits(highByte);
+
+                            spritesHighBytePatternShifters[spriteIndex] = highByte;
+                        
+                            if (spriteIndex >= numSprFound)
+                                spritesHighBytePatternShifters[spriteIndex] = 0x00;
+                        }
+                        break;
+                    case 7: // Fetch again X
+                        spritesXpositionCounters[spriteIndex] = scanlineSecondaryOAM[spriteIndex].posX;
                         break;
                     }
                 }
@@ -335,8 +390,7 @@ namespace nes
 
                 }
             }
-        }
-        
+        }      
 
         if (cycle == 1 && scanline == 241)
         {
@@ -359,6 +413,13 @@ namespace nes
         uint8_t bgPixel = 0x00;
         uint8_t bgPalette = 0x00;
 
+        uint8_t sprPixel = 0x00;
+        uint8_t sprPalette = 0x00;
+        bool isForegroundPriority = false;
+
+        uint8_t finalPixel = 0x00;
+        uint8_t finalPalette = 0x00;
+
         if (PPUMASK.showBackground)
         {
             uint16_t multiplexerBitSelector = 0x8000 >> fineXScroll;
@@ -370,11 +431,76 @@ namespace nes
             uint8_t bgPaletteLow = (low_attribute_shifter & multiplexerBitSelector) > 0;
             uint8_t bgPaletteHigh = (high_attribute_shifter & multiplexerBitSelector) > 0;
             bgPalette = (bgPaletteHigh << 1) | bgPaletteLow;
-            
-            if (scanline >= 0 && scanline <= 239 && cycle >= 1 && cycle <= 256)
-                pixelsFrameBuffer[scanline * 256 + (cycle - 1)] = getRGBAFromNesPalette(bgPalette, bgPixel);
         }
 
+        if (PPUMASK.showSprites && scanline >= 1 && scanline < 240 && cycle >= 1 && cycle < 257)
+        {
+            for (int i = 7; i >= 0; i--)
+            {
+                if (spritesXpositionCounters[i] == 0 && spriteRenderingCounters[i] <= 8 && spriteRenderingCounters[i] > 0) // Render 8 pixels
+                {
+                    uint8_t sprPixelLow = (spritesLowBytePatternShifters[i] & 0x8000) > 0;
+                    uint8_t sprPixelHigh = (spritesHighBytePatternShifters[i] & 0x8000) > 0;
+                    sprPixel = (sprPixelHigh << 1) | sprPixelLow;
+
+                    sprPalette = (spritesAttributesLatches[i] & 0x03) + 4;
+
+                    isForegroundPriority = (spritesAttributesLatches[i] & 0x20) == 0; // Sprite pixel has prio
+
+                    spriteRenderingCounters[i]--;
+                }
+
+                if (spritesXpositionCounters[i] > 0)
+                {
+                    spritesXpositionCounters[i]--;
+                }
+                else
+                {
+                    spritesLowBytePatternShifters[i] <<= 1;
+                    spritesHighBytePatternShifters[i] <<= 1;
+                }
+            }
+        }
+
+        if (bgPixel == 0 && sprPixel == 0)
+        {
+            finalPixel = 0x00;
+            finalPalette = 0x00;
+            isSprPixel = false;
+        }
+        else if (isForegroundPriority || bgPixel == 0)
+        {
+            finalPixel = sprPixel;
+            finalPalette = sprPalette;
+            isSprPixel = true;
+        }
+        else if (!isForegroundPriority && bgPixel > 0)
+        {
+            finalPixel = bgPixel;
+            finalPalette = bgPalette;
+            isSprPixel = false;
+        }
+        else if (bgPixel > 0 && sprPixel > 0)
+        {
+            if (!isForegroundPriority)
+            {
+                finalPixel = bgPixel;
+                finalPalette = bgPalette;
+                isSprPixel = false;
+            }
+            else
+            {
+                finalPixel = sprPixel = 0x00;
+                finalPalette = sprPalette = 0x00;
+                isSprPixel = true;
+            }
+        }
+
+        if (PPUMASK.showBackground || PPUMASK.showSprites)
+        {
+            if (scanline >= 0 && scanline <= 239 && cycle >= 1 && cycle <= 256)
+                pixelsFrameBuffer[scanline * 256 + (cycle - 1)] = isSprPixel ? nesPalToRGBAPalArray[0x30] : getRGBAFromNesPalette(finalPalette, finalPixel);
+        }
 
         /*if (cycle == 0)
             currentXpixelBG = 0;
