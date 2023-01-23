@@ -295,17 +295,35 @@ namespace nes
                 // Sprites rendering
                 if (cycle >= 257 && cycle <= 320)
                 {
+                    uint8_t spriteIndex = ((cycle - 1) % 64) >> 3; // cycle / 8 to get current corresponding sprite
+
                     switch ((cycle - 1) % 8)
                     {
-                    case 0: // Garbage NT fetch
+                    case 0: // Garbage NT fetch and sprite Y coordinate fetch
+                        (void)ppuRead(0x2000 | (loopyV.vramAddrPtr & 0x0FFF));
+                        (void)scanlineSecondaryOAM[spriteIndex].posY;
                         break;
-                    case 2: // Garbage NT fetch and sprite attribute byte loading (from 2nd OAM to respective latch)
+                    case 1: // Sprite tileIndex fetch
+                        fetchedSprTileIndex = scanlineSecondaryOAM[spriteIndex].tileIndex;
+                        break;
+                    case 2: // Garbage NT fetch and sprite attribute byte loading (from 2nd OAM to respective latch)                    
+                        (void)ppuRead(0x2000 | (loopyV.vramAddrPtr & 0x0FFF));
+                        spritesAttributesLatches[spriteIndex] = scanlineSecondaryOAM[spriteIndex].attributes;
                         break;
                     case 3: // Sprite X position byte loading (from 2nd OAM to respective counter)
+                        spritesXpositionCounters[spriteIndex] = scanlineSecondaryOAM[spriteIndex].posX;
                         break;
-                    case 4: // Sprite pattern table tile low byte
+                    case 4: // Sprite pattern table tile low byte                        
+                        uint16_t lowByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+                            | 0 << 3; // 0 << 3 == + 0 (low tile byte)
+                        
+                        spritesLowBytePatternShifters[spriteIndex] = ppuRead(lowByteAddr);
                         break;
                     case 6: // Sprite Pattern table tile high byte
+                        uint16_t highByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+                            | 1 << 3; // 0 << 3 == + 0 (high tile byte)
+
+                        spritesLowBytePatternShifters[spriteIndex] = ppuRead(highByteAddr);
                         break;
                     }
                 }
