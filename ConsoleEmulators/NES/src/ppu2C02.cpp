@@ -147,7 +147,7 @@ namespace nes
 				PPUSTATUS.spriteOverflow = 0;
 			}
 
-			if ((cycle >= 1 && cycle <= 257) || (cycle >= 321 && cycle <= 336))
+			if (scanline >= 0 && ((cycle >= 1 && cycle <= 257) || (cycle >= 321 && cycle <= 336)))
 			{
 				// Shift registers every cycle
 				low_pattern_shifter <<= 1;
@@ -242,7 +242,7 @@ namespace nes
 					copyYvaluesFromTtoVloopyRegs();
 			}
 
-			if (scanline >= 0)
+			if (scanline >= 0 && scanline <= 239)
 			{
 				// ----- SPRITE REGION ---------
 
@@ -329,16 +329,53 @@ namespace nes
 					case 4: // Sprite pattern table tile low byte
 						{
 							uint16_t lowByteAddr = 0x0000;
+							uint8_t spriteHeight = PPUCTRL.sprSize ? 16 : 8;
 
-							if (spritesAttributesLatches[spriteIndex] & 0x80) // Flip vertically)
+							if (spriteHeight == 8)
 							{
-								lowByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
-									| 0 << 3 | ((7 - (scanline - fetchedSprY)) & 0x07); // 0 << 3 == + 0 (low tile byte)
+								if (spritesAttributesLatches[spriteIndex] & 0x80) // Flip vertically)
+								{
+									lowByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+										| 0 << 3 | ((7 - (scanline - fetchedSprY)) & 0x07); // 0 << 3 == + 0 (low tile byte)
+								}
+								else
+								{
+									lowByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+										| 0 << 3 | ((scanline - fetchedSprY) & 0x07); // 0 << 3 == + 0 (low tile byte)
+								}
 							}
-							else
+							else // 8 x 16
 							{
-								lowByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
-									| 0 << 3 | ((scanline - fetchedSprY) & 0x07); // 0 << 3 == + 0 (low tile byte)
+								uint8_t tableSelected = (fetchedSprTileIndex & 0x01);
+								uint8_t tileIndex = (fetchedSprTileIndex & 0xFE);
+								uint8_t patternLine = (scanline - fetchedSprY);
+
+								if (spritesAttributesLatches[spriteIndex] & 0x80) // Flip vertically)
+								{
+									if (patternLine < 8)
+									{
+										lowByteAddr = tableSelected * 0x1000 | (tileIndex + 1) << 4
+											| 0 << 3 | ((7 - patternLine) & 0x07); // 0 << 3 == + 0 (low tile byte)
+									}
+									else
+									{
+										lowByteAddr = tableSelected * 0x1000 | tileIndex << 4
+											| 0 << 3 | ((7 - patternLine) & 0x07); // 0 << 3 == + 0 (low tile byte)
+									}
+								}
+								else
+								{
+									if (patternLine < 8)
+									{
+										lowByteAddr = tableSelected * 0x1000 | tileIndex << 4
+											| 0 << 3 | (patternLine & 0x07); // 0 << 3 == + 0 (low tile byte)
+									}
+									else
+									{
+										lowByteAddr = tableSelected * 0x1000 | (tileIndex + 1) << 4
+											| 0 << 3 | (patternLine & 0x07); // 0 << 3 == + 0 (low tile byte)
+									}
+								}
 							}
 
 							uint8_t lowByte = ppuRead(lowByteAddr);
@@ -355,16 +392,53 @@ namespace nes
 					case 6: // Sprite Pattern table tile high byte
 						{
 							uint16_t highByteAddr = 0x0000;
+							uint8_t spriteHeight = PPUCTRL.sprSize ? 16 : 8;
 
-							if (spritesAttributesLatches[spriteIndex] & 0x80) // Flip vertically)
+							if (spriteHeight == 8)
 							{
-								highByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
-									| 1 << 3 | ((7 - (scanline - fetchedSprY)) & 0x07); // 0 << 3 == + 0 (high tile byte)
+								if (spritesAttributesLatches[spriteIndex] & 0x80) // Flip vertically)
+								{
+									highByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+										| 1 << 3 | ((7 - (scanline - fetchedSprY)) & 0x07); // 0 << 3 == + 0 (high tile byte)
+								}
+								else
+								{
+									highByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
+										| 1 << 3 | ((scanline - fetchedSprY) & 0x07); // 0 << 3 == + 0 (high tile byte)
+								}
 							}
-							else
+							else // 8 x 16
 							{
-								highByteAddr = PPUCTRL.sprPatternTabAddr << 12 | fetchedSprTileIndex << 4
-									| 1 << 3 | ((scanline - fetchedSprY) & 0x07); // 0 << 3 == + 0 (high tile byte)
+								uint8_t tableSelected = (fetchedSprTileIndex & 0x01);
+								uint8_t tileIndex = (fetchedSprTileIndex & 0xFE);
+								uint8_t patternLine = (scanline - fetchedSprY);
+
+								if (spritesAttributesLatches[spriteIndex] & 0x80) // Flip vertically)
+								{
+									if (patternLine < 8)
+									{
+										highByteAddr = tableSelected * 0x1000 | (tileIndex + 1) << 4
+											| 1 << 3 | ((7 - patternLine) & 0x07); // 0 << 3 == + 0 (low tile byte)
+									}
+									else
+									{
+										highByteAddr = tableSelected * 0x1000 | tileIndex << 4
+											| 1 << 3 | ((7 - patternLine) & 0x07); // 0 << 3 == + 0 (low tile byte)
+									}
+								}
+								else
+								{
+									if (patternLine < 8)
+									{
+										highByteAddr = tableSelected * 0x1000 | tileIndex << 4
+											| 1 << 3 | (patternLine & 0x07); // 0 << 3 == + 0 (low tile byte)
+									}
+									else
+									{
+										highByteAddr = tableSelected * 0x1000 | (tileIndex + 1) << 4
+											| 1 << 3 | (patternLine & 0x07); // 0 << 3 == + 0 (low tile byte)
+									}
+								}
 							}
 
 							uint8_t highByte = ppuRead(highByteAddr);
