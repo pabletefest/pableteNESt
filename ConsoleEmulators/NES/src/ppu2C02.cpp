@@ -234,6 +234,20 @@ namespace nes
 					if (PPUMASK.showBackground || PPUMASK.showSprites)
 						copyXvaluesFromTtoVloopyRegs();
 				}
+
+				// Dummy 2 NT fetches (MMC5 mapper uses these two plus byte fetch at the beggining of next scanline to detect 3 consecutive fetches and clock a scanline counter)
+				if (cycle >= 337 && cycle <= 340)
+				{
+					switch ((cycle - 1) % 8)
+					{
+					case 0:
+						fetchedByteNT = ppuRead(0x2000 | (loopyV.vramAddrPtr & 0x0FFF));
+						break;
+					case 2:
+						fetchedByteNT = ppuRead(0x2000 | (loopyV.vramAddrPtr & 0x0FFF));
+						break;
+					}
+				}
 			}
 
 			if (scanline == -1 && cycle >= 280 && cycle <= 304)
@@ -459,11 +473,6 @@ namespace nes
 				}
 
 				// ----- END SPRITE REGION -----
-
-				if (cycle >= 337 && cycle <= 340)
-				{
-
-				}
 			}
 		}
 
