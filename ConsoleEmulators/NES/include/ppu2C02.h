@@ -181,7 +181,7 @@ namespace nes
         uint8_t spritesAttributesLatches[8];
         uint8_t spritesXpositionCounters[8];
 
-        uint8_t spriteRenderingCounters[8];
+        uint8_t spriteRenderingCounters[8] = { 7, 7, 7, 7, 7, 7, 7, 7 };
 
         //temp
         bool isSprPixel = false;
