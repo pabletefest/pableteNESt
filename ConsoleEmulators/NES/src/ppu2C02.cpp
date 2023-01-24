@@ -277,7 +277,7 @@ namespace nes
 
 							// Used current scanline instead of next scanline as PPU uses current one to deal with offset of 1 in Y coordinate
 							// It compares Y to current scanline for next scanline sprite
-							if (scanline >= spriteY && scanline <= spriteY + spriteSize)
+							if (scanline >= spriteY && scanline < spriteY + spriteSize)
 							{
 								// Copy the rest of the OAM Sprite fields (tileIndex, Attributes and X position)
 								//std::memcpy(secondOAMPtr + secondOamIndex * SIZE_OAM_SPR + 1, OAMptr + oamIndex * SIZE_OAM_SPR + 1, 3);
