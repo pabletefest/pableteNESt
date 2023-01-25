@@ -586,6 +586,14 @@ namespace nes
 				finalPixel = bgPixel;
 				finalPalette = bgPalette;
 			}
+
+			if (PPUMASK.showBackground && PPUMASK.showSprites && !PPUSTATUS.spriteZeroHit)
+			{
+				if (spritesXpositionCounters[0] == 0 && spriteRenderingCounters[0] <= 7 && spriteRenderingCounters[0] >= 0)
+				{
+					PPUSTATUS.spriteZeroHit = 1;
+				}
+			}
 		}
 
 		if (PPUMASK.showBackground || PPUMASK.showSprites)
