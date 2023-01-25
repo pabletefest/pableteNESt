@@ -183,8 +183,7 @@ namespace nes
 
         uint8_t spriteRenderingCounters[8] = { 7, 7, 7, 7, 7, 7, 7, 7 };
 
-        //temp
-        bool isSprPixel = false;
+        //bool isPixelAlreadyChosen = false;
 
         public:
             uint8_t* OAMptr = nullptr;

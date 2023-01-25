@@ -110,6 +110,7 @@ namespace nes
 			low_attribute_shifter = (low_attribute_shifter & 0xFF00) | ((fetchedByteAT & 0b01) ? 0xFF : 0x00); // Low bit
 			high_attribute_shifter = (high_attribute_shifter & 0xFF00) | ((fetchedByteAT & 0b10) ? 0xFF : 0x00); // High bit
 		};
+
 		//if (!PPUMASK.showBackground && !PPUMASK.showSprites) // Rendering disabled
 		//    return;
 
@@ -543,19 +544,6 @@ namespace nes
 					spritesLowBytePatternShifters[i] <<= 1;
 					spritesHighBytePatternShifters[i] <<= 1;
 				}
-
-				//if (spritesXpositionCounters[i] == 0 && spriteRenderingCounters[i] <= 7 && spriteRenderingCounters[i] >= 0) // Render 8 pixels
-				//{
-				//	uint8_t sprPixelLow = (spritesLowBytePatternShifters[i] & 0x80) > 0;
-				//	uint8_t sprPixelHigh = (spritesHighBytePatternShifters[i] & 0x80) > 0;
-				//	sprPixel = (sprPixelHigh << 1) | sprPixelLow;
-
-				//	sprPalette = (spritesAttributesLatches[i] & 0x03) + 4;
-
-				//	isForegroundPriority = (spritesAttributesLatches[i] & 0x20) == 0; // Sprite pixel has prio
-
-				//	spriteRenderingCounters[i]--;
-				//}
 			}
 		}
 
