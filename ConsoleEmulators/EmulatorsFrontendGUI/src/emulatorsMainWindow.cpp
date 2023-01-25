@@ -33,6 +33,15 @@ EmulatorsMainWindow::EmulatorsMainWindow(QWidget *parent)
 {
     setupGUI();
 
+    holdingKeysMap.insert({ InputType::A, false });
+    holdingKeysMap.insert({ InputType::B, false });
+    holdingKeysMap.insert({ InputType::SELECT, false });
+    holdingKeysMap.insert({ InputType::START, false });
+    holdingKeysMap.insert({ InputType::UP, false });
+    holdingKeysMap.insert({ InputType::DOWN, false });
+    holdingKeysMap.insert({ InputType::LEFT, false });
+    holdingKeysMap.insert({ InputType::RIGHT, false });
+
     renderTimer.setTimerType(Qt::PreciseTimer);
     renderTimer.setInterval(1000 / 60); // 1000 / 60 -> 60 fps
     connect(&renderTimer, SIGNAL(timeout()), this, SLOT(onRenderFrame()));
@@ -86,66 +95,82 @@ void EmulatorsMainWindow::InitSDLRendering()
 
 void EmulatorsMainWindow::keyPressEvent(QKeyEvent* event)
 {
-    nes.controllers[0] = 0x00;
+    //nes.controllers[0] = 0x00;
 
     switch (event->key())
     {
     case Qt::Key_X:
-        nes.controllers[0] |= 0x80; // A
+        //nes.controllers[0] |= 0x80; // A
+        holdingKeysMap[InputType::A] = true;
         break;
     case Qt::Key_Z:
-        nes.controllers[0] |= 0x40; // B
+        //nes.controllers[0] |= 0x40; // B
+        holdingKeysMap[InputType::B] = true;
         break;
     case Qt::Key_A:
-        nes.controllers[0] |= 0x20; // SELECT
+        //nes.controllers[0] |= 0x20; // SELECT
+        holdingKeysMap[InputType::SELECT] = true;
         break;
     case Qt::Key_S:
-        nes.controllers[0] |= 0x10; // START
+        //nes.controllers[0] |= 0x10; // START
+        holdingKeysMap[InputType::START] = true;
         break;
     case Qt::Key_Up:
-        nes.controllers[0] |= 0x08; // UP
+        //nes.controllers[0] |= 0x08; // UP
+        holdingKeysMap[InputType::UP] = true;
         break;
     case Qt::Key_Down:
-        nes.controllers[0] |= 0x04; // DOWN
+        //nes.controllers[0] |= 0x04; // DOWN
+        holdingKeysMap[InputType::DOWN] = true;
         break;
     case Qt::Key_Left:
-        nes.controllers[0] |= 0x02; // LEFT
+        //nes.controllers[0] |= 0x02; // LEFT
+        holdingKeysMap[InputType::LEFT] = true;
         break;
     case Qt::Key_Right:
-        nes.controllers[0] |= 0x01; // RIGHT
+        //nes.controllers[0] |= 0x01; // RIGHT
+        holdingKeysMap[InputType::RIGHT] = true;
         break;
     }
 }
 
 void EmulatorsMainWindow::keyReleaseEvent(QKeyEvent* event)
 {
-    nes.controllers[0] = 0x00;
+    //nes.controllers[0] = 0x00;
 
     switch (event->key())
     {
     case Qt::Key_X:
-        nes.controllers[0] |= 0x00; // A
+        //nes.controllers[0] |= 0x00; // A
+        holdingKeysMap[InputType::A] = false;
         break;
     case Qt::Key_Z:
-        nes.controllers[0] |= 0x00; // B
+        //nes.controllers[0] |= 0x00; // B
+        holdingKeysMap[InputType::B] = false;
         break;
     case Qt::Key_A:
-        nes.controllers[0] |= 0x00; // SELECT
+        //nes.controllers[0] |= 0x00; // SELECT
+        holdingKeysMap[InputType::SELECT] = false;
         break;
     case Qt::Key_S:
-        nes.controllers[0] |= 0x00; // START
+        //nes.controllers[0] |= 0x00; // START
+        holdingKeysMap[InputType::START] = false;
         break;
     case Qt::Key_Up:
-        nes.controllers[0] |= 0x00; // UP
+        //nes.controllers[0] |= 0x00; // UP
+        holdingKeysMap[InputType::UP] = false;
         break;
     case Qt::Key_Down:
-        nes.controllers[0] |= 0x00; // DOWN
+        //nes.controllers[0] |= 0x00; // DOWN
+        holdingKeysMap[InputType::DOWN] = false;
         break;
     case Qt::Key_Left:
-        nes.controllers[0] |= 0x00; // LEFT
+        //nes.controllers[0] |= 0x00; // LEFT
+        holdingKeysMap[InputType::LEFT] = false;
         break;
     case Qt::Key_Right:
-        nes.controllers[0] |= 0x00; // RIGHT
+        //nes.controllers[0] |= 0x00; // RIGHT
+        holdingKeysMap[InputType::RIGHT] = false;
         break;
     }
 }
@@ -209,6 +234,40 @@ uint32_t EmulatorsMainWindow::printFPS(uint32_t interval, void* params)
     return interval;
 }
 
+void EmulatorsMainWindow::handleUserInput()
+{
+    for (const auto& [key, value] : holdingKeysMap)
+    {
+        switch (key)
+        {
+        case InputType::A:
+            nes.controllers[0] |= value ? 0x80 : 0x00;
+            break;
+        case InputType::B:
+            nes.controllers[0] |= value ? 0x40 : 0x00;
+            break;
+        case InputType::SELECT:
+            nes.controllers[0] |= value ? 0x20 : 0x00;
+            break;
+        case InputType::START:
+            nes.controllers[0] |= value ? 0x10 : 0x00;
+            break;
+        case InputType::UP:
+            nes.controllers[0] |= value ? 0x08 : 0x00;
+            break;
+        case InputType::DOWN:
+            nes.controllers[0] |= value ? 0x04 : 0x00;
+            break;
+        case InputType::LEFT:
+            nes.controllers[0] |= value ? 0x02 : 0x00;
+            break;
+        case InputType::RIGHT:
+            nes.controllers[0] |= value ? 0x01 : 0x00;
+            break;
+        }
+    }
+}
+
 void EmulatorsMainWindow::onOpenROM()
 {
     QString filePath = QFileDialog::getOpenFileName(nullptr, "Open ROM file", "/home", tr("ROMs (*.nes)"));
@@ -269,8 +328,8 @@ void EmulatorsMainWindow::openPatternTablesViewer()
 
 void EmulatorsMainWindow::onRenderFrame()
 {
-    //nes.controllers[0] = 0x00; // Reset every frame
-
+    nes.controllers[0] = 0x00; // Reset every frame
+    handleUserInput();
     nes.runFrame();
 
     /*do

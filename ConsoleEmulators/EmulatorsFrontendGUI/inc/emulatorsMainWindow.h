@@ -69,6 +69,7 @@ private:
     void initEmulator();
     void resetRendererBackground();
     static uint32_t printFPS(uint32_t interval, void* params);
+    void handleUserInput();
 
 signals:
     void windowTitleUpdate(QString newTitle);
@@ -95,4 +96,11 @@ private:
     uint32_t fps = 0;
 
     QString currentGame;
+
+    enum class InputType
+    {
+        A, B, SELECT, START, UP, DOWN, LEFT, RIGHT
+    };
+
+    std::map<InputType, bool> holdingKeysMap;
 };
