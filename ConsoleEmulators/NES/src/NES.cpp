@@ -154,7 +154,6 @@ int main(int argc, char* argv[])
         //if (keystate[SDLK_x])
         //    nes.controllers[0] |= 0x80; // A
     
-
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)

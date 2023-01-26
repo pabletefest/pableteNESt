@@ -520,7 +520,7 @@ namespace nes
 
 		if (PPUMASK.showSprites && scanline >= 1 && scanline < 240 && cycle >= 1 && cycle < 257)
 		{
-			for (int i = 7; i >= 0; i--)
+			for (int i = 0; i < 8; i++)
 			{
 				if (spritesXpositionCounters[i] > 0)
 				{
@@ -532,11 +532,14 @@ namespace nes
 					{
 						uint8_t sprPixelLow = (spritesLowBytePatternShifters[i] & 0x80) > 0;
 						uint8_t sprPixelHigh = (spritesHighBytePatternShifters[i] & 0x80) > 0;
-						sprPixel = (sprPixelHigh << 1) | sprPixelLow;
-
-						sprPalette = (spritesAttributesLatches[i] & 0x03) + 4;
-
-						isForegroundPriority = (spritesAttributesLatches[i] & 0x20) == 0; // Sprite pixel has prio
+						uint8_t pixel = (sprPixelHigh << 1) | sprPixelLow;
+						
+						if (pixel && !sprPixel)
+						{
+							sprPixel = pixel;
+							sprPalette = (spritesAttributesLatches[i] & 0x03) + 4;
+							isForegroundPriority = (spritesAttributesLatches[i] & 0x20) == 0; // Sprite pixel has prio
+						}
 						
 						spriteRenderingCounters[i]--;
 					}
