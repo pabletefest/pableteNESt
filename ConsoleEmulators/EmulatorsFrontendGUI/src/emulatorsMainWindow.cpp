@@ -274,7 +274,7 @@ void EmulatorsMainWindow::onOpenROM()
 
     std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>(filePath.toStdString());
 
-    if (filePath.isEmpty() || !cartridge->isValidROM())
+    if (filePath.isEmpty() || !cartridge || !cartridge->isValidROM())
     {
         QMessageBox::critical(nullptr, "ROM reading error", "Could not open the specifed ROM");
         //resetRendererBackground();
