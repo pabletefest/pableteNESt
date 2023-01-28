@@ -24,3 +24,7 @@ bool nes::Mapper_001::ppuMapWrite(uint16_t addr, uint32_t& mapped_addr)
 {
 	return false;
 }
+
+void nes::Mapper_001::bankSwitchingProcess(uint16_t destRegAddr)
+{
+}
