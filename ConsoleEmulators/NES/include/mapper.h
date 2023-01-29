@@ -6,7 +6,7 @@ namespace nes
 	class Mapper
 	{
 	public:
-		Mapper(uint8_t prgBanks, uint8_t chrBanks);
+		Mapper(uint8_t prgBanks, uint8_t chrBanks, bool batteryBackedPersistentMem = false);
 		virtual ~Mapper() = default;
 
 	public:
@@ -21,5 +21,6 @@ namespace nes
 		// These are stored locally as many of the mappers require this information
 		uint8_t nPRGBanks = 0;
 		uint8_t nCHRBanks = 0;
+		bool containsBatteryMemory = false;
 	};
 }

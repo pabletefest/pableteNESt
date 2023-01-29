@@ -36,7 +36,7 @@ namespace nes
 
 			//Mapper 2 usually does not contain PRG RAM so this is placeholder code line.
 			mapped_addr = addr & (nPRGBanks > 1 ? 0x7FFF : 0x3FFF);
-			return false;
+			return false; // We don't want to write to PRG data
 		}
 
 		return false;

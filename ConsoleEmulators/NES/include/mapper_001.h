@@ -7,7 +7,7 @@ namespace nes
 	class Mapper_001 : public Mapper
 	{
 	public:
-		Mapper_001(uint8_t prgBanks, uint8_t chrBanks);
+		Mapper_001(uint8_t prgBanks, uint8_t chrBanks, bool batteryBackedPersistentMem);
 		~Mapper_001() override = default;
 
 	public:
@@ -17,7 +17,10 @@ namespace nes
 		bool ppuMapWrite(uint16_t addr, uint32_t& mapped_addr) override;
 
 	private:
-		void bankSwitchingProcess(uint16_t destRegAddr);
+		void bankSwitchingProcess(uint32_t destRegAddr);
+		uint32_t getMappedAddress() const;
+		void resetMapper();
+		void configRegisterAt(uint16_t address);
 
 	private:
 
@@ -37,6 +40,9 @@ namespace nes
 			uint8_t reg;
 		}CONTROL;
 
+		uint8_t chrBank0Select = 0x00;
+		uint8_t chrBank1Select = 0x00;
+
 		union
 		{
 			struct
@@ -48,5 +54,7 @@ namespace nes
 
 			uint8_t reg;
 		}PRGBANK;
+
+		uint8_t currentLRWrite = 0x00;
 	};
 }

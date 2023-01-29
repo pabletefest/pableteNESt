@@ -1,5 +1,6 @@
 #include "cartridge.h"
 #include "mapper_000.h"
+#include "mapper_001.h"
 #include "mapper_002.h"
 
 #include <fstream>
@@ -70,6 +71,13 @@ namespace nes
 			case 0:
 				pMapper = std::make_shared<Mapper_000>(nPRGBanks, nCHRBanks);
 				break;
+			case 1:
+				pMapper = std::make_shared<Mapper_001>(nPRGBanks, nCHRBanks, header.mapper1 & 0x02);
+				
+				if (nCHRBanks == 0)
+					vCHRMemory.resize(8192);
+
+				break;
 			case 2:
 				pMapper = std::make_shared<Mapper_002>(nPRGBanks, nCHRBanks);
 				vCHRMemory.resize(8192);
@@ -89,8 +97,8 @@ namespace nes
 			data = vPRGMemory[mapped_addr];
 			return true;
 		}
-		else
-			return false;
+		
+		return false;
 	}
 
 	bool Cartridge::cpuWrite(uint16_t addr, uint8_t data)
@@ -102,8 +110,8 @@ namespace nes
 			vPRGMemory[mapped_addr] = data;
 			return true;
 		}
-		else
-			return false;
+
+		return false;
 	}
 
 	bool Cartridge::ppuRead(uint16_t addr, uint8_t& data)
