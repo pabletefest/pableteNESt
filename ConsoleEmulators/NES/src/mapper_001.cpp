@@ -1,7 +1,8 @@
 #include "mapper_001.h"
+#include "cartridge.h"
 
-nes::Mapper_001::Mapper_001(uint8_t prgBanks, uint8_t chrBanks, bool batteryBackedPersistentMem)
-	: Mapper(prgBanks, chrBanks, batteryBackedPersistentMem)
+nes::Mapper_001::Mapper_001(uint8_t prgBanks, uint8_t chrBanks, bool batteryBackedPersistentMem, nes::Cartridge& cart)
+	: Mapper(prgBanks, chrBanks, batteryBackedPersistentMem), cartRef(cart)
 {
 	CONTROL.reg = 0x00;
 	CONTROL.prgROMBankMode = 3;
@@ -149,6 +150,8 @@ void nes::Mapper_001::configRegisterAt(uint16_t address)
 	if (address >= 0x8000 && address <= 0x9FFF)
 	{
 		CONTROL.reg = dataShiftRegister & 0x1F;
+
+		setCartridgeMirroring();
 	}
 	else if (address >= 0xA000 && address <= 0xBFFF) // Select 4 KB or 8 KB CHR bank at PPU $0000 (low bit ignored in 8 KB mode)
 	{
@@ -165,13 +168,36 @@ void nes::Mapper_001::configRegisterAt(uint16_t address)
 	}
 	else if (address >= 0xC000 && address <= 0xDFFF) // Select 4 KB CHR bank at PPU $1000 (ignored in 8 KB mode)
 	{
-		if (CONTROL.chrROMBankMode == 1)
+		/*if (CONTROL.chrROMBankMode == 1)
 		{
 			chrBank1Select = dataShiftRegister & 0x1F;
-		}
+		}*/
+		chrBank1Select = dataShiftRegister & 0x1F;
 	}
 	else if (address >= 0xE000 && address <= 0xFFFF)
 	{
 		PRGBANK.reg = dataShiftRegister & 0x1F;
+	}
+}
+
+void nes::Mapper_001::setCartridgeMirroring()
+{	
+	switch (CONTROL.mirroring)
+	{
+	case 0:
+		cartRef.setNTMirroring(Cartridge::Mirroring::ONE_SCREEN_LOWER_BANK);
+		break;
+	case 1:
+		cartRef.setNTMirroring(Cartridge::Mirroring::ONE_SCREEN_UPPER_BANK);
+		break;
+	case 2:
+		cartRef.setNTMirroring(Cartridge::Mirroring::VERTICAL);
+		break;
+	case 3:
+		cartRef.setNTMirroring(Cartridge::Mirroring::HORIZONTAL);
+		break;
+	default:
+		// Can't reach the default state
+		break;
 	}
 }

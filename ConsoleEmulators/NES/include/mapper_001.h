@@ -1,5 +1,11 @@
 #pragma once
 #include "mapper.h"
+#include <memory>
+
+namespace nes
+{
+	class Cartridge;
+}
 
 namespace nes
 {
@@ -7,7 +13,7 @@ namespace nes
 	class Mapper_001 : public Mapper
 	{
 	public:
-		Mapper_001(uint8_t prgBanks, uint8_t chrBanks, bool batteryBackedPersistentMem);
+		Mapper_001(uint8_t prgBanks, uint8_t chrBanks, bool batteryBackedPersistentMem, nes::Cartridge& cart);
 		~Mapper_001() override = default;
 
 	public:
@@ -21,6 +27,7 @@ namespace nes
 		uint32_t getMappedAddress() const;
 		void resetMapper();
 		void configRegisterAt(uint16_t address);
+		void setCartridgeMirroring();
 
 	private:
 
@@ -56,5 +63,7 @@ namespace nes
 		}PRGBANK;
 
 		uint8_t currentLRWrite = 0x00;
+
+		nes::Cartridge& cartRef;
 	};
 }

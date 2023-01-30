@@ -8,7 +8,7 @@
 namespace nes
 {
 	// Represents an abstraction of a  NES cartridge 
-	class Cartridge
+	class Cartridge : public std::enable_shared_from_this<Cartridge>
 	{
 	public:
 
@@ -17,6 +17,8 @@ namespace nes
 			VERTICAL,
 			HORIZONTAL,
 			ONE_SCREEN,
+			ONE_SCREEN_LOWER_BANK,
+			ONE_SCREEN_UPPER_BANK,
 			FOUR_SCREEN
 		};
 
@@ -34,6 +36,11 @@ namespace nes
 		Mirroring getNTMirroring() const
 		{
 			return mirroring;
+		}
+
+		void setNTMirroring(Mirroring mirroringMode)
+		{
+			mirroring = mirroringMode;
 		}
 
 		bool isValidROM() const;

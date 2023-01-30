@@ -748,6 +748,14 @@ namespace nes
 				else if (address >= 0x2C00)
 					address &= 0x2BFF;
 			}
+			else if (cartridge->getNTMirroring() == Cartridge::Mirroring::ONE_SCREEN_LOWER_BANK)
+			{
+				address = 0x2000 + (address & 0x03FF);
+			}
+			else if (cartridge->getNTMirroring() == Cartridge::Mirroring::ONE_SCREEN_LOWER_BANK)
+			{
+				address = 0x2400 + (address & 0x03FF);
+			}
 
 			dataRead = nameTables[(address & 0x0F00) >= 0x0400][address & 0x03FF];
 		}
@@ -784,6 +792,14 @@ namespace nes
 					address &= 0x23FF;
 				else if (address >= 0x2C00)
 					address &= 0x2BFF;
+			}
+			else if (cartridge->getNTMirroring() == Cartridge::Mirroring::ONE_SCREEN_LOWER_BANK)
+			{
+				address = 0x2000 + (address & 0x03FF);
+			}
+			else if (cartridge->getNTMirroring() == Cartridge::Mirroring::ONE_SCREEN_LOWER_BANK)
+			{
+				address = 0x2400 + (address & 0x03FF);
 			}
 
 			nameTables[(address & 0x0F00) >= 0x0400][address & 0x03FF] = data;
