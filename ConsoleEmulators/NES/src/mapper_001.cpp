@@ -1,5 +1,6 @@
 #include "mapper_001.h"
 #include "cartridge.h"
+#include "emu_typedefs.h"
 
 nes::Mapper_001::Mapper_001(uint8_t prgBanks, uint8_t chrBanks, bool batteryBackedPersistentMem, nes::Cartridge& cart)
 	: Mapper(prgBanks, chrBanks, batteryBackedPersistentMem), cartRef(cart)
@@ -50,7 +51,7 @@ bool nes::Mapper_001::cpuMapRead(uint16_t addr, uint32_t& mapped_addr)
 
 	if (addr >= 0x6000 && addr <= 0x7FFF)
 	{
-		mapped_addr = (nPRGBanks * 16 * 1024) + (addr & 0x1FFF);
+		mapped_addr = (nPRGBanks * convertKBToBytes<uint32_t>(16)) + (addr & 0x1FFF);
 		return true;
 	}
 
@@ -83,7 +84,7 @@ bool nes::Mapper_001::cpuMapWrite(uint16_t addr, uint32_t& mapped_addr, uint8_t 
 	if (addr >= 0x6000 && addr <= 0x7FFF)
 	{
 		//cartPersitentRAM[addr & 0x1FFF] = data;
-		mapped_addr = (nPRGBanks * 16 * 1024) + (addr & 0x1FFF);
+		mapped_addr = (nPRGBanks * convertKBToBytes<uint32_t>(16)) + (addr & 0x1FFF);
 		return true;
 	}
 	
