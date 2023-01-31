@@ -77,6 +77,11 @@ namespace nes
 				if (nCHRBanks == 0)
 					vCHRMemory.resize(8192);
 
+				if (header.mapper1 & 0x02)
+				{
+					vPRGMemory.resize(vPRGMemory.capacity() + 0x2000);
+				}
+
 				break;
 			case 2:
 				pMapper = std::make_shared<Mapper_002>(nPRGBanks, nCHRBanks);
@@ -131,7 +136,7 @@ namespace nes
 	{
 		uint32_t mapped_addr = 0;
 
-		if (pMapper->ppuMapRead(addr, mapped_addr))
+		if (pMapper->ppuMapWrite(addr, mapped_addr))
 		{
 			vCHRMemory[mapped_addr] = data;
 			return true;

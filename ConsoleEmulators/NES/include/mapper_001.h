@@ -1,6 +1,7 @@
 #pragma once
 #include "mapper.h"
 #include <memory>
+#include <vector>
 
 namespace nes
 {
@@ -65,5 +66,7 @@ namespace nes
 		uint8_t currentLRWrite = 0x00;
 
 		nes::Cartridge& cartRef;
+
+		//std::vector<uint8_t> cartPersitentRAM;
 	};
 }

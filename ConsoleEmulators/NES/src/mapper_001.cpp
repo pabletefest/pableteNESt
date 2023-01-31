@@ -7,6 +7,9 @@ nes::Mapper_001::Mapper_001(uint8_t prgBanks, uint8_t chrBanks, bool batteryBack
 	CONTROL.reg = 0x00;
 	CONTROL.prgROMBankMode = 3;
 	PRGBANK.reg = 0x00;
+
+	//if (containsBatteryMemory)
+	//	cartPersitentRAM.resize(8192); // 8KB RAM
 }
 
 bool nes::Mapper_001::cpuMapRead(uint16_t addr, uint32_t& mapped_addr)
@@ -45,6 +48,12 @@ bool nes::Mapper_001::cpuMapRead(uint16_t addr, uint32_t& mapped_addr)
 		return true;
 	}
 
+	if (addr >= 0x6000 && addr <= 0x7FFF)
+	{
+		mapped_addr = (nPRGBanks * 16 * 1024) + (addr & 0x1FFF);
+		return true;
+	}
+
 	return false;
 }
 
@@ -71,6 +80,13 @@ bool nes::Mapper_001::cpuMapWrite(uint16_t addr, uint32_t& mapped_addr, uint8_t 
 		return false;
 	}
 	
+	if (addr >= 0x6000 && addr <= 0x7FFF)
+	{
+		//cartPersitentRAM[addr & 0x1FFF] = data;
+		mapped_addr = (nPRGBanks * 16 * 1024) + (addr & 0x1FFF);
+		return true;
+	}
+	
 	return false;
 }
 
@@ -78,19 +94,26 @@ bool nes::Mapper_001::ppuMapRead(uint16_t addr, uint32_t& mapped_addr)
 {
 	if (addr >= 0x0000 && addr <= 0x1FFF)
 	{
+		if (nCHRBanks == 0)
+		{
+			mapped_addr = addr & 0x1FFF;
+			return true;
+		}
+
 		if (CONTROL.chrROMBankMode == 0) // 8KB mode
 		{
+			//mapped_addr = addr & 0x1FFF;
 			mapped_addr = ((chrBank0Select & 0x01) * 0x2000) + (addr & 0x1FFF);
 		}
 		else // Separate 4KB mode
 		{
 			if (addr >= 0x0000 && addr <= 0x0FFF)
 			{
-				mapped_addr = (chrBank0Select * 0x2000) + (addr & 0x0FFF);
+				mapped_addr = (chrBank0Select * 0x1000) + (addr & 0x0FFF);
 			}
 			else if (addr >= 0x1000 && addr <= 0x1FFF)
 			{
-				mapped_addr = (chrBank1Select * 0x2000) + (addr & 0x1FFF);
+				mapped_addr = (chrBank1Select * 0x1000) + (addr & 0x1FFF);
 			}
 		}
 
@@ -106,21 +129,23 @@ bool nes::Mapper_001::ppuMapWrite(uint16_t addr, uint32_t& mapped_addr)
 	{
 		if (nCHRBanks == 0) // Treat as RAM
 		{
-			if (CONTROL.chrROMBankMode == 0) // 8KB mode
-			{
-				mapped_addr = ((chrBank0Select & 0x01) * 0x2000) + (addr & 0x1FFF);
-			}
-			else // Separate 4KB mode
-			{
-				if (addr >= 0x0000 && addr <= 0x0FFF)
-				{
-					mapped_addr = (chrBank0Select * 0x2000) + (addr & 0x0FFF);
-				}
-				else if (addr >= 0x1000 && addr <= 0x1FFF)
-				{
-					mapped_addr = (chrBank1Select * 0x2000) + (addr & 0x1FFF);
-				}
-			}
+			mapped_addr = addr & 0x1FFF;
+
+			//if (CONTROL.chrROMBankMode == 0) // 8KB mode
+			//{
+			//	mapped_addr = addr & 0x1FFF;
+			//}
+			//else // Separate 4KB mode
+			//{
+			//	if (addr >= 0x0000 && addr <= 0x0FFF)
+			//	{
+			//		mapped_addr = (chrBank0Select * 0x1000) + (addr & 0x0FFF);
+			//	}
+			//	else if (addr >= 0x1000 && addr <= 0x1FFF)
+			//	{
+			//		mapped_addr = (chrBank1Select * 0x1000) + (addr & 0x1FFF);
+			//	}
+			//}
 
 			return true;
 		}
