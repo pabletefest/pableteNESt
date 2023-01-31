@@ -39,6 +39,9 @@
     <ClInclude Include="include\emu_typedefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\mapper_001.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu6502.cpp">
@@ -66,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\nesCoreDLLWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mapper_001.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

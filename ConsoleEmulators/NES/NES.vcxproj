@@ -24,6 +24,7 @@
     <ClInclude Include="include\emu_typedefs.h" />
     <ClInclude Include="include\mapper.h" />
     <ClInclude Include="include\mapper_000.h" />
+    <ClInclude Include="include\mapper_001.h" />
     <ClInclude Include="include\mapper_002.h" />
     <ClInclude Include="include\nesBus.h" />
     <ClInclude Include="include\ppu2C02.h" />
@@ -33,6 +34,7 @@
     <ClCompile Include="src\cpu6502.cpp" />
     <ClCompile Include="src\mapper.cpp" />
     <ClCompile Include="src\mapper_000.cpp" />
+    <ClCompile Include="src\mapper_001.cpp" />
     <ClCompile Include="src\mapper_002.cpp" />
     <ClCompile Include="src\NES.cpp" />
     <ClCompile Include="src\nesBus.cpp" />
@@ -92,14 +94,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>NES_EMULATOR</TargetName>
-    <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\nes_core\</OutDir>
+    <TargetName>nes_core</TargetName>
+    <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\nes_core\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>NES_EMULATOR</TargetName>
-    <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\nes_core\</OutDir>
+    <TargetName>nes_core</TargetName>
+    <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\nes_core\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\nes_core\</OutDir>
@@ -119,6 +121,8 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)lib\SDL2-2.24.1\include</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>cstdint</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +141,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)lib\SDL2-2.24.1\include</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>cstdint</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,6 +161,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)lib\SDL2-2.24.1\include;$(SolutionDir)lib\SDL2_ttf-2.20.1\include;$(ProjectDir)include\</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>cstdint</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
