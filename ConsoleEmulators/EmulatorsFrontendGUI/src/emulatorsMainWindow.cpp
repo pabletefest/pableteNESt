@@ -84,7 +84,7 @@ void EmulatorsMainWindow::InitSDLRendering()
 
     //rendererWidget->setRenderer(renderer);
 
-    resetRendererBackground();
+    //resetRendererBackground();
     
     connect(this, SIGNAL(windowTitleUpdate(QString)), this, SLOT(onWindowTitleUpdate(QString)), Qt::AutoConnection);
     SDL_AddTimer(1000, EmulatorsMainWindow::printFPS, (void*)this);
