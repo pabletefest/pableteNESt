@@ -42,6 +42,7 @@ protected:
             SDL_RenderPresent(rendererHandler);
         }
 
+        setStyleSheet("QWidget { background-color: black; }");
         QWidget::paintEvent(event);
     }
 
@@ -63,6 +64,8 @@ public:
 protected:
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
+    
+    void focusOutEvent(QFocusEvent* event) override;
 
 private:
     void setupGUI();

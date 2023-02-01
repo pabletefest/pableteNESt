@@ -84,7 +84,7 @@ void EmulatorsMainWindow::InitSDLRendering()
 
     //rendererWidget->setRenderer(renderer);
 
-    //resetRendererBackground();
+    resetRendererBackground();
     
     connect(this, SIGNAL(windowTitleUpdate(QString)), this, SLOT(onWindowTitleUpdate(QString)), Qt::AutoConnection);
     SDL_AddTimer(1000, EmulatorsMainWindow::printFPS, (void*)this);
@@ -173,6 +173,13 @@ void EmulatorsMainWindow::keyReleaseEvent(QKeyEvent* event)
         holdingKeysMap[InputType::RIGHT] = false;
         break;
     }
+}
+
+void EmulatorsMainWindow::focusOutEvent(QFocusEvent* event)
+{
+    this->centralWidget()->setStyleSheet("QWidget { background-color: black; }");
+
+    QWidget::focusOutEvent(event);
 }
 
 //#define MAX_PATH 256
