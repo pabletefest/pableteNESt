@@ -84,7 +84,7 @@ void EmulatorsMainWindow::InitSDLRendering()
 
     //rendererWidget->setRenderer(renderer);
 
-    //resetRendererBackground();
+    resetRendererBackground();
     
     connect(this, SIGNAL(windowTitleUpdate(QString)), this, SLOT(onWindowTitleUpdate(QString)), Qt::AutoConnection);
     SDL_AddTimer(1000, EmulatorsMainWindow::printFPS, (void*)this);
@@ -283,7 +283,10 @@ void EmulatorsMainWindow::onOpenROM()
 
     if (filePath.isEmpty() || !cartridge || !cartridge->isValidROM())
     {
-        QMessageBox::critical(nullptr, "ROM reading error", "Could not open the specifed ROM");
+        QMessageBox::critical(nullptr, "ROM reading error", "Could not open the specifed ROM. Might be one of the following reasons:\n \
+            - Unsupported mapper.\n \
+            - Invalid binary.\n \
+            - Invalid path."); 
         //resetRendererBackground();
         return;
     }
