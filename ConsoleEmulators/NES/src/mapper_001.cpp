@@ -110,11 +110,11 @@ bool nes::Mapper_001::ppuMapRead(uint16_t addr, uint32_t& mapped_addr)
 		{
 			if (addr >= 0x0000 && addr <= 0x0FFF)
 			{
-				mapped_addr = (chrBank0Select * 0x1000) + (addr & 0x0FFF);
+				mapped_addr = (chrBank0Select * 0x2000) + (addr & 0x0FFF); // First 4KB of 8KB bank
 			}
 			else if (addr >= 0x1000 && addr <= 0x1FFF)
 			{
-				mapped_addr = (chrBank1Select * 0x1000) + (addr & 0x1FFF);
+				mapped_addr = (chrBank1Select * 0x2000) + 0x1000 + (addr & 0x0FFF); // Second 4KB of 8KB bank
 			}
 		}
 
