@@ -104,7 +104,7 @@ bool nes::Mapper_001::ppuMapRead(uint16_t addr, uint32_t& mapped_addr)
 		if (CONTROL.chrROMBankMode == 0) // 8KB mode
 		{
 			//mapped_addr = addr & 0x1FFF;
-			mapped_addr = ((chrBank0Select & 0x01) * 0x2000) + (addr & 0x1FFF);
+			mapped_addr = ((chrBank0Select >> 1) * 0x2000) + (addr & 0x1FFF);
 		}
 		else // Separate 4KB mode
 		{
