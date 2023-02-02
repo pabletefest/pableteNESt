@@ -580,9 +580,13 @@ namespace nes
 
 			if (PPUMASK.showBackground && PPUMASK.showSprites && !PPUSTATUS.spriteZeroHit)
 			{
-				if (spritesXpositionCounters[0] == 0 && spriteRenderingCounters[0] <= 7 && spriteRenderingCounters[0] >= 0)
+				if (spritesXpositionCounters[0] == 0 && OAMbuffer[0].posY <= scanline && spriteRenderingCounters[0] <= 7 && spriteRenderingCounters[0] >= 0)
 				{
 					PPUSTATUS.spriteZeroHit = 1;
+					//printf("Sprite 0 Hit occurred at (%d,%d) coords.\n", cycle, scanline);
+					//for (int i = 0; i < 64; i++)
+					//	printf("Sprite %d is in coordinates (%d,%d)\n", i, OAMbuffer[i].posX, OAMbuffer[i].posY);
+					//printf("-------------------------------------------------------------------\n");
 				}
 			}
 		}
@@ -660,15 +664,16 @@ namespace nes
 				dataRead = ppuRead(loopyV.vramAddrPtr);
 			}
 
-			if (isRenderingEnabled() && scanline >= -1 && scanline < 240 && ((cycle % 8) != 7) && cycle != 256)
-			{
-				incrementScrollXloopyV();
-				incrementScrollYloopyV();
-			}
-			else
-			{
-				loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
-			}
+			//if (isRenderingEnabled() && scanline >= -1 && scanline < 240 && ((cycle % 8) != 7) && cycle != 256) // PPU bug while reading/writting to $2007
+			//{
+			//	incrementScrollXloopyV();
+			//	incrementScrollYloopyV();
+			//}
+			//else
+			//{
+			//	loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
+			//}
+			loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
 			break;
 		}
 
@@ -725,15 +730,16 @@ namespace nes
 			break;
 		case 0x0007: // PPU Data
 			ppuWrite(loopyV.vramAddrPtr, data);
-			if (isRenderingEnabled() && scanline >= -1 && scanline < 240 && ((cycle % 8) != 7) && cycle != 256)
-			{
-				incrementScrollXloopyV();
-				incrementScrollYloopyV();
-			}
-			else
-			{
-				loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
-			}
+			//if (isRenderingEnabled() && scanline >= -1 && scanline < 240 && ((cycle % 8) != 7) && cycle != 256) // PPU bug while reading/writting to $2007
+			//{
+			//	incrementScrollXloopyV();
+			//	incrementScrollYloopyV();
+			//}
+			//else
+			//{
+			//	loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
+			//}
+			loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
 			break;
 		}
 	}
