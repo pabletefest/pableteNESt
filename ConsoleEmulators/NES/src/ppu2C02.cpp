@@ -660,7 +660,15 @@ namespace nes
 				dataRead = ppuRead(loopyV.vramAddrPtr);
 			}
 
-			loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
+			if (isRenderingEnabled() && scanline >= -1 && scanline < 240 && ((cycle % 8) != 7) && cycle != 256)
+			{
+				incrementScrollXloopyV();
+				incrementScrollYloopyV();
+			}
+			else
+			{
+				loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
+			}
 			break;
 		}
 
@@ -717,7 +725,15 @@ namespace nes
 			break;
 		case 0x0007: // PPU Data
 			ppuWrite(loopyV.vramAddrPtr, data);
-			loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
+			if (isRenderingEnabled() && scanline >= -1 && scanline < 240 && ((cycle % 8) != 7) && cycle != 256)
+			{
+				incrementScrollXloopyV();
+				incrementScrollYloopyV();
+			}
+			else
+			{
+				loopyV.vramAddrPtr += PPUCTRL.vramAddrInc ? 32 : 1;
+			}
 			break;
 		}
 	}

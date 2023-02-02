@@ -58,6 +58,8 @@ namespace nes
         void copyXvaluesFromTtoVloopyRegs();
         void copyYvaluesFromTtoVloopyRegs();
 
+        inline bool isRenderingEnabled() { return (PPUMASK.showBackground || PPUMASK.showSprites); }
+
     private:
         std::shared_ptr<Cartridge> cartridge;
 
