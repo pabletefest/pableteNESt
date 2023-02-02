@@ -19,7 +19,7 @@ bool nes::Mapper_001::cpuMapRead(uint16_t addr, uint32_t& mapped_addr)
 	{
 		if (CONTROL.prgROMBankMode < 2) // Low bit ignored in 32KB mode
 		{
-			mapped_addr = ((PRGBANK.prgROMBankSelect >> 1) * 0x8000) + addr & 0x7FFF;
+			mapped_addr = (((PRGBANK.prgROMBankSelect >> 1) % nPRGBanks) * 0x8000) + addr & 0x7FFF;
 			return true;
 		}
 
@@ -31,14 +31,14 @@ bool nes::Mapper_001::cpuMapRead(uint16_t addr, uint32_t& mapped_addr)
 			}
 			else if (CONTROL.prgROMBankMode == 3) // fix last bank at $C000 and switch 16 KB bank at $8000
 			{
-				mapped_addr = (PRGBANK.prgROMBankSelect * 0x4000) + (addr & 0x3FFF);
+				mapped_addr = ((PRGBANK.prgROMBankSelect % nPRGBanks) * 0x4000) + (addr & 0x3FFF);
 			}
 		}
 		else if (addr >= 0xC000 && addr <= 0xFFFF)
 		{
 			if (CONTROL.prgROMBankMode == 2) // fix first bank at $8000 and switch 16 KB bank at $C000
 			{
-				mapped_addr = (PRGBANK.prgROMBankSelect * 0x4000) + (addr & 0x3FFF);
+				mapped_addr = ((PRGBANK.prgROMBankSelect % nPRGBanks) * 0x4000) + (addr & 0x3FFF);
 			}
 			else if (CONTROL.prgROMBankMode == 3) // fix last bank at $C000 and switch 16 KB bank at $8000
 			{
@@ -104,18 +104,21 @@ bool nes::Mapper_001::ppuMapRead(uint16_t addr, uint32_t& mapped_addr)
 		if (CONTROL.chrROMBankMode == 0) // 8KB mode
 		{
 			//mapped_addr = addr & 0x1FFF;
-			mapped_addr = ((chrBank0Select >> 1) * 0x2000) + (addr & 0x1FFF);
+			mapped_addr = (((chrBank0Select >> 1) % nCHRBanks) * 0x2000) + (addr & 0x1FFF);
 		}
 		else // Separate 4KB mode
 		{
 			if (addr >= 0x0000 && addr <= 0x0FFF)
 			{
-				mapped_addr = (chrBank0Select * 0x2000) + (addr & 0x0FFF); // First 4KB of 8KB bank
+				mapped_addr = ((chrBank0Select % (nCHRBanks * 2)) * 0x1000) + (addr & 0x0FFF); // First 4KB of 8KB bank
 			}
 			else if (addr >= 0x1000 && addr <= 0x1FFF)
 			{
-				mapped_addr = (chrBank1Select * 0x2000) + 0x1000 + (addr & 0x0FFF); // Second 4KB of 8KB bank
+				mapped_addr = ((chrBank1Select % (nCHRBanks * 2)) * 0x1000) + (addr & 0x0FFF); // Second 4KB of 8KB bank
 			}
+
+			if (mapped_addr >= nCHRBanks * convertKBToBytes<uint32_t>(8))
+				printf("\nO.O\n");
 		}
 
 		return true;
