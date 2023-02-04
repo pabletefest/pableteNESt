@@ -1,5 +1,8 @@
 #include "emulatorsMainWindow.h"
-#include <debuggingWindows.h>
+#include "debuggingWindows.h"
+
+// NES emu_core
+#include <emuLoadSaveUtilities.h>
 
 #include <iostream>
 //#include <filesystem>
@@ -196,14 +199,59 @@ void EmulatorsMainWindow::setupGUI()
     this->setFocusPolicy(Qt::StrongFocus);
     centralWidget()->setFocusPolicy(Qt::NoFocus);
 
+    // Menu "File"
     QMenu* fileMenu = menuBar()->addMenu("File");
+
     QAction* openROMAction = fileMenu->addAction("Open ROM");
     connect(openROMAction, SIGNAL(triggered()), this, SLOT(onOpenROM()));
+    openROMAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_O));
 
+    reloadROMAction = fileMenu->addAction("Reload ROM");
+    connect(reloadROMAction, SIGNAL(triggered()), this, SLOT(onReloadROM()));
+    reloadROMAction->setEnabled(false);
+    reloadROMAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
+
+    fileMenu->addSeparator();
+
+    QAction* quitAction = fileMenu->addAction("Close emulator");
+    connect(quitAction, &QAction::triggered, this, [&]() {
+        this->close();
+    });
+    quitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q));
+
+    //Menu "Game"
+    QMenu* gameMenu = menuBar()->addMenu("Game");
+    resetGameAction = gameMenu->addAction("Reset");
+    connect(resetGameAction, &QAction::triggered, this, [&]() {
+        nes.reset();
+    });
+    resetGameAction->setEnabled(false);
+    resetGameAction->setShortcut(QKeySequence(Qt::Key_R));
+
+    gameMenu->addSeparator();
+
+    saveStateAction = gameMenu->addAction("Save State");
+    connect(saveStateAction, &QAction::triggered, this, [&]() {
+        saveEmulatorState(nes);
+    });
+    saveStateAction->setEnabled(false);
+    saveStateAction->setShortcut(QKeySequence(Qt::Key_F1));
+
+    loadStateAction = gameMenu->addAction("Load State");
+    connect(loadStateAction, &QAction::triggered, this, [&]() {
+        loadEmulatorState(nes);
+    });
+    loadStateAction->setEnabled(false);
+    loadStateAction->setShortcut(QKeySequence(Qt::Key_F2));
+
+    // Menu "Tools"
     QMenu* toolsMenu = menuBar()->addMenu("Tools");
+
     QMenu* debuggingMenu = toolsMenu->addMenu("Debugging");
+
     QAction* openNametablesViewerAction = debuggingMenu->addAction("Nametables Viewer (PPU VRAM)");
     connect(openNametablesViewerAction, SIGNAL(triggered()), this, SLOT(openNametablesViewer()));
+
     QAction* openPatternTablesViewerAction = debuggingMenu->addAction("Pattern tables Viewer (CHR memory data)");
     connect(openPatternTablesViewerAction, SIGNAL(triggered()), this, SLOT(openPatternTablesViewer()));
 }
@@ -294,10 +342,23 @@ void EmulatorsMainWindow::onOpenROM()
     nes.insertCardtridge(cartridge);
     nes.reset();
 
+    resetGameAction->setEnabled(true);
+    reloadROMAction->setEnabled(true);
+    saveStateAction->setEnabled(true);
+    loadStateAction->setEnabled(true);
+
+    currentGamePath = filePath;
     currentGame = filePath.split("/").last();
     setWindowTitle(QString(windowTitle() + " - %1").arg(currentGame));
 
     renderTimer.start();
+}
+
+void EmulatorsMainWindow::onReloadROM()
+{
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>(currentGamePath.toStdString());
+    nes.insertCardtridge(cartridge);
+    nes.reset();
 }
 
 void EmulatorsMainWindow::onWindowTitleUpdate(QString newTitle)

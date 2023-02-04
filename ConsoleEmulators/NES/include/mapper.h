@@ -21,6 +21,8 @@ namespace nes
 		// These are stored locally as many of the mappers require this information
 		uint8_t nPRGBanks = 0;
 		uint8_t nCHRBanks = 0;
+
+	public:
 		bool containsBatteryMemory = false;
 	};
 }

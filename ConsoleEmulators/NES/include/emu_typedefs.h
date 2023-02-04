@@ -36,7 +36,13 @@ template<typename T> using Shared = std::shared_ptr<T>;
 
 #define CONVERT_KB_TO_BYTES(KB) (KB * 1024)
 
-constexpr __forceinline u64 convertKBToBytes(u32 KB) { return static_cast<u64>(KB) * 1024; }
+#ifdef _WIN32
+ #define INLINE __forceinline
+#else
+ #define INLINE inline
+#endif
+
+constexpr INLINE u64 convertKBToBytes(u32 KB) { return static_cast<u64>(KB) * 1024; }
 
 template<typename T>
-constexpr __forceinline T convertKBToBytes(u32 KB) { return static_cast<T>(KB) * 1024; }
+constexpr INLINE T convertKBToBytes(u32 KB) { return static_cast<T>(KB) * 1024; }

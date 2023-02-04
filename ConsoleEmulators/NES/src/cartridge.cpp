@@ -150,4 +150,15 @@ namespace nes
 	{
 		return pMapper.operator bool(); // If mapper is not initialized something went wrong when reading .nes file
 	}
+	bool Cartridge::isCHRRAMCart() const
+	{
+		return nCHRBanks == 0;
+	}
+	bool Cartridge::hasBatteryBackedRAM() const
+	{
+		if (!isValidROM())
+			return false;
+
+		return pMapper->containsBatteryMemory;
+	}
 }

@@ -1,6 +1,7 @@
 #include "emuLoadSaveUtilities.h"
 #include "nesBus.h"
 #include "emuNESStateInfoTypes.h"
+#include "emu_typedefs.h"
 #include <fstream>
 
 void loadEmulatorState(nes::SystemBus& nes)
@@ -12,7 +13,6 @@ void loadEmulatorState(nes::SystemBus& nes)
     if (inFile.is_open())
     {
         inFile.read((char*)&emuStateInfo, sizeof(nes::EmulatorStateInfo));
-        inFile.close();
 
         nes.cpu.loadState(emuStateInfo);
         nes.ppu.loadState(emuStateInfo);
@@ -25,6 +25,21 @@ void loadEmulatorState(nes::SystemBus& nes)
         nes.dmaReadData = emuStateInfo.dmaReadData;
         nes.dmaTransferInterrupt = emuStateInfo.dmaTransferInterrupt;
         nes.waitForEvenCycle = emuStateInfo.waitForEvenCycle;
+
+        if (nes.cartridge->isCHRRAMCart())
+        {
+            auto& chrMemory = nes.cartridge->getCHRMemoryData();
+            inFile.read((char*)chrMemory.data(), chrMemory.size());
+        }
+
+        if (nes.cartridge->hasBatteryBackedRAM())
+        {
+            auto& prgMemory = nes.cartridge->getPRGMemoryData();
+            auto offsetWRAM = nes.cartridge->getNumPRGBanks() * convertKBToBytes(16);
+            inFile.read((char*)prgMemory.data() + offsetWRAM, 0x2000);
+        }
+
+        inFile.close();
     }
 }
 
@@ -46,5 +61,19 @@ void saveEmulatorState(const nes::SystemBus& nes)
 
     std::ofstream outFile("nesEmuState.bin", std::ofstream::binary);
     outFile.write((const char*)&emuStateInfo, sizeof(nes::EmulatorStateInfo));
+
+    if (nes.cartridge->isCHRRAMCart())
+    {
+        auto& chrMemory = nes.cartridge->getCHRMemoryData();
+        outFile.write((const char*)chrMemory.data(), chrMemory.size());
+    }
+
+    if (nes.cartridge->hasBatteryBackedRAM())
+    {
+        auto& prgMemory = nes.cartridge->getPRGMemoryData();
+        auto offsetWRAM = nes.cartridge->getNumPRGBanks() * convertKBToBytes(16);
+        outFile.write((const char*)prgMemory.data() + offsetWRAM, 0x2000);
+    }
+
     outFile.close();
 }

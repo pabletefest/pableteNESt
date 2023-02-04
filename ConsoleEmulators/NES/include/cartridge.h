@@ -45,6 +45,44 @@ namespace nes
 
 		bool isValidROM() const;
 
+		bool isCHRRAMCart() const;
+		bool hasBatteryBackedRAM() const;
+
+		std::vector<uint8_t>& getPRGMemoryData()
+		{
+			return vPRGMemory;
+		}
+
+		const std::vector<uint8_t>& getPRGMemoryData() const
+		{
+			return vPRGMemory;
+		}
+
+		std::vector<uint8_t>& getCHRMemoryData()
+		{
+			return vCHRMemory;
+		}
+
+		const std::vector<uint8_t>& getCHRMemoryData() const
+		{
+			return vCHRMemory;
+		}
+
+		uint8_t getMapperID() const
+		{
+			return nMapperID;
+		}
+
+		uint8_t getNumPRGBanks() const
+		{
+			return nPRGBanks;
+		}
+
+		uint8_t getNumCHRBanks() const
+		{
+			return nCHRBanks;
+		}
+
 	private:
 		uint8_t nMapperID = 0;
 		uint8_t nPRGBanks = 0;

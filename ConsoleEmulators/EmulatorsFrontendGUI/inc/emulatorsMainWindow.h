@@ -80,6 +80,7 @@ signals:
 private slots:
     void onRenderFrame();
     void onOpenROM();
+    void onReloadROM();
     void onWindowTitleUpdate(QString newTitle);
     void openNametablesViewer();
     void openPatternTablesViewer();
@@ -99,6 +100,7 @@ private:
     uint32_t fps = 0;
 
     QString currentGame;
+    QString currentGamePath;
 
     enum class InputType
     {
@@ -106,4 +108,12 @@ private:
     };
 
     std::map<InputType, bool> holdingKeysMap;
+
+    // File Menu
+    QAction* reloadROMAction;
+
+    // Game Menu
+    QAction* resetGameAction;
+    QAction* saveStateAction;
+    QAction* loadStateAction;
 };
