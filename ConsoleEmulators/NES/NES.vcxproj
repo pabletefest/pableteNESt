@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClInclude Include="include\cartridge.h" />
     <ClInclude Include="include\cpu6502.h" />
+    <ClInclude Include="include\emuLoadSaveUtilities.h" />
+    <ClInclude Include="include\emuNESStateInfoTypes.h" />
     <ClInclude Include="include\emu_typedefs.h" />
     <ClInclude Include="include\mapper.h" />
     <ClInclude Include="include\mapper_000.h" />
@@ -32,6 +34,7 @@
   <ItemGroup>
     <ClCompile Include="src\cartridge.cpp" />
     <ClCompile Include="src\cpu6502.cpp" />
+    <ClCompile Include="src\emuLoadSaveStateUtilities.cpp" />
     <ClCompile Include="src\mapper.cpp" />
     <ClCompile Include="src\mapper_000.cpp" />
     <ClCompile Include="src\mapper_001.cpp" />

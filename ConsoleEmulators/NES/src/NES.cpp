@@ -5,6 +5,7 @@
 
 #include "nesBus.h"
 #include "cartridge.h"
+#include "emuLoadSaveUtilities.h"
 
 #include "SDL.h"
 #include "SDL_ttf.h"
@@ -51,11 +52,29 @@ static SDL_Window* window = nullptr;
 
 constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 
+void audioCallback(void* userdata, Uint8* stream, int len)
+{
+    //Sint16* buffer = (Sint16*)stream;
+    //Sint16 sample = rand() % std::numeric_limits<Sint16>::max();
+    ////memcpy(stream, &sample, len / sizeof(int16_t));
+    //for (int i = 0; i < len / sizeof(int16_t); i++)
+    //{
+    //    /*double time = (double)sample_nr / (double)SAMPLE_RATE;*/
+    //    //buffer[i] = (Sint16)(28000 * sin(2.0f * M_PI * 441.0f * (rand() % 1000))); // render 441 HZ sine wave
+    //    buffer[i] = rand() % 1024 * 16; // render 441 HZ sine wave
+    //}
+
+    for (size_t index = 0; index < len / sizeof(float); index++)
+    {
+        ((float*)stream)[index] = (rand() % 256) / 256.f;
+    }
+}
+
 int main(int argc, char* argv[])
 {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
-        std::cout << "Video Initialization Error: " << SDL_GetError() << "\n";
+        std::cout << "Video or Audio Initialization Error: " << SDL_GetError() << "\n";
         return 0;
     }
 
@@ -103,6 +122,8 @@ int main(int argc, char* argv[])
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Empire Invaders (Space Invaders Hack).nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Contra.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Tetris.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales 2.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Castlevania.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior.nes"); // Dragon Quest
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior II.nes"); // Dragon Quest 2
@@ -149,8 +170,26 @@ int main(int argc, char* argv[])
     TTF_Font* pixelEmulatorFont = TTF_OpenFont("fonts/PixelEmulator.ttf", 20);
     SDL_Color whiteColour = { 255, 255, 255 };
 
+    SDL_AudioSpec wanted;
+    SDL_zero(wanted);
+    wanted.freq = 44100;
+    wanted.format = AUDIO_F32;
+    wanted.channels = 1;
+    wanted.samples = 1024;
+    wanted.callback = audioCallback;
+    wanted.userdata = NULL;
+
+    SDL_AudioSpec desired;
+
+    const int count = SDL_GetNumAudioDevices(0);
+    for (int i = 0; i < count; i++)
+        printf("%s\n", SDL_GetAudioDeviceName(i, 0));
+
+    SDL_AudioDeviceID devId =  SDL_OpenAudioDevice(NULL, 0, &wanted, &desired, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+    //SDL_PauseAudioDevice(devId, 0);
+
     while (isRunnning)
-    {
+    {   
         //nes.controllers[0] = 0x00; // Reset every frame
 
         //const Uint8* keystate = SDL_GetKeyboardState(NULL);
@@ -196,6 +235,12 @@ int main(int argc, char* argv[])
                     break;
                 case SDLK_RIGHT:
                     nes.controllers[0] |= 0x01; // RIGHT ARROW
+                    break;
+                case SDLK_F1:
+                    saveEmulatorState(nes);
+                    break;
+                case SDLK_F2:
+                    loadEmulatorState(nes);
                     break;
                 }
             }

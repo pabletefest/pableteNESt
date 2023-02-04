@@ -1,5 +1,6 @@
 #include "cpu6502.h"
 #include "nesBus.h"
+#include "emuNESStateInfoTypes.h"
 
 #ifdef LOG_MODE
 #include <stdio.h>
@@ -177,6 +178,38 @@ namespace nes
 		instructionCycles--;
 
 		debugTotalCyclesElapsed++;
+	}
+
+	void CPU::loadState(const EmulatorStateInfo& emuStateInfo)
+	{
+		A = emuStateInfo.CPUStateInfo.regA;
+		X = emuStateInfo.CPUStateInfo.regX;
+		Y = emuStateInfo.CPUStateInfo.regY;
+		PC = emuStateInfo.CPUStateInfo.PC;
+		SP = emuStateInfo.CPUStateInfo.SP;
+		status = emuStateInfo.CPUStateInfo.status;
+		fetched = emuStateInfo.CPUStateInfo.fetched;
+		effectiveAddr = emuStateInfo.CPUStateInfo.effectiveAddr;
+		relativeAddr = emuStateInfo.CPUStateInfo.relativeAddr;
+		currentOpcode = emuStateInfo.CPUStateInfo.currentOpcode;
+		instructionCycles = emuStateInfo.CPUStateInfo.instructionCycles;
+		debugTotalCyclesElapsed = emuStateInfo.CPUStateInfo.debugTotalCyclesElapsed;
+	}
+
+	void CPU::saveState(EmulatorStateInfo& emuStateInfo) const
+	{
+		emuStateInfo.CPUStateInfo.regA = A;
+		emuStateInfo.CPUStateInfo.regX = X;
+		emuStateInfo.CPUStateInfo.regY = Y;
+		emuStateInfo.CPUStateInfo.PC = PC;
+		emuStateInfo.CPUStateInfo.SP = SP;
+		emuStateInfo.CPUStateInfo.status = status;
+		emuStateInfo.CPUStateInfo.fetched = fetched;
+		emuStateInfo.CPUStateInfo.effectiveAddr = effectiveAddr;
+		emuStateInfo.CPUStateInfo.relativeAddr = relativeAddr;
+		emuStateInfo.CPUStateInfo.currentOpcode = currentOpcode;
+		emuStateInfo.CPUStateInfo.instructionCycles = instructionCycles;
+		emuStateInfo.CPUStateInfo.debugTotalCyclesElapsed = debugTotalCyclesElapsed;
 	}
 
 	bool CPU::isLastCompleted() const

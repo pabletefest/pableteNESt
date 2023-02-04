@@ -1,4 +1,5 @@
 #include "ppu2C02.h"
+#include "emuNESStateInfoTypes.h"
 
 namespace nes
 {
@@ -887,6 +888,86 @@ namespace nes
 	void* PPU::getNametable(int8_t selectNT)
 	{
 		return nameTables[selectNT];
+	}
+
+	void PPU::loadState(const EmulatorStateInfo& emuStateInfo)
+	{
+		nmi = emuStateInfo.PPUStateInfo.nmi;
+		frameCompleted = emuStateInfo.PPUStateInfo.frameCompleted;
+		memcpy(nameTables, emuStateInfo.PPUStateInfo.nameTablesVRAM, sizeof(nameTables));
+		memcpy(paletteRam, emuStateInfo.PPUStateInfo.paletteRAM, sizeof(paletteRam));
+		scanline = emuStateInfo.PPUStateInfo.scanline;
+		cycle = emuStateInfo.PPUStateInfo.cycle;
+		framesElapsed = emuStateInfo.PPUStateInfo.framesElapsed;
+		totalCycles = emuStateInfo.PPUStateInfo.totalCycles;
+		memcpy(pixelsFrameBuffer.data(), emuStateInfo.PPUStateInfo.frameBuffer,  sizeof(emuStateInfo.PPUStateInfo.frameBuffer));
+		PPUCTRL.controlReg = emuStateInfo.PPUStateInfo.controlReg;
+		PPUMASK.maskReg = emuStateInfo.PPUStateInfo.maskReg;
+		PPUSTATUS.statusReg = emuStateInfo.PPUStateInfo.statusReg;
+		loopyV.vramAddrPtr = emuStateInfo.PPUStateInfo.loppyVReg;
+		loopyT.vramAddrPtr = emuStateInfo.PPUStateInfo.loppyTReg;
+		fineXScroll = emuStateInfo.PPUStateInfo.fineXScroll;
+		addressLatchToggle = emuStateInfo.PPUStateInfo.addressLatchToggle;
+		internalReadBuffer = emuStateInfo.PPUStateInfo.internalReadBuffer;
+		low_pattern_shifter = emuStateInfo.PPUStateInfo.low_pattern_shifter;
+		high_pattern_shifter = emuStateInfo.PPUStateInfo.high_pattern_shifter;
+		low_attribute_shifter = emuStateInfo.PPUStateInfo.low_attribute_shifter;
+		high_attribute_shifter = emuStateInfo.PPUStateInfo.high_attribute_shifter;
+		fetchedByteNT = emuStateInfo.PPUStateInfo.fetchedByteNT;
+		fetchedByteAT = emuStateInfo.PPUStateInfo.fetchedByteAT;
+		fetchedLowBytePT = emuStateInfo.PPUStateInfo.fetchedLowBytePT;
+		fetchedHighBytePT = emuStateInfo.PPUStateInfo.fetchedHighBytePT;
+		memcpy(OAMbuffer, emuStateInfo.PPUStateInfo.OAMbuffer,  sizeof(OAMbuffer));
+		OAMaddr = emuStateInfo.PPUStateInfo.OAMaddr;
+		memcpy(scanlineSecondaryOAM, emuStateInfo.PPUStateInfo.scanlineSecondaryOAM, sizeof(scanlineSecondaryOAM));
+		numSprFound = emuStateInfo.PPUStateInfo.numSprFound;
+		fetchedSprY = emuStateInfo.PPUStateInfo.fetchedSprY;
+		fetchedSprTileIndex = emuStateInfo.PPUStateInfo.fetchedSprTileIndex;
+		memcpy(spritesLowBytePatternShifters, emuStateInfo.PPUStateInfo.spritesLowBytePatternShifters, sizeof(spritesLowBytePatternShifters));
+		memcpy(spritesHighBytePatternShifters, emuStateInfo.PPUStateInfo.spritesHighBytePatternShifters,  sizeof(spritesHighBytePatternShifters));
+		memcpy(spritesAttributesLatches, emuStateInfo.PPUStateInfo.spritesAttributesLatches, sizeof(spritesAttributesLatches));
+		memcpy(spritesXpositionCounters, emuStateInfo.PPUStateInfo.spritesXpositionCounters, sizeof(spritesXpositionCounters));
+		memcpy(spriteRenderingCounters, emuStateInfo.PPUStateInfo.spriteRenderingCounters, sizeof(spriteRenderingCounters));
+	}
+
+	void PPU::saveState(EmulatorStateInfo& emuStateInfo) const
+	{
+		emuStateInfo.PPUStateInfo.nmi = nmi;
+		emuStateInfo.PPUStateInfo.frameCompleted = frameCompleted;
+		memcpy(emuStateInfo.PPUStateInfo.nameTablesVRAM, nameTables, sizeof(nameTables));
+		memcpy(emuStateInfo.PPUStateInfo.paletteRAM, paletteRam, sizeof(paletteRam));
+		emuStateInfo.PPUStateInfo.scanline = scanline;
+		emuStateInfo.PPUStateInfo.cycle = cycle;
+		emuStateInfo.PPUStateInfo.framesElapsed = framesElapsed;
+		emuStateInfo.PPUStateInfo.totalCycles = totalCycles;
+		memcpy(emuStateInfo.PPUStateInfo.frameBuffer, pixelsFrameBuffer.data(), sizeof(emuStateInfo.PPUStateInfo.frameBuffer));
+		emuStateInfo.PPUStateInfo.controlReg = PPUCTRL.controlReg;
+		emuStateInfo.PPUStateInfo.maskReg = PPUMASK.maskReg;
+		emuStateInfo.PPUStateInfo.statusReg = PPUSTATUS.statusReg;
+		emuStateInfo.PPUStateInfo.loppyVReg = loopyV.vramAddrPtr;
+		emuStateInfo.PPUStateInfo.loppyTReg = loopyT.vramAddrPtr;
+		emuStateInfo.PPUStateInfo.fineXScroll = fineXScroll;
+		emuStateInfo.PPUStateInfo.addressLatchToggle = addressLatchToggle;
+		emuStateInfo.PPUStateInfo.internalReadBuffer = internalReadBuffer;
+		emuStateInfo.PPUStateInfo.low_pattern_shifter = low_pattern_shifter;
+		emuStateInfo.PPUStateInfo.high_pattern_shifter = high_pattern_shifter;
+		emuStateInfo.PPUStateInfo.low_attribute_shifter = low_attribute_shifter;
+		emuStateInfo.PPUStateInfo.high_attribute_shifter = high_attribute_shifter;
+		emuStateInfo.PPUStateInfo.fetchedByteNT = fetchedByteNT;
+		emuStateInfo.PPUStateInfo.fetchedByteAT = fetchedByteAT;
+		emuStateInfo.PPUStateInfo.fetchedLowBytePT = fetchedLowBytePT;
+		emuStateInfo.PPUStateInfo.fetchedHighBytePT = fetchedHighBytePT;
+		memcpy(emuStateInfo.PPUStateInfo.OAMbuffer, OAMbuffer, sizeof(OAMbuffer));
+		emuStateInfo.PPUStateInfo.OAMaddr = OAMaddr;
+		memcpy(emuStateInfo.PPUStateInfo.scanlineSecondaryOAM, scanlineSecondaryOAM, sizeof(scanlineSecondaryOAM));
+		emuStateInfo.PPUStateInfo.numSprFound = numSprFound;
+		emuStateInfo.PPUStateInfo.fetchedSprY = fetchedSprY;
+		emuStateInfo.PPUStateInfo.fetchedSprTileIndex = fetchedSprTileIndex;
+		memcpy(emuStateInfo.PPUStateInfo.spritesLowBytePatternShifters, spritesLowBytePatternShifters, sizeof(spritesLowBytePatternShifters));
+		memcpy(emuStateInfo.PPUStateInfo.spritesHighBytePatternShifters, spritesHighBytePatternShifters, sizeof(spritesHighBytePatternShifters));
+		memcpy(emuStateInfo.PPUStateInfo.spritesAttributesLatches, spritesAttributesLatches, sizeof(spritesAttributesLatches));
+		memcpy(emuStateInfo.PPUStateInfo.spritesXpositionCounters, spritesXpositionCounters, sizeof(spritesXpositionCounters));
+		memcpy(emuStateInfo.PPUStateInfo.spriteRenderingCounters, spriteRenderingCounters, sizeof(spriteRenderingCounters));
 	}
 
 	void PPU::init()

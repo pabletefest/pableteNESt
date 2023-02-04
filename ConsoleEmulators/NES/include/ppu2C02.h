@@ -6,6 +6,8 @@
 
 namespace nes
 {
+    struct EmulatorStateInfo;
+
     // PPU 2C02 (Picture Processing Unit) of the NES console
     class PPU
     {
@@ -49,6 +51,9 @@ namespace nes
 
         // If selectNT is -1, a pointer the both NT is returned
         void* getNametable(int8_t selectNT);
+
+        void loadState(const EmulatorStateInfo& emuStateInfo);
+        void saveState(EmulatorStateInfo& emuStateInfo) const;
 
     private:
         void init();

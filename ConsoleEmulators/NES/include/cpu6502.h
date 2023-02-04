@@ -12,6 +12,7 @@
 namespace nes
 {
 	class SystemBus;
+	struct EmulatorStateInfo;
 
 	// CPU 2A03/2A07 (6502 NES console processor)
 	class CPU
@@ -24,6 +25,9 @@ namespace nes
 		void irq();
 		void nmi();
 		void clock();
+
+		void loadState(const EmulatorStateInfo& emuStateInfo);
+		void saveState(EmulatorStateInfo& emuStateInfo) const;
 
 	public:
 		// Registers of 6502 core (public to examine and debug later on)

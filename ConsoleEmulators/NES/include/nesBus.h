@@ -46,7 +46,7 @@ namespace nes
 		bool dmaTransferInterrupt = false;
 		bool waitForEvenCycle = true;
 
-	private:
+	public:
 		uint8_t controllersCache[2]; // Internal keep state
 	};
 }
