@@ -243,6 +243,18 @@ void EmulatorsMainWindow::setupGUI()
     });
     loadStateAction->setEnabled(false);
     loadStateAction->setShortcut(QKeySequence(Qt::Key_F2));
+    
+    gameMenu->addSeparator();
+
+    screenshotAction = gameMenu->addAction("Take Screenshot");
+    connect(screenshotAction, SIGNAL(triggered()), this, SLOT(onTakeGameScreenshot()));
+    screenshotAction->setEnabled(false);
+    screenshotAction->setShortcut(QKeySequence(Qt::Key_T));
+
+    bilinearFilterScreenshotAction = gameMenu->addAction("Take Screenshot (Bilinear Filtering)");
+    connect(bilinearFilterScreenshotAction, SIGNAL(triggered()), this, SLOT(onTakeGameScreenshotBilinearFilter()));
+    bilinearFilterScreenshotAction->setEnabled(false);
+    bilinearFilterScreenshotAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_T));
 
     // Menu "Tools"
     QMenu* toolsMenu = menuBar()->addMenu("Tools");
@@ -346,6 +358,8 @@ void EmulatorsMainWindow::onOpenROM()
     reloadROMAction->setEnabled(true);
     saveStateAction->setEnabled(true);
     loadStateAction->setEnabled(true);
+    screenshotAction->setEnabled(true);
+    bilinearFilterScreenshotAction->setEnabled(true);
 
     currentGamePath = filePath;
     currentGame = filePath.split("/").last();
@@ -395,6 +409,53 @@ void EmulatorsMainWindow::openPatternTablesViewer()
     patternMemoryViewer->setWindowTitle("PPU & Graphics Debugging: Pattern Tables");
     patternMemoryViewer->setAttribute(Qt::WA_DeleteOnClose);
     patternMemoryViewer->open();
+}
+
+void EmulatorsMainWindow::onTakeGameScreenshot()
+{
+    static int screenshotNumber = 0;
+
+    //QImage screenshotImage = QImage(centralWidget()->size(), QImage::Format_ARGB32);
+    /*centralWidget()->render(&screenshotImage);*/
+
+    std::vector<uint8_t> imageBuffer; // Container for pixels with no alpha channel
+    imageBuffer.reserve(256 * 240 * 3);
+
+    for (int i = 0; i < nes.ppu.getPixelsFrameBuffer().size(); i++)
+    {
+        // Omit alpha component of each pixel of the frameBuffer (copy bytes 1, 2, and 3 of each element)
+        memcpy(imageBuffer.data() + (i * 3), ((uint8_t*)nes.ppu.getPixelsFrameBuffer().data()) + (i * 4) + 1, 3);
+    }
+
+    QImage screenshotImage = QImage((const uint8_t*)imageBuffer.data(), 256, 240, 256 * 3, QImage::Format_RGB888);
+    screenshotImage = screenshotImage.scaled(screenshotImage.width() * 4, screenshotImage.height() * 4, Qt::KeepAspectRatio, Qt::FastTransformation);
+
+    if (screenshotImage.save(QString(/*"/Screenshots/" + */currentGame.split(".").first() + "_screenshot_%1.jpeg").arg(screenshotNumber), "JPEG"))
+    {
+        screenshotNumber++;
+    }
+}
+
+void EmulatorsMainWindow::onTakeGameScreenshotBilinearFilter()
+{
+    static int screenshotNumber = 0;
+
+    std::vector<uint8_t> imageBuffer; // Container for pixels with no alpha channel
+    imageBuffer.reserve(256 * 240 * 3);
+
+    for (int i = 0; i < nes.ppu.getPixelsFrameBuffer().size(); i++)
+    {
+        // Omit alpha component of each pixel of the frameBuffer (copy bytes 1, 2, and 3 of each element)
+        memcpy(imageBuffer.data() + (i * 3), ((uint8_t*)nes.ppu.getPixelsFrameBuffer().data()) + (i * 4) + 1, 3);
+    }
+
+    QImage screenshotImage = QImage((const uint8_t*)imageBuffer.data(), 256, 240, 256 * 3, QImage::Format_RGB888);
+    screenshotImage = screenshotImage.scaled(screenshotImage.width() * 4, screenshotImage.height() * 4, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    if (screenshotImage.save(QString(/*"/Screenshots/" + */currentGame.split(".").first() + "_screenshot_%1 (Bilinear Filtering).jpeg").arg(screenshotNumber), "JPEG"))
+    {
+        screenshotNumber++;
+    }
 }
 
 void EmulatorsMainWindow::onRenderFrame()

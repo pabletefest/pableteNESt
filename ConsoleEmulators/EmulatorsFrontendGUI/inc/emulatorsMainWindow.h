@@ -84,6 +84,8 @@ private slots:
     void onWindowTitleUpdate(QString newTitle);
     void openNametablesViewer();
     void openPatternTablesViewer();
+    void onTakeGameScreenshot();
+    void onTakeGameScreenshotBilinearFilter();
 
 private:
     Ui::EmulatorsFrontendGUIClass ui;
@@ -116,4 +118,6 @@ private:
     QAction* resetGameAction;
     QAction* saveStateAction;
     QAction* loadStateAction;
+    QAction* screenshotAction;
+    QAction* bilinearFilterScreenshotAction;
 };
