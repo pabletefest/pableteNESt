@@ -339,7 +339,9 @@ void EmulatorsMainWindow::onOpenROM()
 {
     QString filePath = QFileDialog::getOpenFileName(nullptr, "Open ROM file", "/home", tr("ROMs (*.nes)"));
 
-    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>(filePath.toStdString());
+    std::string stdFilePath = filePath.toUtf8().data();
+    //std::string stdFilePath2 = filePath.toLatin1().data();
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>(stdFilePath);
 
     if (filePath.isEmpty() || !cartridge || !cartridge->isValidROM())
     {
@@ -413,7 +415,7 @@ void EmulatorsMainWindow::openPatternTablesViewer()
 
 void EmulatorsMainWindow::onTakeGameScreenshot()
 {
-    static int screenshotNumber = 0;
+    int screenshotNumber = 0;
 
     //QImage screenshotImage = QImage(centralWidget()->size(), QImage::Format_ARGB32);
     /*centralWidget()->render(&screenshotImage);*/
@@ -430,10 +432,18 @@ void EmulatorsMainWindow::onTakeGameScreenshot()
     QImage screenshotImage = QImage((const uint8_t*)imageBuffer.data(), 256, 240, 256 * 3, QImage::Format_RGB888);
     screenshotImage = screenshotImage.scaled(screenshotImage.width() * 4, screenshotImage.height() * 4, Qt::KeepAspectRatio, Qt::FastTransformation);
 
-    if (screenshotImage.save(QString(/*"/Screenshots/" + */currentGame.split(".").first() + "_screenshot_%1.jpeg").arg(screenshotNumber), "JPEG"))
+    QDir dir;
+    dir.mkdir(qApp->applicationDirPath() + "/Screenshots/");
+    
+    QString screenshotPath;
+
+    do
     {
+        screenshotPath = QString(qApp->applicationDirPath() + "/Screenshots/" + currentGame.split(".").first() + "_screenshot_%1.jpeg").arg(screenshotNumber);
         screenshotNumber++;
-    }
+    } while (QFile(screenshotPath).exists());
+
+    screenshotImage.save(screenshotPath, "JPEG");
 }
 
 void EmulatorsMainWindow::onTakeGameScreenshotBilinearFilter()
@@ -452,14 +462,24 @@ void EmulatorsMainWindow::onTakeGameScreenshotBilinearFilter()
     QImage screenshotImage = QImage((const uint8_t*)imageBuffer.data(), 256, 240, 256 * 3, QImage::Format_RGB888);
     screenshotImage = screenshotImage.scaled(screenshotImage.width() * 4, screenshotImage.height() * 4, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    if (screenshotImage.save(QString(/*"/Screenshots/" + */currentGame.split(".").first() + "_screenshot_%1 (Bilinear Filtering).jpeg").arg(screenshotNumber), "JPEG"))
+    QDir dir;
+    dir.mkdir(qApp->applicationDirPath() + "/Screenshots/");
+
+    QString screenshotPath;
+
+    do
     {
+        screenshotPath = QString(qApp->applicationDirPath() + "/Screenshots/" + currentGame.split(".").first() + "_screenshot_%1.jpeg").arg(screenshotNumber);
         screenshotNumber++;
-    }
+    } while (QFile(screenshotPath).exists());
+
+    screenshotImage.save(screenshotPath, "JPEG");
 }
 
 void EmulatorsMainWindow::onRenderFrame()
 {
+    if (!nes.cartridge->isValidROM()) return;
+
     nes.controllers[0] = 0x00; // Reset every frame
     handleUserInput();
     nes.runFrame();

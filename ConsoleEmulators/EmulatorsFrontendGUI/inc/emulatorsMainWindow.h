@@ -112,12 +112,12 @@ private:
     std::map<InputType, bool> holdingKeysMap;
 
     // File Menu
-    QAction* reloadROMAction;
+    QAction* reloadROMAction = nullptr;
 
     // Game Menu
-    QAction* resetGameAction;
-    QAction* saveStateAction;
-    QAction* loadStateAction;
-    QAction* screenshotAction;
-    QAction* bilinearFilterScreenshotAction;
+    QAction* resetGameAction = nullptr;
+    QAction* saveStateAction = nullptr;
+    QAction* loadStateAction = nullptr;
+    QAction* screenshotAction = nullptr;
+    QAction* bilinearFilterScreenshotAction = nullptr;
 };

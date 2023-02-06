@@ -184,6 +184,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)lib\SDL2-2.24.1\include;$(SolutionDir)lib\SDL2_ttf-2.20.1\include;$(ProjectDir)include\</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>cstdint</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
