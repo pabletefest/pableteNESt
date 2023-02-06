@@ -873,7 +873,7 @@ namespace nes
 						uint16_t x = indexTileX * 8 + (sprCol);
 						uint16_t y = indexTileY * 8 + sprRow;
 
-						buffer[y * 128 + x] = getRGBAFromNesPalette(0, pixel);
+						buffer[y * 128 + x] = getRGBAFromNesPalette(paletteIndex, pixel);
 
 						MSB <<= 1;
 						LSB <<= 1;
