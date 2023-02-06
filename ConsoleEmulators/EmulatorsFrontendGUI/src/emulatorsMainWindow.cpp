@@ -266,6 +266,29 @@ void EmulatorsMainWindow::setupGUI()
 
     QAction* openPatternTablesViewerAction = debuggingMenu->addAction("Pattern tables Viewer (CHR memory data)");
     connect(openPatternTablesViewerAction, SIGNAL(triggered()), this, SLOT(openPatternTablesViewer()));
+
+    // Menu "Help"
+    QMenu* helpMenu = menuBar()->addMenu("Help");
+
+    QAction* aboutAction = helpMenu->addAction("About Emulator");
+    connect(aboutAction, &QAction::triggered, this, [&]() {
+        QMessageBox::about(this, "About pableteNESt", "NES emulator by pabletefest\n \
+*******************************************************\n \
+*       3rd Party Libraries/Frameworks used:                *\n \
+*           - Interface/GUI: -> Qt                                       *\n \
+*           - Video Display -> SDL                                     *\n \
+*           - Audio Display (Work In Progress) -> SDL   *\n \
+*           - Input Handling -> Qt                                    *\n \
+*******************************************************\n \
+This emulator is under development, future features:\n \
+            - Audio display\n \
+            - Support more mappers (thus more games). Currently 0, 1 (kind of) and 2\n");
+    });
+
+    QAction* aboutQtAction = helpMenu->addAction("About Qt (GUI framework)");
+    connect(aboutQtAction, &QAction::triggered, this, [&]() {
+        QMessageBox::aboutQt(this, "About Qt framework");
+    });
 }
 
 void EmulatorsMainWindow::initEmulator()
