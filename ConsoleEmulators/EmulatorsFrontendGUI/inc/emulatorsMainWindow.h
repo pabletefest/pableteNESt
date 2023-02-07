@@ -5,6 +5,7 @@
 
 // EMU_CORE NES
 #include <nesBus.h>
+#include <rewindGameplay.h>
 
 // SDL
 #include <SDL.h>
@@ -118,6 +119,11 @@ private:
     QAction* resetGameAction = nullptr;
     QAction* saveStateAction = nullptr;
     QAction* loadStateAction = nullptr;
+    QAction* rewindAction = nullptr;
     QAction* screenshotAction = nullptr;
     QAction* bilinearFilterScreenshotAction = nullptr;
+
+    // Rewind functionality
+    RewindManager rewindManager;
+    bool rewindHeld = false;
 };

@@ -5,11 +5,21 @@
 #include "emu_typedefs.h"
 
 #include <fstream>
+#include <sstream>
 
 namespace nes
 {
 	Cartridge::Cartridge(const std::string& filename)
 	{
+		std::stringstream ss;
+		ss << filename;
+		std::getline(ss, gameName, '.');
+
+		ss.clear();
+		ss << gameName;
+
+		while (std::getline(ss, gameName, '/'));
+
 		// iNES Format Header
 		struct sHeader
 		{

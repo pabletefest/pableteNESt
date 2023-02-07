@@ -32,7 +32,7 @@
 constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 
 EmulatorsMainWindow::EmulatorsMainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), rewindManager(this->nes)
 {
     setupGUI();
 
@@ -134,6 +134,9 @@ void EmulatorsMainWindow::keyPressEvent(QKeyEvent* event)
         //nes.controllers[0] |= 0x01; // RIGHT
         holdingKeysMap[InputType::RIGHT] = true;
         break;
+    case Qt::Key_R:
+        rewindHeld = true;
+        break;
     }
 }
 
@@ -174,6 +177,9 @@ void EmulatorsMainWindow::keyReleaseEvent(QKeyEvent* event)
     case Qt::Key_Right:
         //nes.controllers[0] |= 0x00; // RIGHT
         holdingKeysMap[InputType::RIGHT] = false;
+        break;
+    case Qt::Key_R:
+        rewindHeld = false;
         break;
     }
 }
@@ -226,7 +232,7 @@ void EmulatorsMainWindow::setupGUI()
         nes.reset();
     });
     resetGameAction->setEnabled(false);
-    resetGameAction->setShortcut(QKeySequence(Qt::Key_R));
+    resetGameAction->setShortcut(QKeySequence(Qt::SHIFT | Qt::Key_R));
 
     gameMenu->addSeparator();
 
@@ -243,6 +249,13 @@ void EmulatorsMainWindow::setupGUI()
     });
     loadStateAction->setEnabled(false);
     loadStateAction->setShortcut(QKeySequence(Qt::Key_F2));
+
+    rewindAction = gameMenu->addAction("Rewind (Press 'R' for frame by frame or 'Click' for 360 frames at once)");
+    connect(rewindAction, &QAction::triggered, this, [&]() {
+        rewindHeld = true;
+    });
+    rewindAction->setEnabled(false);
+    //rewindAction->setShortcut(QKeySequence(Qt::Key_R));
     
     gameMenu->addSeparator();
 
@@ -383,6 +396,7 @@ void EmulatorsMainWindow::onOpenROM()
     reloadROMAction->setEnabled(true);
     saveStateAction->setEnabled(true);
     loadStateAction->setEnabled(true);
+    rewindAction->setEnabled(true);
     screenshotAction->setEnabled(true);
     bilinearFilterScreenshotAction->setEnabled(true);
 
@@ -519,6 +533,20 @@ void EmulatorsMainWindow::onRenderFrame()
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, gameTexture, NULL, NULL);
     SDL_RenderPresent(renderer);
+
+    if (rewindHeld)
+    {
+        if (!rewindManager.unstackFrame())
+        {
+            rewindHeld = false;
+        }
+
+        nes.controllers[0] = 0x00;
+    }
+    else
+    {
+        rewindManager.stackFrame();
+    }
 
     fps++;
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 
 namespace nes
 {
@@ -69,5 +70,13 @@ namespace nes
         uint8_t dmaReadData;
         bool dmaTransferInterrupt;
         bool waitForEvenCycle;
+
+        struct CartridgeState
+        {
+            uint8_t CHRMemory[0x2000];
+            uint8_t wram[0x2000];
+        };
+
+        std::optional<CartridgeState> cartState;
     };
 }

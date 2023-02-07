@@ -2,13 +2,23 @@
 #include "nesBus.h"
 #include "emuNESStateInfoTypes.h"
 #include "emu_typedefs.h"
+
 #include <fstream>
+#include <filesystem>
+
+static constexpr const char* DIR_NAME = "SaveFiles/";
+static constexpr const char* SAVE_FILE_EXTENSION = ".bin";
+
+static std::string getSaveFilePath(const std::string& gameName)
+{
+    return std::string(DIR_NAME + gameName + SAVE_FILE_EXTENSION);
+}
 
 void loadEmulatorState(nes::SystemBus& nes)
 {
     nes::EmulatorStateInfo emuStateInfo;
 
-    std::ifstream inFile("nesEmuState.bin", std::ofstream::binary);
+    std::ifstream inFile(getSaveFilePath(nes.cartridge->getGameName()), std::ofstream::binary);
 
     if (inFile.is_open())
     {
@@ -59,7 +69,10 @@ void saveEmulatorState(const nes::SystemBus& nes)
     emuStateInfo.dmaTransferInterrupt = nes.dmaTransferInterrupt;
     emuStateInfo.waitForEvenCycle = nes.waitForEvenCycle;
 
-    std::ofstream outFile("nesEmuState.bin", std::ofstream::binary);
+    if (!std::filesystem::exists(DIR_NAME))
+        std::filesystem::create_directory(DIR_NAME);
+
+    std::ofstream outFile(getSaveFilePath(nes.cartridge->getGameName()), std::ofstream::binary);
     outFile.write((const char*)&emuStateInfo, sizeof(nes::EmulatorStateInfo));
 
     if (nes.cartridge->isCHRRAMCart())

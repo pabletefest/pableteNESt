@@ -6,6 +6,7 @@
 #include "nesBus.h"
 #include "cartridge.h"
 #include "emuLoadSaveUtilities.h"
+#include "rewindGameplay.h"
 
 #include "SDL.h"
 #include "SDL_ttf.h"
@@ -108,6 +109,8 @@ int main(int argc, char* argv[])
     SDL_AddTimer(1000, printFPS, (void*)&fps);
 
     nes::SystemBus nes;
+    RewindManager rewindManager = RewindManager(nes);
+    bool rewindHeld = false;
 
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/instr_test_v5/16-special.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/240pee.nes");
@@ -242,6 +245,9 @@ int main(int argc, char* argv[])
                 case SDLK_F2:
                     loadEmulatorState(nes);
                     break;
+                case SDLK_r:
+                    rewindHeld = true;
+                    break;
                 }
             }
             else if (event.type == SDL_KEYUP)
@@ -273,6 +279,9 @@ int main(int argc, char* argv[])
                     break;
                 case SDLK_RIGHT:
                     nes.controllers[0] &= ~0x01;
+                    break;
+                case SDLK_r:
+                    rewindHeld = false;
                     break;
                 }
             }
@@ -324,6 +333,20 @@ int main(int argc, char* argv[])
 
         SDL_RenderPresent(renderer);
         //SDL_UpdateWindowSurface(window);
+
+        if (rewindHeld)
+        {
+            if (!rewindManager.unstackFrame())
+            {
+                rewindHeld = false;
+            }
+
+            nes.controllers[0] = 0x00;
+        }
+        else
+        {
+            rewindManager.stackFrame();
+        }
 
         fps++;
     }

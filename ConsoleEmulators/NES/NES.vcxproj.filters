@@ -48,6 +48,9 @@
     <ClInclude Include="include\emuLoadSaveUtilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\rewindGameplay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu6502.cpp">
@@ -81,6 +84,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\emuLoadSaveStateUtilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rewindGameplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

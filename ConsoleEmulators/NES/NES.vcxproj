@@ -30,6 +30,7 @@
     <ClInclude Include="include\mapper_002.h" />
     <ClInclude Include="include\nesBus.h" />
     <ClInclude Include="include\ppu2C02.h" />
+    <ClInclude Include="include\rewindGameplay.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cartridge.cpp" />
@@ -43,6 +44,7 @@
     <ClCompile Include="src\nesBus.cpp" />
     <ClCompile Include="src\nesCoreDLLWrapper.cpp" />
     <ClCompile Include="src\ppu2C02.cpp" />
+    <ClCompile Include="src\rewindGameplay.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

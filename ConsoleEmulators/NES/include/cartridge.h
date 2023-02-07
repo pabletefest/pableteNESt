@@ -83,7 +83,14 @@ namespace nes
 			return nCHRBanks;
 		}
 
+		std::string getGameName() const
+		{
+			return gameName;
+		}
+
 	private:
+		std::string gameName;
+
 		uint8_t nMapperID = 0;
 		uint8_t nPRGBanks = 0;
 		uint8_t nCHRBanks = 0;
