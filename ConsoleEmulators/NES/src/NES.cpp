@@ -51,6 +51,10 @@ static SDL_Window* window = nullptr;
 #define PATTERN_TABLE_WIDTH 128
 #define PATTERN_TABLE_HEIGHT 128
 
+#define SDL_NEAREST_PIXEL "0"
+#define SDL_LINEAR_FILTERING "1" // OpenGL and Direct3D
+#define SDL_ANISOTROPIC_FILTERING "2" // Direct3D
+
 constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 
 void audioCallback(void* userdata, Uint8* stream, int len)
@@ -79,7 +83,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    window = SDL_CreateWindow(APP_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow(APP_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 
     if (!window)
     {
@@ -87,8 +91,12 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, SDL_LINEAR_FILTERING);
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
+
     //SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED /*| SDL_RENDERER_PRESENTVSYNC*/);
+    SDL_GL_SetSwapInterval(1);
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
     SDL_Texture* gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
@@ -127,6 +135,8 @@ int main(int argc, char* argv[])
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Tetris.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales 2.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Arkanoid.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Gradius.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Castlevania.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior.nes"); // Dragon Quest
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior II.nes"); // Dragon Quest 2
@@ -283,6 +293,25 @@ int main(int argc, char* argv[])
                 case SDLK_r:
                     rewindHeld = false;
                     break;
+                case SDLK_k: // Debug
+                    static bool isLinearFilterApplied = false;
+
+                    if (!isLinearFilterApplied)
+                        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, SDL_LINEAR_FILTERING);
+                    else
+                        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, SDL_NEAREST_PIXEL);
+
+                    isLinearFilterApplied = !isLinearFilterApplied;
+
+                    SDL_DestroyRenderer(renderer);
+
+                    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+                    SDL_GL_SetSwapInterval(1);
+
+                    gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
+                    sprTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
+                    bgTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
+                    break;
                 }
             }
         }
@@ -367,6 +396,7 @@ int main(int argc, char* argv[])
     SDL_DestroyTexture(gameTexture);
     SDL_DestroyTexture(sprTexture);
     SDL_DestroyTexture(bgTexture);
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
