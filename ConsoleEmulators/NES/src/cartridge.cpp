@@ -2,6 +2,7 @@
 #include "mapper_000.h"
 #include "mapper_001.h"
 #include "mapper_002.h"
+#include "mapper_003.h"
 #include "emu_typedefs.h"
 
 #include <fstream>
@@ -67,7 +68,12 @@ namespace nes
 				ifs.read((char*)vPRGMemory.data(), vPRGMemory.size());
 
 				nCHRBanks = header.chr_rom_chunks;
-				vCHRMemory.resize(nCHRBanks * convertKBToBytes(8));
+
+				if (nCHRBanks == 0)
+					vCHRMemory.resize(convertKBToBytes(8));
+				else
+					vCHRMemory.resize(nCHRBanks* convertKBToBytes(8));
+
 				ifs.read((char*)vCHRMemory.data(), vCHRMemory.size());
 			}
 
@@ -84,19 +90,16 @@ namespace nes
 				break;
 			case 1:
 				pMapper = std::make_shared<Mapper_001>(nPRGBanks, nCHRBanks, header.mapper1 & 0x02, *this);
-				
-				if (nCHRBanks == 0)
-					vCHRMemory.resize(convertKBToBytes(8));
 
 				if (header.mapper1 & 0x02)
-				{
 					vPRGMemory.resize(vPRGMemory.capacity() + 0x2000);
-				}
 
 				break;
 			case 2:
 				pMapper = std::make_shared<Mapper_002>(nPRGBanks, nCHRBanks);
-				vCHRMemory.resize(convertKBToBytes(8));
+				break;
+			case 3:
+				pMapper = std::make_shared<Mapper_003>(nPRGBanks, nCHRBanks);
 				break;
 			}
 

@@ -28,6 +28,7 @@
     <ClInclude Include="include\mapper_000.h" />
     <ClInclude Include="include\mapper_001.h" />
     <ClInclude Include="include\mapper_002.h" />
+    <ClInclude Include="include\mapper_003.h" />
     <ClInclude Include="include\nesBus.h" />
     <ClInclude Include="include\ppu2C02.h" />
     <ClInclude Include="include\rewindGameplay.h" />
@@ -40,6 +41,7 @@
     <ClCompile Include="src\mapper_000.cpp" />
     <ClCompile Include="src\mapper_001.cpp" />
     <ClCompile Include="src\mapper_002.cpp" />
+    <ClCompile Include="src\mapper_003.cpp" />
     <ClCompile Include="src\NES.cpp" />
     <ClCompile Include="src\nesBus.cpp" />
     <ClCompile Include="src\nesCoreDLLWrapper.cpp" />
@@ -74,7 +76,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>

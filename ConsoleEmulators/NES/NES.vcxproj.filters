@@ -51,6 +51,9 @@
     <ClInclude Include="include\rewindGameplay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\mapper_003.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu6502.cpp">
@@ -87,6 +90,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\rewindGameplay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mapper_003.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
