@@ -3,6 +3,7 @@
 #include "mapper_001.h"
 #include "mapper_002.h"
 #include "mapper_003.h"
+#include "mapper_007.h"
 #include "emu_typedefs.h"
 
 #include <fstream>
@@ -100,6 +101,9 @@ namespace nes
 				break;
 			case 3:
 				pMapper = std::make_shared<Mapper_003>(nPRGBanks, nCHRBanks);
+				break;
+			case 7:
+				pMapper = std::make_shared<Mapper_007>(nPRGBanks, nCHRBanks, *this);
 				break;
 			}
 

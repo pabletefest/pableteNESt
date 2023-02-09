@@ -116,9 +116,6 @@ bool nes::Mapper_001::ppuMapRead(uint16_t addr, uint32_t& mapped_addr)
 			{
 				mapped_addr = ((chrBank1Select % (nCHRBanks * 2)) * 0x1000) + (addr & 0x0FFF); // Second 4KB of 8KB bank
 			}
-
-			if (mapped_addr >= nCHRBanks * convertKBToBytes<uint32_t>(8))
-				printf("\nO.O\n");
 		}
 
 		return true;

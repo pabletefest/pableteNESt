@@ -775,7 +775,7 @@ namespace nes
 			{
 				address = 0x2000 + (address & 0x03FF);
 			}
-			else if (cartridge->getNTMirroring() == Cartridge::Mirroring::ONE_SCREEN_LOWER_BANK)
+			else if (cartridge->getNTMirroring() == Cartridge::Mirroring::ONE_SCREEN_UPPER_BANK)
 			{
 				address = 0x2400 + (address & 0x03FF);
 			}
@@ -820,7 +820,7 @@ namespace nes
 			{
 				address = 0x2000 + (address & 0x03FF);
 			}
-			else if (cartridge->getNTMirroring() == Cartridge::Mirroring::ONE_SCREEN_LOWER_BANK)
+			else if (cartridge->getNTMirroring() == Cartridge::Mirroring::ONE_SCREEN_UPPER_BANK)
 			{
 				address = 0x2400 + (address & 0x03FF);
 			}

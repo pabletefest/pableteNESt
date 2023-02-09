@@ -55,7 +55,6 @@ bool nes::Mapper_003::ppuMapWrite(uint16_t addr, uint32_t& mapped_addr)
             mapped_addr = addr;
             return true;
         }
-
     }
 
     return false;
