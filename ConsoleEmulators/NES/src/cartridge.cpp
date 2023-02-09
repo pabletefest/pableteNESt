@@ -92,8 +92,10 @@ namespace nes
 			case 1:
 				pMapper = std::make_shared<Mapper_001>(nPRGBanks, nCHRBanks, header.mapper1 & 0x02, *this);
 
-				if (header.mapper1 & 0x02)
+				if ((header.mapper1 & 0x02) || header.prg_ram_size == 0)
 					vPRGMemory.resize(vPRGMemory.capacity() + 0x2000);
+				else
+					vPRGMemory.resize(vPRGMemory.capacity() + (header.prg_ram_size * 0x2000));
 
 				break;
 			case 2:
