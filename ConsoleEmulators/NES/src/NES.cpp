@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
         printf("%s\n", SDL_GetAudioDeviceName(i, 0));
 
     SDL_AudioDeviceID audioDevId =  SDL_OpenAudioDevice(NULL, 0, &wanted, &desired, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
-    SDL_PauseAudioDevice(audioDevId, 0);
+    //SDL_PauseAudioDevice(audioDevId, 0);
 
     while (isRunnning)
     {   
