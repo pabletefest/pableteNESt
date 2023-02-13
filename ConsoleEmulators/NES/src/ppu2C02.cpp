@@ -595,7 +595,16 @@ namespace nes
 		if (PPUMASK.showBackground || PPUMASK.showSprites)
 		{
 			if (scanline >= 0 && scanline <= 239 && cycle >= 1 && cycle <= 256)
+			{
 				pixelsFrameBuffer[scanline * 256 + (cycle - 1)] =/* isSprPixel ? nesPalToRGBAPalArray[0x30] : */getRGBAFromNesPalette(finalPalette, finalPixel);
+
+				// OVERSCAN AREA (8 black pixels on each edge)
+				if ((cycle <= (1 + 8)) || (cycle > (256 - 8)))
+					pixelsFrameBuffer[scanline * 256 + (cycle - 1)] = nesPalToRGBAPalArray[0x3F];
+
+				if (scanline < 8 || scanline >= 232)
+					pixelsFrameBuffer[scanline * 256 + (cycle - 1)] = nesPalToRGBAPalArray[0x3F];
+			}
 		}
 
 		/*if (cycle == 0)
