@@ -57,6 +57,9 @@
     <ClInclude Include="include\mapper_007.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\mapper_066.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cpu6502.cpp">
@@ -99,6 +102,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\mapper_007.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mapper_066.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

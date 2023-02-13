@@ -76,6 +76,12 @@ namespace nes
 		ppu.reset();
 		cpu.reset();
 		totalSystemClockCycles = 0;
+		dmaPageHiAddr = 0x00;
+		dmaInternalLoAddr = 0x00;
+		dmaReadData = 0x00;
+		dmaTransferInterrupt = false;
+		waitForEvenCycle = true;
+		std::memset(controllers, 0, 2);
 	}
 
 	void SystemBus::clock()

@@ -30,6 +30,7 @@
     <ClInclude Include="include\mapper_002.h" />
     <ClInclude Include="include\mapper_003.h" />
     <ClInclude Include="include\mapper_007.h" />
+    <ClInclude Include="include\mapper_066.h" />
     <ClInclude Include="include\nesBus.h" />
     <ClInclude Include="include\ppu2C02.h" />
     <ClInclude Include="include\rewindGameplay.h" />
@@ -44,6 +45,7 @@
     <ClCompile Include="src\mapper_001.cpp" />
     <ClCompile Include="src\mapper_002.cpp" />
     <ClCompile Include="src\mapper_003.cpp" />
+    <ClCompile Include="src\mapper_066.cpp" />
     <ClCompile Include="src\NES.cpp" />
     <ClCompile Include="src\nesBus.cpp" />
     <ClCompile Include="src\nesCoreDLLWrapper.cpp" />
