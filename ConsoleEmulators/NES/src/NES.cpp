@@ -8,8 +8,9 @@
 #include "emuLoadSaveUtilities.h"
 #include "rewindGameplay.h"
 
-#include "SDL.h"
-#include "SDL_ttf.h"
+#include <SDL.h>
+#include <SDL_ttf.h>
+#include <SDL_thread.h>
 
 #ifdef LOG_MODE
 #include <fstream>
@@ -42,6 +43,7 @@ std::string getTextFromBuffer(T* nametable, uint16_t bufferSize)
 }
 
 static SDL_Window* window = nullptr;
+
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
@@ -55,7 +57,9 @@ static SDL_Window* window = nullptr;
 #define SDL_LINEAR_FILTERING "1" // OpenGL and Direct3D
 #define SDL_ANISOTROPIC_FILTERING "2" // Direct3D
 
-constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
+static constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
+static uint32_t fps = 0;
+static bool rewindHeld = false;
 
 void audioCallback(void* userdata, Uint8* stream, int len)
 {
@@ -73,6 +77,48 @@ void audioCallback(void* userdata, Uint8* stream, int len)
     {
         ((float*)stream)[index] = (rand() % 256) / 256.f;
     }
+}
+
+int emulatorThreadCallback(void* emulatorPtr)
+{
+    nes::SystemBus* nesEmulator = reinterpret_cast<nes::SystemBus*>(emulatorPtr);
+
+    if (!nesEmulator)
+        return -1;
+
+    RewindManager rewindManager = RewindManager(*nesEmulator);
+
+    while (true)
+    {
+        auto startFrameTicks = SDL_GetTicks64();
+
+        do
+        {
+            nesEmulator->clock();
+        } while (!nesEmulator->ppu.frameCompleted);
+
+        nesEmulator->ppu.frameCompleted = false;
+
+        if (rewindHeld)
+        {
+            if (!rewindManager.unstackFrame())
+            {
+                rewindHeld = false;
+            }
+
+            nesEmulator->controllers[0] = 0x00;
+        }
+        else
+        {
+            rewindManager.stackFrame();
+        }
+
+        SDL_Delay((1000 / 60) - (SDL_GetTicks64() - startFrameTicks));
+
+        //fps++;
+    }
+
+    return 0;
 }
 
 int main(int argc, char* argv[])
@@ -112,13 +158,9 @@ int main(int argc, char* argv[])
     SDL_Event event;
     bool isRunnning = true;
 
-    uint32_t fps = 0;
-
     SDL_AddTimer(1000, printFPS, (void*)&fps);
 
     nes::SystemBus nes;
-    RewindManager rewindManager = RewindManager(nes);
-    bool rewindHeld = false;
 
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/instr_test_v5/16-special.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/240pee.nes");
@@ -206,9 +248,14 @@ int main(int argc, char* argv[])
     SDL_AudioDeviceID audioDevId =  SDL_OpenAudioDevice(NULL, 0, &wanted, &desired, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
     //SDL_PauseAudioDevice(audioDevId, 0);
 
+    SDL_Thread* emulatorThread = SDL_CreateThread(emulatorThreadCallback, "EmulatorThread", (void*) &nes);
+
+    constexpr uint64_t frameTimeMs = 1000 / 60;
+    uint64_t elapsedTicks = frameTimeMs;
+    uint64_t startFrameTicks = SDL_GetTicks64();
+
     while (isRunnning)
     {   
-        auto startFrameTicks = SDL_GetTicks64();
         //nes.controllers[0] = 0x00; // Reset every frame
 
         //const Uint8* keystate = SDL_GetKeyboardState(NULL);
@@ -328,71 +375,59 @@ int main(int argc, char* argv[])
             }
         }
 
-        do
+        if (elapsedTicks >= frameTimeMs)
         {
-            nes.clock();
-        } while (!nes.ppu.frameCompleted);
+            const std::vector<nes::PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
+            sprPatternTable = nes.ppu.getPatternTableBuffer(0, 0);
+            bgPatternTable = nes.ppu.getPatternTableBuffer(1, 0);
+            SDL_UpdateTexture(gameTexture, nullptr, pixels.data(), sizeof(nes::PPU::Pixel)* PPU_SCANLINE_DOTS);
+            SDL_UpdateTexture(sprTexture, nullptr, sprPatternTable.data(), sizeof(nes::PPU::Pixel)* PATTERN_TABLE_WIDTH);
+            SDL_UpdateTexture(bgTexture, nullptr, bgPatternTable.data(), sizeof(nes::PPU::Pixel)* PATTERN_TABLE_WIDTH);
 
-        nes.ppu.frameCompleted = false;
+            SDL_Rect gameViewport;
+            gameViewport.w = PPU_SCANLINE_DOTS * 3;
+            gameViewport.h = PPU_NUM_SCANLINES * 3;
+            gameViewport.x = 0;
+            gameViewport.y = 0;
 
-        const std::vector<nes::PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
-        sprPatternTable = nes.ppu.getPatternTableBuffer(0, 0);
-        bgPatternTable = nes.ppu.getPatternTableBuffer(1, 0);
-        SDL_UpdateTexture(gameTexture, nullptr, pixels.data(), sizeof(nes::PPU::Pixel) * PPU_SCANLINE_DOTS);
-        SDL_UpdateTexture(sprTexture, nullptr, sprPatternTable.data(), sizeof(nes::PPU::Pixel) * PATTERN_TABLE_WIDTH);
-        SDL_UpdateTexture(bgTexture, nullptr, bgPatternTable.data(), sizeof(nes::PPU::Pixel) * PATTERN_TABLE_WIDTH);
+            SDL_Rect sprViewport;
+            sprViewport.w = SCREEN_WIDTH - gameViewport.w;
+            sprViewport.h = gameViewport.h / 2;
+            sprViewport.x = gameViewport.w;
+            sprViewport.y = 0;
 
-        SDL_Rect gameViewport;
-        gameViewport.w = PPU_SCANLINE_DOTS * 3;
-        gameViewport.h = PPU_NUM_SCANLINES * 3;
-        gameViewport.x = 0;
-        gameViewport.y = 0;
+            SDL_Rect bgViewport;
+            bgViewport.w = SCREEN_WIDTH - gameViewport.w;
+            bgViewport.h = gameViewport.h / 2;
+            bgViewport.x = gameViewport.w;
+            bgViewport.y = sprViewport.h;
 
-        SDL_Rect sprViewport;
-        sprViewport.w = SCREEN_WIDTH - gameViewport.w;
-        sprViewport.h = gameViewport.h / 2;
-        sprViewport.x = gameViewport.w;
-        sprViewport.y = 0;
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, gameTexture, NULL, &gameViewport);
+            SDL_RenderCopy(renderer, sprTexture, NULL, &sprViewport);
+            SDL_RenderCopy(renderer, bgTexture, NULL, &bgViewport);
 
-        SDL_Rect bgViewport;
-        bgViewport.w = SCREEN_WIDTH - gameViewport.w;
-        bgViewport.h = gameViewport.h / 2;
-        bgViewport.x = gameViewport.w;
-        bgViewport.y = sprViewport.h;
+            /*uint8_t* nameTable = reinterpret_cast<uint8_t*>(nes.ppu.getNametable(1));
+            SDL_Surface* nameTableSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
+            SDL_Texture* nameTableTexture = SDL_CreateTextureFromSurface(renderer, nameTableSurface);
+            SDL_RenderCopy(renderer, nameTableTexture, NULL, &gameViewport);
+            SDL_FreeSurface(nameTableSurface);
+            SDL_DestroyTexture(nameTableTexture);*/
 
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, gameTexture, NULL, &gameViewport);
-        SDL_RenderCopy(renderer, sprTexture, NULL, &sprViewport);
-        SDL_RenderCopy(renderer, bgTexture, NULL, &bgViewport);
+            SDL_RenderPresent(renderer);
+            //SDL_UpdateWindowSurface(window);
 
-        /*uint8_t* nameTable = reinterpret_cast<uint8_t*>(nes.ppu.getNametable(1));
-        SDL_Surface* nameTableSurface = TTF_RenderText_Solid_Wrapped(pixelEmulatorFont, getTextFromBuffer<uint8_t>(nameTable, 960).c_str(), whiteColour, 0);
-        SDL_Texture* nameTableTexture = SDL_CreateTextureFromSurface(renderer, nameTableSurface);
-        SDL_RenderCopy(renderer, nameTableTexture, NULL, &gameViewport);
-        SDL_FreeSurface(nameTableSurface);
-        SDL_DestroyTexture(nameTableTexture);*/
+            //startFrameTicks = (1000 / 60);
+            elapsedTicks = 0;
 
-        SDL_RenderPresent(renderer);
-        //SDL_UpdateWindowSurface(window);
-
-        if (rewindHeld)
-        {
-            if (!rewindManager.unstackFrame())
-            {
-                rewindHeld = false;
-            }
-
-            nes.controllers[0] = 0x00;
-        }
-        else
-        {
-            rewindManager.stackFrame();
+            fps++;
         }
 
-        SDL_Delay((1000 / 60) - (SDL_GetTicks64() - startFrameTicks));
-
-        fps++;
+        elapsedTicks += (SDL_GetTicks64() - startFrameTicks);
+        startFrameTicks = SDL_GetTicks64();
     }
+
+    SDL_WaitThread(emulatorThread, NULL);
 
 #undef LOG_MODE
 #ifdef LOG_MODE
