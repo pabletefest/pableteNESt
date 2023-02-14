@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <thread>
 
 #include "nesBus.h"
 #include "cartridge.h"
@@ -61,6 +62,8 @@ static constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 static uint32_t fps = 0;
 static bool rewindHeld = false;
 
+static std::vector<nes::PPU::Pixel> pixels;
+
 void audioCallback(void* userdata, Uint8* stream, int len)
 {
     //Sint16* buffer = (Sint16*)stream;
@@ -99,6 +102,8 @@ int emulatorThreadCallback(void* emulatorPtr)
 
         nesEmulator->ppu.frameCompleted = false;
 
+        pixels = nesEmulator->ppu.getPixelsFrameBuffer();
+
         if (rewindHeld)
         {
             if (!rewindManager.unstackFrame())
@@ -113,7 +118,8 @@ int emulatorThreadCallback(void* emulatorPtr)
             rewindManager.stackFrame();
         }
 
-        SDL_Delay((1000 / 60) - (SDL_GetTicks64() - startFrameTicks));
+        //SDL_Delay((1000 / 60) - (SDL_GetTicks64() - startFrameTicks));
+        std::this_thread::sleep_for(std::chrono::milliseconds((1000 / 60) - (SDL_GetTicks64() - startFrameTicks)));
 
         //fps++;
     }
@@ -248,7 +254,8 @@ int main(int argc, char* argv[])
     SDL_AudioDeviceID audioDevId =  SDL_OpenAudioDevice(NULL, 0, &wanted, &desired, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
     //SDL_PauseAudioDevice(audioDevId, 0);
 
-    SDL_Thread* emulatorThread = SDL_CreateThread(emulatorThreadCallback, "EmulatorThread", (void*) &nes);
+    //SDL_Thread* emulatorThread = SDL_CreateThread(emulatorThreadCallback, "EmulatorThread", (void*) &nes);
+    std::thread emulatorThread = std::thread(emulatorThreadCallback, (void*) &nes);
 
     constexpr uint64_t frameTimeMs = 1000 / 60;
     uint64_t elapsedTicks = frameTimeMs;
@@ -374,13 +381,13 @@ int main(int argc, char* argv[])
                 }
             }
         }
-
+        
         if (elapsedTicks >= frameTimeMs)
         {
-            const std::vector<nes::PPU::Pixel>& pixels = nes.ppu.getPixelsFrameBuffer();
+            auto cachedPixels = pixels;
             sprPatternTable = nes.ppu.getPatternTableBuffer(0, 0);
             bgPatternTable = nes.ppu.getPatternTableBuffer(1, 0);
-            SDL_UpdateTexture(gameTexture, nullptr, pixels.data(), sizeof(nes::PPU::Pixel)* PPU_SCANLINE_DOTS);
+            SDL_UpdateTexture(gameTexture, nullptr, cachedPixels.data(), sizeof(nes::PPU::Pixel)* PPU_SCANLINE_DOTS);
             SDL_UpdateTexture(sprTexture, nullptr, sprPatternTable.data(), sizeof(nes::PPU::Pixel)* PATTERN_TABLE_WIDTH);
             SDL_UpdateTexture(bgTexture, nullptr, bgPatternTable.data(), sizeof(nes::PPU::Pixel)* PATTERN_TABLE_WIDTH);
 
@@ -427,7 +434,9 @@ int main(int argc, char* argv[])
         startFrameTicks = SDL_GetTicks64();
     }
 
-    SDL_WaitThread(emulatorThread, NULL);
+    emulatorThread.join();
+
+    //SDL_WaitThread(emulatorThread, NULL);
 
 #undef LOG_MODE
 #ifdef LOG_MODE
