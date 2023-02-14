@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     //SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED /*| SDL_RENDERER_PRESENTVSYNC*/);
-    SDL_GL_SetSwapInterval(1);
+    //SDL_GL_SetSwapInterval(1);
     //SDL_Surface* screen = SDL_GetWindowSurface(window);
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, screen);
     SDL_Texture* gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
 
     while (isRunnning)
     {   
+        auto startFrameTicks = SDL_GetTicks64();
         //nes.controllers[0] = 0x00; // Reset every frame
 
         //const Uint8* keystate = SDL_GetKeyboardState(NULL);
@@ -279,8 +280,9 @@ int main(int argc, char* argv[])
 
                         SDL_DestroyRenderer(renderer);
 
-                        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-                        SDL_GL_SetSwapInterval(1);
+                        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED /*| SDL_RENDERER_PRESENTVSYNC*/);
+                        //SDL_GL_SetSwapInterval(1);    
+                        SDL_GL_SetSwapInterval(0);
 
                         gameTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PPU_SCANLINE_DOTS, PPU_NUM_SCANLINES);
                         sprTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STREAMING, PATTERN_TABLE_WIDTH, PATTERN_TABLE_HEIGHT);
@@ -386,6 +388,8 @@ int main(int argc, char* argv[])
         {
             rewindManager.stackFrame();
         }
+
+        SDL_Delay((1000 / 60) - (SDL_GetTicks64() - startFrameTicks));
 
         fps++;
     }
