@@ -118,8 +118,10 @@ namespace nes
 			}
 			else
 			{
-				cpu.clock();
+				cpu.clock();	
 			}
+
+			apu.clock();
 		}
 
 		if (ppu.nmi)

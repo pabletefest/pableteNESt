@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\apu2A03.h" />
     <ClInclude Include="include\cartridge.h" />
     <ClInclude Include="include\cpu6502.h" />
     <ClInclude Include="include\emuLoadSaveUtilities.h" />
@@ -36,6 +37,7 @@
     <ClInclude Include="include\rewindGameplay.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\apu2A03.cpp" />
     <ClCompile Include="src\mapper_007.cpp" />
     <ClCompile Include="src\cartridge.cpp" />
     <ClCompile Include="src\cpu6502.cpp" />

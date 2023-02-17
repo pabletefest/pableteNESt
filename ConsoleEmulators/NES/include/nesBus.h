@@ -1,6 +1,7 @@
 #pragma once
 #include "cpu6502.h"
 #include "ppu2C02.h"
+#include "apu2A03.h"
 #include "cartridge.h"
 
 //#include <cstdint>
@@ -30,6 +31,7 @@ namespace nes
 	public:
 		CPU cpu;
 		PPU ppu;
+		APU apu;
 
 		// Game Cartridge
 		std::shared_ptr<Cartridge> cartridge;
