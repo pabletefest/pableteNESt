@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <thread>
+#include <mutex>
 
 #include "nesBus.h"
 #include "cartridge.h"
@@ -60,8 +61,8 @@ static SDL_Window* window = nullptr;
 
 static constexpr const char* APP_TITLE = "pableteNESt (NES EMULATOR)";
 static uint32_t fps = 0;
-static bool rewindHeld = false;
 
+static std::mutex mutexPixels;
 static std::vector<nes::PPU::Pixel> pixels;
 
 void audioCallback(void* userdata, Uint8* stream, int len)
@@ -82,7 +83,7 @@ void audioCallback(void* userdata, Uint8* stream, int len)
     }
 }
 
-int emulatorThreadCallback(void* emulatorPtr)
+int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning, std::atomic<bool>& rewindHeld)
 {
     nes::SystemBus* nesEmulator = reinterpret_cast<nes::SystemBus*>(emulatorPtr);
 
@@ -91,7 +92,7 @@ int emulatorThreadCallback(void* emulatorPtr)
 
     RewindManager rewindManager = RewindManager(*nesEmulator);
 
-    while (true)
+    while (isRunning)
     {
         auto startFrameTicks = SDL_GetTicks64();
 
@@ -102,7 +103,9 @@ int emulatorThreadCallback(void* emulatorPtr)
 
         nesEmulator->ppu.frameCompleted = false;
 
+        mutexPixels.lock();
         pixels = nesEmulator->ppu.getPixelsFrameBuffer();
+        mutexPixels.unlock();
 
         if (rewindHeld)
         {
@@ -162,7 +165,8 @@ int main(int argc, char* argv[])
     memset(pixels.data(), 0, sizeof(PPU::Pixel) * pixels.size());*/
 
     SDL_Event event;
-    bool isRunnning = true;
+    std::atomic<bool> isRunnning = true;
+    std::atomic<bool> rewindHeld = false;
 
     SDL_AddTimer(1000, printFPS, (void*)&fps);
 
@@ -255,7 +259,7 @@ int main(int argc, char* argv[])
     //SDL_PauseAudioDevice(audioDevId, 0);
 
     //SDL_Thread* emulatorThread = SDL_CreateThread(emulatorThreadCallback, "EmulatorThread", (void*) &nes);
-    std::thread emulatorThread = std::thread(emulatorThreadCallback, (void*) &nes);
+    std::thread emulatorThread = std::thread(emulatorThreadCallback, (void*) &nes, std::cref(isRunnning), std::ref(rewindHeld));
 
     constexpr uint64_t frameTimeMs = 1000 / 60;
     uint64_t elapsedTicks = frameTimeMs;
