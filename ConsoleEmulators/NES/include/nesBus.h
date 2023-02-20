@@ -28,7 +28,7 @@ namespace nes
 		void clock();
 		void runFrame();
 
-		uint8_t getAudioSample() const;
+		float getAudioSample() const;
 
 	public:
 		CPU cpu;

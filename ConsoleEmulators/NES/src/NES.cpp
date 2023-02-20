@@ -92,13 +92,13 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
     RewindManager rewindManager = RewindManager(*nesEmulator);
 
-    //std::vector<uint8_t> samplesBuffer;
-    //samplesBuffer.reserve(4096);
+    std::vector<float> samplesBuffer;
+    samplesBuffer.reserve(1024);
 
     SDL_AudioSpec wanted;
     SDL_zero(wanted);
     wanted.freq = 44100;
-    wanted.format = AUDIO_U8;
+    wanted.format = AUDIO_F32;
     wanted.channels = 1;
     wanted.samples = 1024;
     wanted.callback = NULL;
@@ -106,7 +106,7 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
     SDL_AudioSpec obtained;
 
-    SDL_AudioDeviceID audioDevId = SDL_OpenAudioDevice(NULL, 0, &wanted, &obtained, SDL_AUDIO_ALLOW_FORMAT_CHANGE | SDL_AUDIO_ALLOW_SAMPLES_CHANGE);
+    SDL_AudioDeviceID audioDevId = SDL_OpenAudioDevice(NULL, 0, &wanted, &obtained, SDL_AUDIO_ALLOW_FORMAT_CHANGE /*| SDL_AUDIO_ALLOW_SAMPLES_CHANGE*/);
     //SDL_PauseAudioDevice(audioDevId, 0);
 
     bool isAudioPlaying = false;
@@ -121,14 +121,23 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
             if (nesEmulator->isAudioSampleReady)
             {
-                uint8_t sample = nesEmulator->getAudioSample();
-                SDL_QueueAudio(audioDevId, (const void*) &sample, sizeof(uint8_t));
+                float sample = (nesEmulator->getAudioSample() * 2.0) - 1.0;
+                samplesBuffer.push_back(sample);
+                /*SDL_QueueAudio(audioDevId, (const void*) &sample, sizeof(uint8_t));*/
             }
 
-            if (SDL_GetQueuedAudioSize(audioDevId) > 16 && !isAudioPlaying)
+            if (samplesBuffer.size() >= 1024)
             {
-                SDL_PauseAudioDevice(audioDevId, 0);
-                isAudioPlaying = true;
+                std::cout << "Queued a buffer of: " << samplesBuffer.size() * sizeof(float) << " bytes in float format.\n";
+                SDL_QueueAudio(audioDevId, (const void*) samplesBuffer.data(), samplesBuffer.size() * sizeof(float));
+                samplesBuffer.clear();
+
+                if (!isAudioPlaying)
+                {
+                    std::cout << "\n\nAUDIO STARTED PLAYING\n\n";
+                    SDL_PauseAudioDevice(audioDevId, 0);
+                    isAudioPlaying = true;
+                }
             }
 
         } while (!nesEmulator->ppu.frameCompleted);
@@ -211,7 +220,7 @@ int main(int argc, char* argv[])
 
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/nestest.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
-    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Pac-Man.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Ice Climber.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Space Invaders.nes");
@@ -219,7 +228,7 @@ int main(int argc, char* argv[])
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Empire Invaders (Space Invaders Hack).nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Contra.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Tetris.nes");
-    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales.nes");
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales 2.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Arkanoid.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Gradius.nes");

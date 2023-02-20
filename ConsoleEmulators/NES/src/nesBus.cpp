@@ -146,7 +146,7 @@ namespace nes
 		if (audioElapsedTime >= CPU_CLOCK_SPEED)
 		{
 			isAudioSampleReady = true;
-			audioElapsedTime = 0;
+			audioElapsedTime -= CPU_CLOCK_SPEED;
 		}
 
 		totalSystemClockCycles++;
@@ -162,7 +162,7 @@ namespace nes
 		ppu.frameCompleted = false;
 	}
 
-	uint8_t SystemBus::getAudioSample() const
+	float SystemBus::getAudioSample() const
 	{
 		isAudioSampleReady = false;
 

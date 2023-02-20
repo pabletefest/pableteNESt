@@ -3,10 +3,10 @@
 namespace nes
 {
     static uint8_t dutyCyclePulseTables[4][8] = {
-        {0, 0, 0, 0, 0, 0, 0, 1}, // 12.5%
-        {0, 0, 0, 0, 0, 0, 1, 1}, // 25%
-        {0, 0, 0, 0, 1, 1, 1, 1}, // 50%
-        {1, 1, 1, 1, 1, 1, 0, 0}  // 25% negated
+        {0, 1, 0, 0, 0, 0, 0, 0}, // 12.5%
+        {0, 1, 1, 0, 0, 0, 0, 0}, // 25%
+        {0, 1, 1, 1, 1, 0, 0, 0}, // 50%
+        {1, 0, 0, 1, 1, 1, 1, 1}  // 25% negated
     };
 
     // Audio processor included in the 2A03 chip (CPU + APU)
@@ -19,7 +19,7 @@ namespace nes
         void reset();
         void clock();
 
-        uint8_t getOutputAPU() const;
+        float getOutputAPU() const;
 
         // Communications with CPU
         uint8_t cpuRead(uint16_t address);
@@ -82,5 +82,6 @@ namespace nes
         };
 
         PulseSequencer pulse1Sequencer;
+        PulseSequencer pulse2Sequencer;
     };
 }

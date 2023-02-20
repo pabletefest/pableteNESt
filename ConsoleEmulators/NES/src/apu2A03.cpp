@@ -14,18 +14,19 @@ void nes::APU::clock()
     if (elapsedCycles % 2 == 1) // Every other cycle work
     {
         pulse1Sequencer.clock();
+        pulse2Sequencer.clock();
     }
 
     elapsedCycles++;
 }
 
-uint8_t nes::APU::getOutputAPU() const
+float nes::APU::getOutputAPU() const
 {
     double output = 0.0;
     double pulse_out = 0.0;
     double tnd_out = 0.0;
 
-    uint8_t pulseChannelsOutput = pulse1Sequencer.output() + 0;
+    uint8_t pulseChannelsOutput = pulse1Sequencer.output() + pulse2Sequencer.output();
 
     if (pulseChannelsOutput > 0)
     {
@@ -34,7 +35,7 @@ uint8_t nes::APU::getOutputAPU() const
 
     output = pulse_out + tnd_out;
 
-    return output * 255;
+    return output/* * 255*/;
 }
 
 uint8_t nes::APU::cpuRead(uint16_t address)
@@ -82,12 +83,16 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         pulse1Sequencer.lengthCounterLoad = (data >> 3);
         break;
     case 0x4004:
+        pulse2Sequencer.dutyCycleTable = (data >> 6);
         break;
     case 0x4005:
         break;
     case 0x4006:
+        pulse2Sequencer.timerReload = ((0x0700 & pulse2Sequencer.timerReload) | (data & 0x00FF)); // Low 8 bits
         break;
     case 0x4007:
+        pulse2Sequencer.timerReload = (((data & 0x07) << 8) | (pulse2Sequencer.timerReload & 0x00FF)); // High 3 bits
+        pulse2Sequencer.lengthCounterLoad = (data >> 3);
         break;
     case 0x4008:
         break;
