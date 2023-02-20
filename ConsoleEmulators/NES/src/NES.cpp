@@ -107,10 +107,8 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
     SDL_AudioSpec obtained;
 
     SDL_AudioDeviceID audioDevId = SDL_OpenAudioDevice(NULL, 0, &wanted, &obtained, SDL_AUDIO_ALLOW_FORMAT_CHANGE /*| SDL_AUDIO_ALLOW_SAMPLES_CHANGE*/);
-    //SDL_PauseAudioDevice(audioDevId, 0);
 
     bool isAudioPlaying = false;
-    //int numSamples = 0;
 
     while (isRunning)
     {
@@ -124,19 +122,15 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
             {
                 float sample = static_cast<float>((nesEmulator->getAudioSample() * 2.0) - 1.0);               
                 samplesBuffer.push_back(sample);
-                //numSamples++;
-                //SDL_QueueAudio(audioDevId, (const void*) &sample, sizeof(uint8_t));
             }
 
             if (samplesBuffer.size() >= 1024)
             {
-                //std::cout << "Queued a buffer of: " << samplesBuffer.size() * sizeof(float) << " bytes in float format.\n";
                 SDL_QueueAudio(audioDevId, (const void*) samplesBuffer.data(), static_cast<uint32_t>(samplesBuffer.size() * sizeof(float)));
                 samplesBuffer.clear();
 
                 if (!isAudioPlaying)
                 {
-                    //std::cout << "\n\nAUDIO STARTED PLAYING\n\n";
                     SDL_PauseAudioDevice(audioDevId, 0);
                     isAudioPlaying = true;
                 }
