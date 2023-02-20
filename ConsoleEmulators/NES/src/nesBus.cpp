@@ -3,6 +3,9 @@
 
 namespace nes
 {
+	constexpr uint32_t CPU_CLOCK_SPEED = 1789773;
+	constexpr uint32_t AUDIO_FREQUENCY = 44100;
+
 	SystemBus::SystemBus() : cpu(this)
 	{
 		for (auto& elem : cpuRam)
@@ -28,6 +31,10 @@ namespace nes
 		else if (address >= 0x2000 && address <= 0x3FFF)
 		{
 			ppu.cpuWrite(address & 0x0007, data);
+		}
+		else if ((address >= 0x4000 && address <= 0x4013) || address == 0x4015 || address == 0x4017)
+		{
+			apu.cpuWrite(address, data);
 		}
 		else if (address >= 0x4016 && address <= 0x4017)
 		{
@@ -55,6 +62,10 @@ namespace nes
 		else if (address >= 0x2000 && address <= 0x3FFF)
 		{
 			dataRead = ppu.cpuRead(address & 0x0007);
+		}
+		else if ((address >= 0x4000 && address <= 0x4013) || address == 0x4015 || address == 0x4017)
+		{
+			dataRead = apu.cpuRead(address);
 		}
 		else if (address >= 0x4016 && address <= 0x4017)
 		{
@@ -130,6 +141,14 @@ namespace nes
 			ppu.nmi = false;
 		}
 
+		audioElapsedTime += AUDIO_FREQUENCY;
+
+		if (audioElapsedTime >= CPU_CLOCK_SPEED)
+		{
+			isAudioSampleReady = true;
+			audioElapsedTime = 0;
+		}
+
 		totalSystemClockCycles++;
 	}
 
@@ -141,5 +160,12 @@ namespace nes
 		} while (!ppu.frameCompleted);
 
 		ppu.frameCompleted = false;
+	}
+
+	uint8_t SystemBus::getAudioSample() const
+	{
+		isAudioSampleReady = false;
+
+		return apu.getOutputAPU();
 	}
 }

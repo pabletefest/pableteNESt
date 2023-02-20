@@ -92,6 +92,23 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
     RewindManager rewindManager = RewindManager(*nesEmulator);
 
+    //std::vector<uint8_t> samplesBuffer;
+    //samplesBuffer.reserve(4096);
+
+    SDL_AudioSpec wanted;
+    SDL_zero(wanted);
+    wanted.freq = 44100;
+    wanted.format = AUDIO_U8;
+    wanted.channels = 1;
+    wanted.samples = 4096;
+    wanted.callback = NULL;
+    wanted.userdata = NULL;
+
+    SDL_AudioSpec obtained;
+
+    SDL_AudioDeviceID audioDevId = SDL_OpenAudioDevice(NULL, 0, &wanted, &obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
+    SDL_PauseAudioDevice(audioDevId, 0);
+
     while (isRunning)
     {
         auto startFrameTicks = SDL_GetTicks64();
@@ -99,6 +116,13 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
         do
         {
             nesEmulator->clock();
+
+            if (nesEmulator->isAudioSampleReady)
+            {
+                uint8_t sample = nesEmulator->getAudioSample();
+                SDL_QueueAudio(audioDevId, (const void*) &sample, sizeof(uint8_t));
+            }
+
         } while (!nesEmulator->ppu.frameCompleted);
 
         nesEmulator->ppu.frameCompleted = false;
@@ -124,7 +148,7 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
         //SDL_Delay((1000 / 60) - (SDL_GetTicks64() - startFrameTicks));
         std::this_thread::sleep_for(std::chrono::milliseconds((1000 / 60) - (SDL_GetTicks64() - startFrameTicks)));
 
-        //fps++;
+        fps++;
     }
 
     return 0;
@@ -195,6 +219,7 @@ int main(int argc, char* argv[])
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Metroid.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Castlevania.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros + Duck Hunt.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Sweet Home (Japan).nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior.nes"); // Dragon Quest
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior II.nes"); // Dragon Quest 2
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior III.nes"); // Dragon Quest 3
@@ -431,7 +456,7 @@ int main(int argc, char* argv[])
             //startFrameTicks = (1000 / 60);
             elapsedTicks = 0;
 
-            fps++;
+            //fps++;
         }
 
         elapsedTicks += (SDL_GetTicks64() - startFrameTicks);

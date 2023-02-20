@@ -28,6 +28,8 @@ namespace nes
 		void clock();
 		void runFrame();
 
+		uint8_t getAudioSample() const;
+
 	public:
 		CPU cpu;
 		PPU ppu;
@@ -48,7 +50,13 @@ namespace nes
 		bool dmaTransferInterrupt = false;
 		bool waitForEvenCycle = true;
 
+		mutable bool isAudioSampleReady = false;
+		friend uint8_t getOutputAPU();
+
 	public:
 		uint8_t controllersCache[2]; // Internal keep state
+	
+	private:
+		uint32_t audioElapsedTime = 0;
 	};
 }
