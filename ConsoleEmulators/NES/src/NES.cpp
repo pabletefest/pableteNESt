@@ -110,6 +110,7 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
     //SDL_PauseAudioDevice(audioDevId, 0);
 
     bool isAudioPlaying = false;
+    //int numSamples = 0;
 
     while (isRunning)
     {
@@ -121,20 +122,21 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
             if (nesEmulator->isAudioSampleReady)
             {
-                float sample = (nesEmulator->getAudioSample() * 2.0) - 1.0;
+                float sample = (nesEmulator->getAudioSample() * 2.0) - 1.0;               
                 samplesBuffer.push_back(sample);
-                /*SDL_QueueAudio(audioDevId, (const void*) &sample, sizeof(uint8_t));*/
+                //numSamples++;
+                //SDL_QueueAudio(audioDevId, (const void*) &sample, sizeof(uint8_t));
             }
 
             if (samplesBuffer.size() >= 1024)
             {
-                std::cout << "Queued a buffer of: " << samplesBuffer.size() * sizeof(float) << " bytes in float format.\n";
+                //std::cout << "Queued a buffer of: " << samplesBuffer.size() * sizeof(float) << " bytes in float format.\n";
                 SDL_QueueAudio(audioDevId, (const void*) samplesBuffer.data(), samplesBuffer.size() * sizeof(float));
                 samplesBuffer.clear();
 
                 if (!isAudioPlaying)
                 {
-                    std::cout << "\n\nAUDIO STARTED PLAYING\n\n";
+                    //std::cout << "\n\nAUDIO STARTED PLAYING\n\n";
                     SDL_PauseAudioDevice(audioDevId, 0);
                     isAudioPlaying = true;
                 }
@@ -220,7 +222,7 @@ int main(int argc, char* argv[])
 
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/nestest.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
-    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Pac-Man.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Ice Climber.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Space Invaders.nes");
@@ -228,7 +230,7 @@ int main(int argc, char* argv[])
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Empire Invaders (Space Invaders Hack).nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Contra.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Tetris.nes");
-    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales 2.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Arkanoid.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Gradius.nes");

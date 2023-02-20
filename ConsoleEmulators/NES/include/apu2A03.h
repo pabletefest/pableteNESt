@@ -58,11 +58,10 @@ namespace nes
             uint16_t timerReload = 0x0000;
             uint8_t lengthCounterLoad = 0;
             uint8_t pulseChannelOutput = 0x00;
+            uint8_t tableIndex = 0;
 
             void clock()
             {
-                static uint8_t tableIndex = 0;
-
                 if (pulseTimer > 0)
                 {
                     pulseTimer--;

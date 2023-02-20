@@ -133,20 +133,20 @@ namespace nes
 			}
 
 			apu.clock();
+
+			audioElapsedTime += AUDIO_FREQUENCY;
+
+			if (audioElapsedTime >= CPU_CLOCK_SPEED)
+			{
+				isAudioSampleReady = true;
+				audioElapsedTime -= CPU_CLOCK_SPEED;
+			}
 		}
 
 		if (ppu.nmi)
 		{
 			cpu.nmi();
 			ppu.nmi = false;
-		}
-
-		audioElapsedTime += AUDIO_FREQUENCY;
-
-		if (audioElapsedTime >= CPU_CLOCK_SPEED)
-		{
-			isAudioSampleReady = true;
-			audioElapsedTime -= CPU_CLOCK_SPEED;
 		}
 
 		totalSystemClockCycles++;
