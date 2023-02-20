@@ -38,6 +38,9 @@ void RewindManager::stackFrame()
 
     if (nes.cartridge->hasBatteryBackedRAM())
     {
+        if (!emuStateInfo.cartState.has_value())
+            emuStateInfo.cartState = nes::EmulatorStateInfo::CartridgeState{};
+
         auto& prgMemory = nes.cartridge->getPRGMemoryData();
         auto offsetWRAM = nes.cartridge->getNumPRGBanks() * convertKBToBytes(16);
         memcpy((*emuStateInfo.cartState).wram, prgMemory.data() + offsetWRAM, 0x2000);

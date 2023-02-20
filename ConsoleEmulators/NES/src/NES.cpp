@@ -122,7 +122,7 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
             if (nesEmulator->isAudioSampleReady)
             {
-                float sample = (nesEmulator->getAudioSample() * 2.0) - 1.0;               
+                float sample = static_cast<float>((nesEmulator->getAudioSample() * 2.0) - 1.0);               
                 samplesBuffer.push_back(sample);
                 //numSamples++;
                 //SDL_QueueAudio(audioDevId, (const void*) &sample, sizeof(uint8_t));
@@ -131,7 +131,7 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
             if (samplesBuffer.size() >= 1024)
             {
                 //std::cout << "Queued a buffer of: " << samplesBuffer.size() * sizeof(float) << " bytes in float format.\n";
-                SDL_QueueAudio(audioDevId, (const void*) samplesBuffer.data(), samplesBuffer.size() * sizeof(float));
+                SDL_QueueAudio(audioDevId, (const void*) samplesBuffer.data(), static_cast<uint32_t>(samplesBuffer.size() * sizeof(float)));
                 samplesBuffer.clear();
 
                 if (!isAudioPlaying)
