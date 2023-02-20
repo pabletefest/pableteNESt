@@ -74,11 +74,11 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
     case 0x4001:
         break;
     case 0x4002:
-        pulse1Sequencer.timerReload = ((0x0700 & pulse1Sequencer.pulseTimer) | (data & 0x00FF)); // Low 8 bits
+        pulse1Sequencer.timerReload = ((0x0700 & pulse1Sequencer.timerReload) | (data & 0x00FF)); // Low 8 bits
         break;
     case 0x4003:
-        pulse1Sequencer.timerReload = (((data & 0x07) << 8) | (pulse1Sequencer.pulseTimer & 0x00FF)); // High 3 bits
-        pulse1Sequencer.pulseTimer = pulse1Sequencer.timerReload;
+        pulse1Sequencer.timerReload = (((data & 0x07) << 8) | (pulse1Sequencer.timerReload & 0x00FF)); // High 3 bits
+        //pulse1Sequencer.pulseTimer = pulse1Sequencer.timerReload;
         pulse1Sequencer.lengthCounterLoad = (data >> 3);
         break;
     case 0x4004:

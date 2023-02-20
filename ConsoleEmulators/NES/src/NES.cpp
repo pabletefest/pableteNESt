@@ -100,14 +100,16 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
     wanted.freq = 44100;
     wanted.format = AUDIO_U8;
     wanted.channels = 1;
-    wanted.samples = 4096;
+    wanted.samples = 1024;
     wanted.callback = NULL;
     wanted.userdata = NULL;
 
     SDL_AudioSpec obtained;
 
-    SDL_AudioDeviceID audioDevId = SDL_OpenAudioDevice(NULL, 0, &wanted, &obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
-    SDL_PauseAudioDevice(audioDevId, 0);
+    SDL_AudioDeviceID audioDevId = SDL_OpenAudioDevice(NULL, 0, &wanted, &obtained, SDL_AUDIO_ALLOW_FORMAT_CHANGE | SDL_AUDIO_ALLOW_SAMPLES_CHANGE);
+    //SDL_PauseAudioDevice(audioDevId, 0);
+
+    bool isAudioPlaying = false;
 
     while (isRunning)
     {
@@ -121,6 +123,12 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
             {
                 uint8_t sample = nesEmulator->getAudioSample();
                 SDL_QueueAudio(audioDevId, (const void*) &sample, sizeof(uint8_t));
+            }
+
+            if (SDL_GetQueuedAudioSize(audioDevId) > 16 && !isAudioPlaying)
+            {
+                SDL_PauseAudioDevice(audioDevId, 0);
+                isAudioPlaying = true;
             }
 
         } while (!nesEmulator->ppu.frameCompleted);
@@ -156,6 +164,8 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
 int main(int argc, char* argv[])
 {
+    SDL_setenv("SDL_AUDIODRIVER", "directsound", 1);
+
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
         std::cout << "Video or Audio Initialization Error: " << SDL_GetError() << "\n";
@@ -265,7 +275,7 @@ int main(int argc, char* argv[])
     TTF_Font* pixelEmulatorFont = TTF_OpenFont("fonts/PixelEmulator.ttf", 20);
     SDL_Color whiteColour = { 255, 255, 255 };
 
-    SDL_AudioSpec wanted;
+    /*SDL_AudioSpec wanted;
     SDL_zero(wanted);
     wanted.freq = 44100;
     wanted.format = AUDIO_F32;
@@ -274,13 +284,13 @@ int main(int argc, char* argv[])
     wanted.callback = audioCallback;
     wanted.userdata = NULL;
 
-    SDL_AudioSpec desired;
+    SDL_AudioSpec desired;*/
 
-    const int count = SDL_GetNumAudioDevices(0);
+    /*const int count = SDL_GetNumAudioDevices(0);
     for (int i = 0; i < count; i++)
         printf("%s\n", SDL_GetAudioDeviceName(i, 0));
 
-    SDL_AudioDeviceID audioDevId =  SDL_OpenAudioDevice(NULL, 0, &wanted, &desired, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+    SDL_AudioDeviceID audioDevId =  SDL_OpenAudioDevice(NULL, 0, &wanted, &desired, SDL_AUDIO_ALLOW_FORMAT_CHANGE);*/
     //SDL_PauseAudioDevice(audioDevId, 0);
 
     //SDL_Thread* emulatorThread = SDL_CreateThread(emulatorThreadCallback, "EmulatorThread", (void*) &nes);
