@@ -1,5 +1,11 @@
 #include "apu2A03.h"
 
+namespace nes
+{
+    static uint8_t lengthCounterTable[32] = {10, 254, 20, 2, 40, 4, 80, 6, 160, 8, 60, 10, 14, 12, 26, 14,
+                                      12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30};
+}
+
 nes::APU::APU()
 {
 }
@@ -80,7 +86,7 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
     case 0x4003:
         pulse1Sequencer.timerReload = (((data & 0x07) << 8) | (pulse1Sequencer.timerReload & 0x00FF)); // High 3 bits
         //pulse1Sequencer.pulseTimer = pulse1Sequencer.timerReload;
-        pulse1Sequencer.lengthCounterLoad = (data >> 3);
+        pulse1Sequencer.lengthCounterLoad = lengthCounterTable[(data >> 3)];
         break;
     case 0x4004:
         pulse2Sequencer.dutyCycleTable = (data >> 6);
@@ -92,7 +98,7 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         break;
     case 0x4007:
         pulse2Sequencer.timerReload = (((data & 0x07) << 8) | (pulse2Sequencer.timerReload & 0x00FF)); // High 3 bits
-        pulse2Sequencer.lengthCounterLoad = (data >> 3);
+        pulse2Sequencer.lengthCounterLoad = lengthCounterTable[(data >> 3)];
         break;
     case 0x4008:
         break;
