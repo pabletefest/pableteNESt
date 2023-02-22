@@ -599,7 +599,7 @@ namespace nes
 				pixelsFrameBuffer[scanline * 256 + (cycle - 1)] =/* isSprPixel ? nesPalToRGBAPalArray[0x30] : */getRGBAFromNesPalette(finalPalette, finalPixel);
 
 				// OVERSCAN AREA (8 black pixels on each edge)
-				if ((cycle <= (1 + 8)) || (cycle > (256 - 8)))
+				if ((cycle <= 8) || (cycle > (256 - 8)))
 					pixelsFrameBuffer[scanline * 256 + (cycle - 1)] = nesPalToRGBAPalArray[0x3F];
 
 				if (scanline < 8 || scanline >= 232)
