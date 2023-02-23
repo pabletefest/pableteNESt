@@ -25,45 +25,45 @@ void nes::APU::clock()
     {
         pulse1Sequencer.clock();
         pulse2Sequencer.clock();
-    }
 
-    if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][0]) // 3728
-    {
-
-    }
-
-    if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][1]) // 7456
-    {
-        pulse1LengthCounter.clock();
-        pulse2LengthCounter.clock();
-    }
-
-    if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][2]) // 11185
-    {
-
-    }
-
-    if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][3]) // 14914
-    {
-        if (frameCounter.mode == 0) // Only in mode 0: 4-step
+        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][0]) // 3728
         {
-            pulse1LengthCounter.clock();
-            pulse2LengthCounter.clock();
-            elapsedCycles = 0;
+
         }
-    }
 
-    // Only in mode 1: 5-step
-    if (frameCounter.mode)
-    {
-        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][4]) // 18640
+        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][1]) // 7456
         {
             pulse1LengthCounter.clock();
             pulse2LengthCounter.clock();
-            elapsedCycles = 0;
+        }
 
-            if (frameCounter.interruptInhibitFlag == 0)
-                irq = true;
+        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][2]) // 11185
+        {
+
+        }
+
+        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][3]) // 14914
+        {
+            if (frameCounter.mode == 0) // Only in mode 0: 4-step
+            {
+                pulse1LengthCounter.clock();
+                pulse2LengthCounter.clock();
+                elapsedCycles = 0;
+            }
+        }
+
+        // Only in mode 1: 5-step
+        if (frameCounter.mode)
+        {
+            if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][4]) // 18640
+            {
+                pulse1LengthCounter.clock();
+                pulse2LengthCounter.clock();
+                elapsedCycles = 0;
+
+                if (frameCounter.interruptInhibitFlag == 0)
+                    irq = true;
+            }
         }
     }
 
