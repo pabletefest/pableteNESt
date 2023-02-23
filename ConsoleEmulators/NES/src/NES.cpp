@@ -169,7 +169,12 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
 int main(int argc, char* argv[])
 {
+
+#ifdef _WIN32
     SDL_setenv("SDL_AUDIODRIVER", "directsound", 1);
+#endif
+
+    //SDL_setenv("SDL_AUDIODRIVER", "directsound", 1);
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
