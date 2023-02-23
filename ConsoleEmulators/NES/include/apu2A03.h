@@ -25,6 +25,9 @@ namespace nes
         uint8_t cpuRead(uint16_t address);
         void    cpuWrite(uint16_t address, uint8_t  data);
 
+    public:
+        bool irq = false;
+
     private:
         uint64_t elapsedCycles = 0;
 
@@ -56,21 +59,24 @@ namespace nes
             //uint8_t sequence;
             uint16_t pulseTimer = 0x0000;
             uint16_t timerReload = 0x0000;
-            uint8_t lengthCounterLoad = 0;
+            uint8_t lengthCounterLoad = 0; // Copy of lengthCounter load value
             uint8_t pulseChannelOutput = 0x00;
             uint8_t tableIndex = 0;
 
             void clock()
             {
-                if (pulseTimer > 0)
+                if (enabled)
                 {
-                    pulseTimer--;
-                    pulseChannelOutput = dutyCyclePulseTables[dutyCycleTable][tableIndex & 7];
-                }
-                else
-                {
-                    pulseTimer = timerReload;
-                    tableIndex++;
+                    if (pulseTimer > 0)
+                    {
+                        pulseTimer--;
+                        pulseChannelOutput = dutyCyclePulseTables[dutyCycleTable][tableIndex & 7];
+                    }
+                    else
+                    {
+                        pulseTimer = timerReload;
+                        tableIndex++;
+                    }
                 }
             }
 
@@ -82,5 +88,35 @@ namespace nes
 
         PulseSequencer pulse1Sequencer;
         PulseSequencer pulse2Sequencer;
+
+        struct LengthCounter
+        {
+            bool enabled = false;
+            uint8_t internalCounter = 0x00;
+            bool haltFlag = false;
+
+            void clock()
+            {
+                if (enabled)
+                {
+                    if (internalCounter > 0 && !haltFlag)
+                    {
+                        internalCounter--;
+                    }
+                }
+            }
+        };
+
+        LengthCounter pulse1LengthCounter;
+        LengthCounter pulse2LengthCounter;
+
+        struct FrameCounterBits
+        {
+            uint8_t mode;
+            uint8_t interruptInhibitFlag;
+        };
+
+        FrameCounterBits frameCounter;
+        //bool pendingCyclesCounterReset = false;
     };
 }

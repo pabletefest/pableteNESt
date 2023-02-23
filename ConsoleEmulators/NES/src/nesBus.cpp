@@ -149,6 +149,12 @@ namespace nes
 			ppu.nmi = false;
 		}
 
+		if (apu.irq)
+		{
+			cpu.irq();
+			apu.irq = false;
+		}
+
 		totalSystemClockCycles++;
 	}
 
