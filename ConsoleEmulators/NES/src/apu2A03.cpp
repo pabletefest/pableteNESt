@@ -21,45 +21,60 @@ void nes::APU::reset()
 
 void nes::APU::clock()
 {
-    if (elapsedCycles % 2 == 1) // Every other cycle work
+    if (elapsedCycles % 2 == 0) // Every other cpu cycle
     {
         pulse1Sequencer.clock();
         pulse2Sequencer.clock();
 
-        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][0]) // 3728
-        {
+        elapsedFrameCounterCycles++;
 
+        if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][0]) // 3728
+        {
+            pulse1Envelope.clock();
+            pulse2Envelope.clock();
         }
 
-        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][1]) // 7456
+        if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][1]) // 7456
         {
             pulse1LengthCounter.clock();
             pulse2LengthCounter.clock();
+
+            pulse1Envelope.clock();
+            pulse2Envelope.clock();
         }
 
-        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][2]) // 11185
+        if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][2]) // 11185
         {
-
+            pulse1Envelope.clock();
+            pulse2Envelope.clock();
         }
 
-        if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][3]) // 14914
+        if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][3]) // 14914
         {
             if (frameCounter.mode == 0) // Only in mode 0: 4-step
             {
                 pulse1LengthCounter.clock();
                 pulse2LengthCounter.clock();
-                elapsedCycles = 0;
+
+                pulse1Envelope.clock();
+                pulse2Envelope.clock();
+
+                elapsedFrameCounterCycles = 0;
             }
         }
 
         // Only in mode 1: 5-step
         if (frameCounter.mode)
         {
-            if (elapsedCycles == stepSequenceModeTables[frameCounter.mode][4]) // 18640
+            if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][4]) // 18640
             {
                 pulse1LengthCounter.clock();
                 pulse2LengthCounter.clock();
-                elapsedCycles = 0;
+
+                pulse1Envelope.clock();
+                pulse2Envelope.clock();
+
+                elapsedFrameCounterCycles = 0;
 
                 if (frameCounter.interruptInhibitFlag == 0)
                     irq = true;
@@ -76,8 +91,8 @@ float nes::APU::getOutputAPU() const
     double pulse_out = 0.0;
     double tnd_out = 0.0;
 
-    uint8_t pulse1Output = (pulse1LengthCounter.internalCounter > 0 && pulse1Sequencer.pulseTimer > 8) ? pulse1Sequencer.output() : 0;
-    uint8_t pulse2Output = (pulse2LengthCounter.internalCounter > 0 && pulse2Sequencer.pulseTimer > 8) ? pulse2Sequencer.output() : 0;
+    uint8_t pulse1Output = (pulse1LengthCounter.internalCounter > 0 && pulse1Sequencer.pulseTimer > 8) ? pulse1Sequencer.output(pulse1Envelope) : 0;
+    uint8_t pulse2Output = (pulse2LengthCounter.internalCounter > 0 && pulse2Sequencer.pulseTimer > 8) ? pulse2Sequencer.output(pulse2Envelope) : 0;
 
     uint8_t pulseChannelsOutput = pulse1Output + pulse2Output;
 
@@ -129,6 +144,9 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
 
         pulse1Sequencer.dutyCycleTable = (data >> 6);
         pulse1LengthCounter.haltFlag = (data & 0x20) > 0;
+        pulse1Envelope.loopFlag = (data & 0x20) > 0;
+        pulse1Envelope.constantVolumeFlag = (data & 0x10) > 0;
+        pulse1Envelope.envelopeDividerPeriodVolume = data & 0x0F;
         break;
     case 0x4001:
         break;
@@ -140,10 +158,14 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         //pulse1Sequencer.pulseTimer = pulse1Sequencer.timerReload;
         pulse1Sequencer.lengthCounterLoad = lengthCounterTable[(data >> 3)];
         pulse1LengthCounter.internalCounter = lengthCounterTable[(data >> 3)];
+        pulse1Envelope.startFlag = true;
         break;
     case 0x4004:
         pulse2Sequencer.dutyCycleTable = (data >> 6);
         pulse2LengthCounter.haltFlag = (data & 0x20) > 0;
+        pulse2Envelope.loopFlag = (data & 0x20) > 0;
+        pulse2Envelope.constantVolumeFlag = (data & 0x10) > 0;
+        pulse2Envelope.envelopeDividerPeriodVolume = data & 0x0F;
         break;
     case 0x4005:
         break;
@@ -154,6 +176,7 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         pulse2Sequencer.timerReload = (((data & 0x07) << 8) | (pulse2Sequencer.timerReload & 0x00FF)); // High 3 bits
         pulse2Sequencer.lengthCounterLoad = lengthCounterTable[(data >> 3)];
         pulse2LengthCounter.internalCounter = lengthCounterTable[(data >> 3)];
+        pulse2Envelope.startFlag = true;
         break;
     case 0x4008:
         break;

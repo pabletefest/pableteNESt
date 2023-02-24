@@ -30,6 +30,7 @@ namespace nes
 
     private:
         uint64_t elapsedCycles = 0;
+        uint64_t elapsedFrameCounterCycles = 0;
 
         /*struct PulseChannelParameters
         {
@@ -51,6 +52,57 @@ namespace nes
         };
 
         PulseChannelParameters pulse1Parameters;*/
+
+
+        struct EnvelopeGenerator
+        {
+            bool startFlag = false;
+            uint8_t divider = 0x00;
+            uint8_t decayLevelCounter = 0x00;
+            bool constantVolumeFlag = false;
+            bool loopFlag = false;
+            uint8_t envelopeDividerPeriodVolume = 0x00;
+
+            void clock()
+            {
+                if (!startFlag)
+                {
+                    if (divider > 0)
+                        divider--;
+
+                    if (divider == 0)
+                    {
+                        divider = envelopeDividerPeriodVolume;
+
+                        if (decayLevelCounter > 0)
+                        {
+                            decayLevelCounter--;
+                        }
+                        else if (loopFlag)
+                        {
+                            decayLevelCounter = 15;
+                        }
+                    }
+                }
+                else
+                {
+                    startFlag = false;
+                    decayLevelCounter = 15;
+                    divider = envelopeDividerPeriodVolume;
+                }
+            }
+
+            uint8_t output() const
+            {
+                if (constantVolumeFlag)
+                    return envelopeDividerPeriodVolume;
+
+                return decayLevelCounter;
+            }
+        };
+
+        EnvelopeGenerator pulse1Envelope;
+        EnvelopeGenerator pulse2Envelope;
 
         struct PulseSequencer
         {
@@ -80,9 +132,9 @@ namespace nes
                 }
             }
 
-            uint8_t output() const
+            uint8_t output(const EnvelopeGenerator& envelope) const
             {
-                return pulseChannelOutput * 15;
+                return pulseChannelOutput * envelope.output();
             }
         };
 
@@ -112,8 +164,8 @@ namespace nes
 
         struct FrameCounterBits
         {
-            uint8_t mode;
-            uint8_t interruptInhibitFlag;
+            uint8_t mode = 0;
+            uint8_t interruptInhibitFlag = 0;
         };
 
         FrameCounterBits frameCounter;

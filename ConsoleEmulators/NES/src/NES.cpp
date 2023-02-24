@@ -146,16 +146,23 @@ int emulatorThreadCallback(void* emulatorPtr, const std::atomic<bool>& isRunning
 
         if (rewindHeld)
         {
+            if (SDL_GetAudioDeviceStatus(audioDevId) == SDL_AUDIO_PLAYING)
+                SDL_PauseAudioDevice(audioDevId, 1);
+
             if (!rewindManager.unstackFrame())
             {
                 rewindHeld = false;
             }
 
             nesEmulator->controllers[0] = 0x00;
+            SDL_ClearQueuedAudio(audioDevId);
         }
         else
         {
             rewindManager.stackFrame();
+
+            if (SDL_GetAudioDeviceStatus(audioDevId) == SDL_AUDIO_PAUSED)
+                SDL_PauseAudioDevice(audioDevId, 0);
         }
 
         //SDL_Delay((1000 / 60) - (SDL_GetTicks64() - startFrameTicks));
