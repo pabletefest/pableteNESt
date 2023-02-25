@@ -113,7 +113,7 @@ float nes::APU::getOutputAPU() const
 
     if (pulseChannelsOutput > 0)
     {
-        pulse_out = 95.88 / ((8128 / pulseChannelsOutput) + 100);
+        pulse_out = 95.88f / ((8128 / pulseChannelsOutput) + 100);
     }
 
     uint8_t triangleOutput = triangleSequencer.output(); // if (triangleLengthCounter.internalCounter > 0 && triangleLinearCounter.internalCounter > 0), the channel is not silenced, otherwise output is 0 
@@ -124,7 +124,7 @@ float nes::APU::getOutputAPU() const
 
     if (tndChannelsOutput > 0)
     {
-        tnd_out = 159.79 / ((1 / tndChannelsOutput) + 100);
+        tnd_out = 159.79f / ((1 / tndChannelsOutput) + 100);
     }
 
     output = pulse_out + tnd_out;
@@ -210,12 +210,12 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         triangleLinearCounter.counterReloadValue = data & 0x7F;
         break;
     case 0x400A:
-        triangleSequencer.timerReload = ((0x0700 & triangleSequencer.timerReload) | (data & 0x00FF)); // Low 8 bits
+        triangleSequencer.timerReload = ((0x0700 & triangleSequencer.timerReload) | (data & 0x00FF)); // Low 8 bits     
+        break;
+    case 0x400B:
         triangleSequencer.timerReload = (((data & 0x07) << 8) | (triangleSequencer.timerReload & 0x00FF)); // High 3 bits
         triangleLengthCounter.internalCounter = lengthCounterTable[(data >> 3)];
         triangleLinearCounter.reloadFlag = true;
-        break;
-    case 0x400B:
         break;
     case 0x400C:
         break;
