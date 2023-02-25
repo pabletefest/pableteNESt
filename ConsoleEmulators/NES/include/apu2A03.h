@@ -9,6 +9,9 @@ namespace nes
         {1, 0, 0, 1, 1, 1, 1, 1}  // 25% negated
     };
 
+    static uint8_t triangleStepSequences[32] = { 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,
+                                                0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15 };
+
     // Audio processor included in the 2A03 chip (CPU + APU)
     class APU
     {
@@ -141,13 +144,51 @@ namespace nes
         PulseSequencer pulse1Sequencer;
         PulseSequencer pulse2Sequencer;
 
-        struct LengthCounter
+        struct TriangleSequencer
         {
             bool enabled = false;
+            uint16_t timer = 0x0000;
+            uint16_t timerReload = 0x0000;
+            uint8_t triangleOutput = 0x00;
+            uint8_t stepSequenceIndex = 0;
+
+            void clock(bool countersNonZero)
+            {
+                if (enabled)
+                {
+                    if (countersNonZero)
+                    {
+                        if (timer > 0)
+                        {
+                            timer--;
+                            triangleOutput = triangleStepSequences[stepSequenceIndex & 0x1F];
+                        }
+                        else
+                        {
+                            timer = timerReload;
+                            stepSequenceIndex++;
+                        }
+                    }
+                }
+            }
+
+            uint8_t output() const
+            {
+                if (timer < 2)
+                    return 0;
+
+                return triangleOutput;
+            }
+        };
+
+        TriangleSequencer triangleSequencer;
+
+        struct LengthCounter
+        {
             uint8_t internalCounter = 0x00;
             bool haltFlag = false;
 
-            void clock()
+            void clock(bool enabled)
             {
                 if (enabled)
                 {
@@ -156,11 +197,44 @@ namespace nes
                         internalCounter--;
                     }
                 }
+                else
+                {
+                    internalCounter = 0;
+                }
             }
         };
 
         LengthCounter pulse1LengthCounter;
         LengthCounter pulse2LengthCounter;
+        LengthCounter triangleLengthCounter;
+
+        struct LinearCounter
+        {
+            bool controlFlag = false;
+            uint8_t internalCounter = 0x00;
+            uint8_t counterReloadValue = 0x00;
+            bool reloadFlag = false;
+
+            void clock(bool enabled)
+            {
+                if (enabled)
+                {
+                    if (reloadFlag)
+                        internalCounter = counterReloadValue;
+                    else if (internalCounter > 0)
+                        internalCounter--;
+
+                    if (!controlFlag)
+                        reloadFlag = false;
+                }
+                else
+                {
+                    internalCounter = 0;
+                }
+            }
+        };
+
+        LinearCounter triangleLinearCounter;
 
         struct FrameCounterBits
         {

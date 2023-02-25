@@ -21,6 +21,8 @@ void nes::APU::reset()
 
 void nes::APU::clock()
 {
+    triangleSequencer.clock((triangleLengthCounter.internalCounter > 0 && triangleLinearCounter.internalCounter > 0));
+
     if (elapsedCycles % 2 == 0) // Every other cpu cycle
     {
         pulse1Sequencer.clock();
@@ -32,32 +34,42 @@ void nes::APU::clock()
         {
             pulse1Envelope.clock();
             pulse2Envelope.clock();
+
+            triangleLinearCounter.clock(triangleSequencer.enabled);
         }
 
         if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][1]) // 7456
         {
-            pulse1LengthCounter.clock();
-            pulse2LengthCounter.clock();
+            pulse1LengthCounter.clock(pulse1Sequencer.enabled);
+            pulse2LengthCounter.clock(pulse1Sequencer.enabled);
+            triangleLengthCounter.clock(triangleSequencer.enabled);
 
             pulse1Envelope.clock();
             pulse2Envelope.clock();
+
+            triangleLinearCounter.clock(triangleSequencer.enabled);
         }
 
         if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][2]) // 11185
         {
             pulse1Envelope.clock();
             pulse2Envelope.clock();
+
+            triangleLinearCounter.clock(triangleSequencer.enabled);
         }
 
         if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][3]) // 14914
         {
             if (frameCounter.mode == 0) // Only in mode 0: 4-step
             {
-                pulse1LengthCounter.clock();
-                pulse2LengthCounter.clock();
+                pulse1LengthCounter.clock(pulse1Sequencer.enabled);
+                pulse2LengthCounter.clock(pulse1Sequencer.enabled);
+                triangleLengthCounter.clock(triangleSequencer.enabled);
 
                 pulse1Envelope.clock();
                 pulse2Envelope.clock();
+
+                triangleLinearCounter.clock(triangleSequencer.enabled);
 
                 elapsedFrameCounterCycles = 0;
             }
@@ -68,11 +80,14 @@ void nes::APU::clock()
         {
             if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][4]) // 18640
             {
-                pulse1LengthCounter.clock();
-                pulse2LengthCounter.clock();
+                pulse1LengthCounter.clock(pulse1Sequencer.enabled);
+                pulse2LengthCounter.clock(pulse1Sequencer.enabled);
+                triangleLengthCounter.clock(triangleSequencer.enabled);
 
                 pulse1Envelope.clock();
                 pulse2Envelope.clock();
+
+                triangleLinearCounter.clock(triangleSequencer.enabled);
 
                 elapsedFrameCounterCycles = 0;
 
@@ -87,9 +102,9 @@ void nes::APU::clock()
 
 float nes::APU::getOutputAPU() const
 {
-    double output = 0.0;
-    double pulse_out = 0.0;
-    double tnd_out = 0.0;
+    float output = 0.0f;
+    float pulse_out = 0.0f;
+    float tnd_out = 0.0f;
 
     uint8_t pulse1Output = (pulse1LengthCounter.internalCounter > 0 && pulse1Sequencer.pulseTimer > 8) ? pulse1Sequencer.output(pulse1Envelope) : 0;
     uint8_t pulse2Output = (pulse2LengthCounter.internalCounter > 0 && pulse2Sequencer.pulseTimer > 8) ? pulse2Sequencer.output(pulse2Envelope) : 0;
@@ -101,9 +116,20 @@ float nes::APU::getOutputAPU() const
         pulse_out = 95.88 / ((8128 / pulseChannelsOutput) + 100);
     }
 
+    uint8_t triangleOutput = triangleSequencer.output(); // if (triangleLengthCounter.internalCounter > 0 && triangleLinearCounter.internalCounter > 0), the channel is not silenced, otherwise output is 0 
+    uint8_t noiseOutput = 0;
+    uint8_t dmcOutput = 0;
+
+    float tndChannelsOutput = ((float)triangleOutput / 8227) + ((float)noiseOutput / 12241) + ((float)dmcOutput / 22638);
+
+    if (tndChannelsOutput > 0)
+    {
+        tnd_out = 159.79 / ((1 / tndChannelsOutput) + 100);
+    }
+
     output = pulse_out + tnd_out;
 
-    return static_cast<float>(output)/* * 255*/;
+    return output;
 }
 
 uint8_t nes::APU::cpuRead(uint16_t address)
@@ -179,8 +205,15 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         pulse2Envelope.startFlag = true;
         break;
     case 0x4008:
+        triangleLengthCounter.haltFlag = (data & 0x80) > 0;
+        triangleLinearCounter.controlFlag = (data & 0x80) > 0;
+        triangleLinearCounter.counterReloadValue = data & 0x7F;
         break;
     case 0x400A:
+        triangleSequencer.timerReload = ((0x0700 & triangleSequencer.timerReload) | (data & 0x00FF)); // Low 8 bits
+        triangleSequencer.timerReload = (((data & 0x07) << 8) | (triangleSequencer.timerReload & 0x00FF)); // High 3 bits
+        triangleLengthCounter.internalCounter = lengthCounterTable[(data >> 3)];
+        triangleLinearCounter.reloadFlag = true;
         break;
     case 0x400B:
         break;
@@ -206,6 +239,10 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         pulse2Sequencer.enabled = (data & 0x02) > 0;
         if (!pulse2Sequencer.enabled)
             pulse2LengthCounter.internalCounter = 0;
+
+        triangleSequencer.enabled = (data & 0x04) > 0;
+        if (!triangleSequencer.enabled)
+            triangleLengthCounter.internalCounter = 0;
         break;
     case 0x4017:
         frameCounter.mode = data >> 7;
