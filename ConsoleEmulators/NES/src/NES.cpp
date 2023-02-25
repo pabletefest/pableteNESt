@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("tests/nestest.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Donkey Kong.nes");
-    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Pac-Man.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Ice Climber.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Space Invaders.nes");
@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Empire Invaders (Space Invaders Hack).nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Contra.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Tetris.nes");
-    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales.nes");
+    std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/DuckTales 2.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Arkanoid.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Gradius.nes");
@@ -247,6 +247,7 @@ int main(int argc, char* argv[])
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Castlevania.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Super Mario Bros + Duck Hunt.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Sweet Home (Japan).nes");
+    //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Solstice - The Quest for the Staff of Demnos.nes");
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior.nes"); // Dragon Quest
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior II.nes"); // Dragon Quest 2
     //std::shared_ptr<nes::Cartridge> cartridge = std::make_shared<nes::Cartridge>("roms/Dragon Warrior III.nes"); // Dragon Quest 3
