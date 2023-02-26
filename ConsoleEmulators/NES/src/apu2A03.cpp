@@ -16,6 +16,7 @@ nes::APU::APU()
 void nes::APU::reset()
 {
     elapsedCycles = 0;
+    noiseChannelLFSR.shiftRegister = 0x0001;
     cpuWrite(0x4015, 0x00); // Power-up and reset have the effect of writing $00, silencing all channels.
 }
 
@@ -27,6 +28,7 @@ void nes::APU::clock()
     {
         pulse1Sequencer.clock();
         pulse2Sequencer.clock();
+        noiseChannelLFSR.clock();
 
         elapsedFrameCounterCycles++;
 
@@ -34,6 +36,7 @@ void nes::APU::clock()
         {
             pulse1Envelope.clock();
             pulse2Envelope.clock();
+            noiseEnvelope.clock();
 
             triangleLinearCounter.clock(triangleSequencer.enabled);
         }
@@ -43,9 +46,11 @@ void nes::APU::clock()
             pulse1LengthCounter.clock(pulse1Sequencer.enabled);
             pulse2LengthCounter.clock(pulse1Sequencer.enabled);
             triangleLengthCounter.clock(triangleSequencer.enabled);
+            noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 
             pulse1Envelope.clock();
             pulse2Envelope.clock();
+            noiseEnvelope.clock();
 
             triangleLinearCounter.clock(triangleSequencer.enabled);
         }
@@ -54,6 +59,7 @@ void nes::APU::clock()
         {
             pulse1Envelope.clock();
             pulse2Envelope.clock();
+            noiseEnvelope.clock();
 
             triangleLinearCounter.clock(triangleSequencer.enabled);
         }
@@ -65,9 +71,11 @@ void nes::APU::clock()
                 pulse1LengthCounter.clock(pulse1Sequencer.enabled);
                 pulse2LengthCounter.clock(pulse1Sequencer.enabled);
                 triangleLengthCounter.clock(triangleSequencer.enabled);
+                noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 
                 pulse1Envelope.clock();
                 pulse2Envelope.clock();
+                noiseEnvelope.clock();
 
                 triangleLinearCounter.clock(triangleSequencer.enabled);
 
@@ -83,9 +91,11 @@ void nes::APU::clock()
                 pulse1LengthCounter.clock(pulse1Sequencer.enabled);
                 pulse2LengthCounter.clock(pulse1Sequencer.enabled);
                 triangleLengthCounter.clock(triangleSequencer.enabled);
+                noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 
                 pulse1Envelope.clock();
                 pulse2Envelope.clock();
+                noiseEnvelope.clock();
 
                 triangleLinearCounter.clock(triangleSequencer.enabled);
 
@@ -117,7 +127,7 @@ float nes::APU::getOutputAPU() const
     }
 
     uint8_t triangleOutput = triangleSequencer.output(); // if (triangleLengthCounter.internalCounter > 0 && triangleLinearCounter.internalCounter > 0), the channel is not silenced, otherwise output is 0 
-    uint8_t noiseOutput = 0;
+    uint8_t noiseOutput = (noiseLengthCounter.internalCounter > 0) ? noiseChannelLFSR.output(noiseEnvelope) : 0;
     uint8_t dmcOutput = 0;
 
     float tndChannelsOutput = ((float)triangleOutput / 8227) + ((float)noiseOutput / 12241) + ((float)dmcOutput / 22638);
@@ -218,10 +228,21 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         triangleLinearCounter.reloadFlag = true;
         break;
     case 0x400C:
+        noiseLengthCounter.haltFlag = (data & 0x20) > 0;
+        noiseEnvelope.loopFlag = (data & 0x20) > 0;
+        noiseEnvelope.constantVolumeFlag = (data & 0x10) > 0;
+        noiseEnvelope.envelopeDividerPeriodVolume = data & 0x0F;
         break;
     case 0x400D:
         break;
+    case 0x400E:
+        noiseChannelLFSR.modeFlag = (data & 0x80) > 0;
+        noiseChannelLFSR.timer = noisePeriodsTable[data & 0x0F];
+        noiseChannelLFSR.timerReload = noisePeriodsTable[data & 0x0F]; // To reload the timer when reaching 0
+        break;
     case 0x400F:
+        noiseLengthCounter.internalCounter = lengthCounterTable[(data >> 3)];
+        noiseEnvelope.startFlag = true;
         break;
     case 0x4010:
         break;
@@ -243,6 +264,10 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         triangleSequencer.enabled = (data & 0x04) > 0;
         if (!triangleSequencer.enabled)
             triangleLengthCounter.internalCounter = 0;
+
+        noiseChannelLFSR.enabled = (data & 0x08) > 0;
+        if (!noiseChannelLFSR.enabled)
+            noiseLengthCounter.internalCounter = 0;
         break;
     case 0x4017:
         frameCounter.mode = data >> 7;

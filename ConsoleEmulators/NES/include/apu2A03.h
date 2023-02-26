@@ -3,14 +3,16 @@
 namespace nes
 {
     static uint8_t dutyCyclePulseTables[4][8] = {
-        {0, 1, 0, 0, 0, 0, 0, 0}, // 12.5%
-        {0, 1, 1, 0, 0, 0, 0, 0}, // 25%
-        {0, 1, 1, 1, 1, 0, 0, 0}, // 50%
-        {1, 0, 0, 1, 1, 1, 1, 1}  // 25% negated
+        { 0, 1, 0, 0, 0, 0, 0, 0 }, // 12.5%
+        { 0, 1, 1, 0, 0, 0, 0, 0 }, // 25%
+        { 0, 1, 1, 1, 1, 0, 0, 0 }, // 50%
+        { 1, 0, 0, 1, 1, 1, 1, 1 }  // 25% negated
     };
 
     static uint8_t triangleStepSequences[32] = { 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0,
                                                 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15 };
+
+    static uint16_t noisePeriodsTable[16] = { 4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068 };
 
     // Audio processor included in the 2A03 chip (CPU + APU)
     class APU
@@ -106,6 +108,7 @@ namespace nes
 
         EnvelopeGenerator pulse1Envelope;
         EnvelopeGenerator pulse2Envelope;
+        EnvelopeGenerator noiseEnvelope;
 
         struct PulseSequencer
         {
@@ -183,6 +186,43 @@ namespace nes
 
         TriangleSequencer triangleSequencer;
 
+        struct NoiseLFSR
+        {
+            bool enabled = false;
+            bool modeFlag = false;
+            uint8_t timer = 0x00;
+            uint8_t timerReload = 0x00;
+            uint16_t shiftRegister = 1;
+
+            void clock()
+            {
+                if (enabled)
+                {
+                    if (timer > 0)
+                    {
+                        timer--;
+                    }
+                    else
+                    {
+                        timer = timerReload;
+
+                        //if Mode flag is set, XOR bit 0 and bit 6, otherwise, bit 0 with bit 1
+                        uint16_t feedback = (modeFlag) ? ((shiftRegister & 0x0001) ^ ((shiftRegister & 0x0040) >> 6)) : ((shiftRegister & 0x0001) ^ ((shiftRegister & 0x0002) >> 1));
+                        shiftRegister >>= 1;
+                        shiftRegister |= (feedback << 14);
+                    }
+                }
+            }   
+
+            uint8_t output(const EnvelopeGenerator& envelope) const
+            {
+                // This returns 0 if bit 0 is set
+                return (~shiftRegister & 0x0001) * envelope.output(); 
+            }
+        };
+
+        NoiseLFSR noiseChannelLFSR;
+
         struct LengthCounter
         {
             uint8_t internalCounter = 0x00;
@@ -207,6 +247,7 @@ namespace nes
         LengthCounter pulse1LengthCounter;
         LengthCounter pulse2LengthCounter;
         LengthCounter triangleLengthCounter;
+        LengthCounter noiseLengthCounter;
 
         struct LinearCounter
         {
