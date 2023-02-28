@@ -110,6 +110,11 @@ namespace nes
         EnvelopeGenerator pulse2Envelope;
         EnvelopeGenerator noiseEnvelope;
 
+        enum PulseIdentifier
+        {
+            PULSE1, PULSE2
+        };
+
         struct PulseSequencer
         {
             bool enabled = false;
@@ -120,10 +125,63 @@ namespace nes
             uint8_t lengthCounterLoad = 0; // Copy of lengthCounter load value
             uint8_t pulseChannelOutput = 0x00;
             uint8_t tableIndex = 0;
+            PulseIdentifier pulseId;
+
+            struct SweepUnit
+            {
+                bool enabled = false;
+                uint8_t divider = 0x00;
+                uint8_t dividerPeriodReload = 0x00;
+                bool reloadFlag = false;
+                bool negateFlag = false;
+                uint8_t shiftCount = 0x00;
+                uint16_t targetPeriod = 0x0000;
+                uint16_t changeAmount = 0x0000;
+                bool muted = false;
+                
+                SweepUnit() = delete;
+
+                SweepUnit(PulseSequencer& channel)
+                    : pulseChannel(channel) { }
+
+                void clock()
+                {
+                    if (divider == 0 && this->enabled && !muted)
+                    {
+                        pulseChannel.pulseTimer = targetPeriod;
+                    }
+
+                    if (divider == 0 || reloadFlag)
+                    {
+                        divider = dividerPeriodReload;
+                        reloadFlag = false;
+                    }
+                    else
+                    {
+                        divider--;
+                    }
+                }
+
+                void calculateTargetPeriod()
+                {
+                    changeAmount = pulseChannel.pulseTimer >> shiftCount;
+                    muted = (pulseChannel.pulseTimer < 8) || (targetPeriod > 0x07FF);
+
+                    changeAmount *= (negateFlag) ? -1 : 1;
+
+                    if (negateFlag && pulseChannel.pulseId == PULSE1)
+                        changeAmount -= 1;
+
+                    targetPeriod = pulseChannel.pulseTimer + changeAmount;
+                }
+
+            private:
+                PulseSequencer& pulseChannel;
+            }pulseSweeper = SweepUnit(*this);
 
             void clock()
             {
-                if (enabled)
+                if (this->enabled)
                 {
                     if (pulseTimer > 0)
                     {
@@ -140,6 +198,9 @@ namespace nes
 
             uint8_t output(const EnvelopeGenerator& envelope) const
             {
+                if (pulseSweeper.muted)
+                    return 0;
+
                 return pulseChannelOutput * envelope.output();
             }
         };
@@ -190,8 +251,8 @@ namespace nes
         {
             bool enabled = false;
             bool modeFlag = false;
-            uint8_t timer = 0x00;
-            uint8_t timerReload = 0x00;
+            uint16_t timer = 0x0000;
+            uint16_t timerReload = 0x0000;
             uint16_t shiftRegister = 1;
 
             void clock()

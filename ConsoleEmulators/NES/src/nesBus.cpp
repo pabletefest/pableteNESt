@@ -86,6 +86,7 @@ namespace nes
 	{
 		ppu.reset();
 		cpu.reset();
+		apu.reset();
 		totalSystemClockCycles = 0;
 		dmaPageHiAddr = 0x00;
 		dmaInternalLoAddr = 0x00;

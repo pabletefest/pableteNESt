@@ -11,11 +11,15 @@ namespace nes
 
 nes::APU::APU()
 {
+    pulse1Sequencer.pulseId = PULSE1;
+    pulse2Sequencer.pulseId = PULSE2;
 }
 
 void nes::APU::reset()
 {
     elapsedCycles = 0;
+    pulse1Sequencer.pulseId = PULSE1;
+    pulse2Sequencer.pulseId = PULSE2;
     noiseChannelLFSR.shiftRegister = 0x0001;
     cpuWrite(0x4015, 0x00); // Power-up and reset have the effect of writing $00, silencing all channels.
 }
@@ -48,6 +52,9 @@ void nes::APU::clock()
             triangleLengthCounter.clock(triangleSequencer.enabled);
             noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 
+            pulse1Sequencer.pulseSweeper.clock();
+            pulse2Sequencer.pulseSweeper.clock();
+
             pulse1Envelope.clock();
             pulse2Envelope.clock();
             noiseEnvelope.clock();
@@ -73,6 +80,9 @@ void nes::APU::clock()
                 triangleLengthCounter.clock(triangleSequencer.enabled);
                 noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 
+                pulse1Sequencer.pulseSweeper.clock();
+                pulse2Sequencer.pulseSweeper.clock();
+
                 pulse1Envelope.clock();
                 pulse2Envelope.clock();
                 noiseEnvelope.clock();
@@ -93,6 +103,9 @@ void nes::APU::clock()
                 triangleLengthCounter.clock(triangleSequencer.enabled);
                 noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 
+                pulse1Sequencer.pulseSweeper.clock();
+                pulse2Sequencer.pulseSweeper.clock();
+
                 pulse1Envelope.clock();
                 pulse2Envelope.clock();
                 noiseEnvelope.clock();
@@ -106,6 +119,10 @@ void nes::APU::clock()
             }
         }
     }
+
+    // This is done always regardless of SweepUnit being disabled or its divider not outputting a clock signal
+    pulse1Sequencer.pulseSweeper.calculateTargetPeriod();
+    pulse2Sequencer.pulseSweeper.calculateTargetPeriod();
 
     elapsedCycles++;
 }
@@ -185,6 +202,11 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         pulse1Envelope.envelopeDividerPeriodVolume = data & 0x0F;
         break;
     case 0x4001:
+        pulse1Sequencer.pulseSweeper.enabled = (data & 0x80) > 0;
+        pulse1Sequencer.pulseSweeper.divider = ((data & 0x70) >> 4) + 1;
+        pulse1Sequencer.pulseSweeper.dividerPeriodReload = ((data & 0x70) >> 4) + 1;
+        pulse1Sequencer.pulseSweeper.negateFlag = (data & 0x08) > 0;
+        pulse1Sequencer.pulseSweeper.shiftCount = data & 0x07;
         break;
     case 0x4002:
         pulse1Sequencer.timerReload = ((0x0700 & pulse1Sequencer.timerReload) | (data & 0x00FF)); // Low 8 bits
@@ -204,6 +226,11 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         pulse2Envelope.envelopeDividerPeriodVolume = data & 0x0F;
         break;
     case 0x4005:
+        pulse2Sequencer.pulseSweeper.enabled = (data & 0x80) > 0;
+        pulse2Sequencer.pulseSweeper.divider = ((data & 0x70) >> 4) + 1;
+        pulse2Sequencer.pulseSweeper.dividerPeriodReload = ((data & 0x70) >> 4) + 1;
+        pulse2Sequencer.pulseSweeper.negateFlag = (data & 0x08) > 0;
+        pulse2Sequencer.pulseSweeper.shiftCount = data & 0x07;
         break;
     case 0x4006:
         pulse2Sequencer.timerReload = ((0x0700 & pulse2Sequencer.timerReload) | (data & 0x00FF)); // Low 8 bits
