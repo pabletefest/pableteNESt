@@ -204,8 +204,8 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         break;
     case 0x4001:
         pulse1Sequencer.pulseSweeper.enabled = (data & 0x80) > 0;
-        pulse1Sequencer.pulseSweeper.divider = ((data & 0x70) >> 4);
-        pulse1Sequencer.pulseSweeper.dividerPeriodReload = ((data & 0x70) >> 4);
+        pulse1Sequencer.pulseSweeper.divider = ((data & 0x70) >> 4) + 1; // Maybe we need to add 1 (incognita)
+        pulse1Sequencer.pulseSweeper.dividerPeriodReload = ((data & 0x70) >> 4) + 1; // Maybe we need to add 1 (incognita)
         pulse1Sequencer.pulseSweeper.negateFlag = (data & 0x08) > 0;
         pulse1Sequencer.pulseSweeper.shiftCount = data & 0x07;
         break;
@@ -228,8 +228,8 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         break;
     case 0x4005:
         pulse2Sequencer.pulseSweeper.enabled = (data & 0x80) > 0;
-        pulse2Sequencer.pulseSweeper.divider = ((data & 0x70) >> 4);
-        pulse2Sequencer.pulseSweeper.dividerPeriodReload = ((data & 0x70) >> 4);
+        pulse2Sequencer.pulseSweeper.divider = ((data & 0x70) >> 4) + 1; // Maybe we need to add 1 (incognita)
+        pulse2Sequencer.pulseSweeper.dividerPeriodReload = ((data & 0x70) >> 4) + 1; // Maybe we need to add 1 (incognita)
         pulse2Sequencer.pulseSweeper.negateFlag = (data & 0x08) > 0;
         pulse2Sequencer.pulseSweeper.shiftCount = data & 0x07;
         break;

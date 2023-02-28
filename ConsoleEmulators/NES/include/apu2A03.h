@@ -200,7 +200,7 @@ namespace nes
 
             uint8_t output(const EnvelopeGenerator& envelope) const
             {
-                if ((timerReload < 8) || (timerReload > 0x07FF))
+                if ((timerReload < 8) || (pulseSweeper.targetPeriod > 0x07FF))
                     return 0;
 
                 return pulseChannelOutput * envelope.output();
