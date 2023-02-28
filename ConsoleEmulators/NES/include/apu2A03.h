@@ -148,7 +148,7 @@ namespace nes
                 {
                     if (divider == 0 && this->enabled && !muted)
                     {
-                        pulseChannel.pulseTimer = targetPeriod;
+                        pulseChannel.timerReload = targetPeriod;
                     }
 
                     if (divider == 0 || reloadFlag)
@@ -160,19 +160,21 @@ namespace nes
                     {
                         divider--;
                     }
+
+                    //muted = (pulseChannel.timerReload < 8) || (pulseChannel.timerReload > 0x07FF);
                 }
 
                 void calculateTargetPeriod()
                 {
                     changeAmount = pulseChannel.pulseTimer >> shiftCount;
-                    muted = (pulseChannel.pulseTimer < 8) || (targetPeriod > 0x07FF);
+                    //muted = (pulseChannel.timerReload < 8) || (pulseChannel.timerReload > 0x07FF);
 
                     changeAmount *= (negateFlag) ? -1 : 1;
 
                     if (negateFlag && pulseChannel.pulseId == PULSE1)
                         changeAmount -= 1;
 
-                    targetPeriod = pulseChannel.pulseTimer + changeAmount;
+                    targetPeriod = pulseChannel.timerReload + changeAmount;
                 }
 
             private:
@@ -198,7 +200,7 @@ namespace nes
 
             uint8_t output(const EnvelopeGenerator& envelope) const
             {
-                if (pulseSweeper.muted)
+                if ((timerReload < 8) || (timerReload > 0x07FF))
                     return 0;
 
                 return pulseChannelOutput * envelope.output();
