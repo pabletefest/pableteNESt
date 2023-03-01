@@ -166,8 +166,8 @@ namespace nes
 
                 void calculateTargetPeriod()
                 {
-                    changeAmount = pulseChannel.pulseTimer >> shiftCount;
-                    //muted = (pulseChannel.timerReload < 8) || (pulseChannel.timerReload > 0x07FF);
+                    changeAmount = pulseChannel.timerReload >> shiftCount;
+                    muted = pulseChannel.timerReload < 8 || (!negateFlag && targetPeriod > 0x7FF);
 
                     changeAmount *= (negateFlag) ? -1 : 1;
 
@@ -200,7 +200,7 @@ namespace nes
 
             uint8_t output(const EnvelopeGenerator& envelope) const
             {
-                if ((timerReload < 8) || (pulseSweeper.targetPeriod > 0x07FF))
+                if (timerReload < 8 || (!pulseSweeper.negateFlag && pulseSweeper.targetPeriod > 0x7FF))
                     return 0;
 
                 return pulseChannelOutput * envelope.output();
