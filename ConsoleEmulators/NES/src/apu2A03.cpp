@@ -53,7 +53,7 @@ void nes::APU::clock()
         if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][1]) // 7456
         {
             pulse1LengthCounter.clock(pulse1Sequencer.enabled);
-            pulse2LengthCounter.clock(pulse1Sequencer.enabled);
+            pulse2LengthCounter.clock(pulse2Sequencer.enabled);
             triangleLengthCounter.clock(triangleSequencer.enabled);
             noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 
@@ -81,7 +81,7 @@ void nes::APU::clock()
             if (frameCounter.mode == 0) // Only in mode 0: 4-step
             {
                 pulse1LengthCounter.clock(pulse1Sequencer.enabled);
-                pulse2LengthCounter.clock(pulse1Sequencer.enabled);
+                pulse2LengthCounter.clock(pulse2Sequencer.enabled);
                 triangleLengthCounter.clock(triangleSequencer.enabled);
                 noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 
@@ -104,7 +104,7 @@ void nes::APU::clock()
             if (elapsedFrameCounterCycles == stepSequenceModeTables[frameCounter.mode][4]) // 18640
             {
                 pulse1LengthCounter.clock(pulse1Sequencer.enabled);
-                pulse2LengthCounter.clock(pulse1Sequencer.enabled);
+                pulse2LengthCounter.clock(pulse2Sequencer.enabled);
                 triangleLengthCounter.clock(triangleSequencer.enabled);
                 noiseLengthCounter.clock(noiseChannelLFSR.enabled);
 

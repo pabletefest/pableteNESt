@@ -340,6 +340,14 @@ namespace nes
 
         LinearCounter triangleLinearCounter;
 
+        struct DeltaModulationChannel
+        {
+            bool irqEnabledFlag = false;
+            bool loopFlag = false;
+        };
+
+        DeltaModulationChannel dmcChannel;
+
         struct FrameCounterBits
         {
             uint8_t mode = 0;
