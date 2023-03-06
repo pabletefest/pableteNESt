@@ -2,6 +2,8 @@
 
 namespace nes
 {
+    class SystemBus;
+
     static uint8_t dutyCyclePulseTables[4][8] = {
         { 0, 1, 0, 0, 0, 0, 0, 0 }, // 12.5%
         { 0, 1, 1, 0, 0, 0, 0, 0 }, // 25%
@@ -18,7 +20,7 @@ namespace nes
     class APU
     {
     public:
-        APU();
+        APU(SystemBus* nesBus);
         ~APU() = default;
 
         void reset();
@@ -32,8 +34,11 @@ namespace nes
 
     public:
         bool irq = false;
+        bool dmcInterrupt = false;
 
     private:
+        SystemBus* nes;
+
         uint64_t elapsedCycles = 0;
         uint64_t elapsedFrameCounterCycles = 0;
 
@@ -344,6 +349,18 @@ namespace nes
         {
             bool irqEnabledFlag = false;
             bool loopFlag = false;
+            uint16_t frequency = 0x0000; // From rateIndex
+            uint16_t sampleAddress = 0xC000;
+            uint16_t sampleLength = 0x0000;
+            uint8_t sampleBuffer = 0x00;
+            uint16_t currentAddress = 0x0000;
+            uint16_t bytesRemaining = 0x0000;
+            uint8_t outputLevel = 0x00;
+
+            uint8_t output()
+            {
+                return outputLevel;
+            }
         };
 
         DeltaModulationChannel dmcChannel;

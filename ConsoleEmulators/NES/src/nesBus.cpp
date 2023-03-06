@@ -6,7 +6,7 @@ namespace nes
 	constexpr uint32_t CPU_CLOCK_SPEED = 1789773;
 	constexpr uint32_t AUDIO_FREQUENCY = 44100;
 
-	SystemBus::SystemBus() : cpu(this)
+	SystemBus::SystemBus() : cpu(this), apu(this)
 	{
 		for (auto& elem : cpuRam)
 			elem = 0x00; // Can be randomized with rand() & 0xFF
@@ -148,6 +148,11 @@ namespace nes
 		{
 			cpu.nmi();
 			ppu.nmi = false;
+		}
+
+		if (apu.dmcInterrupt)
+		{
+			cpu.irq();
 		}
 
 		if (apu.irq)

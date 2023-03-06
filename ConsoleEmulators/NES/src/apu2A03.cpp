@@ -7,9 +7,14 @@ namespace nes
                                       12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30};
 
     static const std::vector<uint16_t> stepSequenceModeTables[2] = { {3728, 7456, 11185, 14914}, {3728, 7456, 11185, 14914, 18640} };
+
+    static uint16_t dmcRateIndexes[16] = { 428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106,  84,  72,  54 };
+
+    constexpr uint32_t CPU_CLOCK_SPEED = 1789773;
 }
 
-nes::APU::APU()
+nes::APU::APU(SystemBus* nesBus)
+    : nes(nesBus)
 {
     pulse1Sequencer.pulseId = PULSE1;
     pulse2Sequencer.pulseId = PULSE2;
@@ -168,7 +173,11 @@ uint8_t nes::APU::cpuRead(uint16_t address)
     {
         dataRead |= (pulse1LengthCounter.internalCounter > 0) ? 0x01 : 0x00;
         dataRead |= (pulse2LengthCounter.internalCounter > 0) ? 0x02 : 0x00;
+        dataRead |= (triangleLengthCounter.internalCounter > 0) ? 0x04 : 0x00;
+        dataRead |= (noiseLengthCounter.internalCounter > 0) ? 0x08 : 0x00;
+        dataRead |= (dmcChannel.bytesRemaining > 0) ? 0x10 : 0x00;
         dataRead |= irq ? 0x40 : 0x00;
+        dataRead |= dmcInterrupt ? 0x80 : 0x00;
         irq = false;
     }
 
@@ -273,12 +282,18 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         noiseEnvelope.startFlag = true;
         break;
     case 0x4010:
+        dmcChannel.irqEnabledFlag = (data & 0x80) > 0;
+        dmcChannel.loopFlag = (data & 0x40) > 0;
+        dmcChannel.frequency = CPU_CLOCK_SPEED / (data & 0x0F);
         break;
     case 0x4011:
+        dmcChannel.outputLevel = data & 0x7F;
         break;
     case 0x4012:
+        dmcChannel.sampleAddress = 0xC000 + (data * 64);
         break;
     case 0x4013:
+        dmcChannel.sampleLength = (data * 16) + 1;
         break;
     case 0x4015:
         pulse1Sequencer.enabled = (data & 0x01) > 0;
@@ -296,6 +311,24 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         noiseChannelLFSR.enabled = (data & 0x08) > 0;
         if (!noiseChannelLFSR.enabled)
             noiseLengthCounter.internalCounter = 0;
+
+        if ((data & 0x80) == 0)
+        {
+
+        }
+        else if (data & 0x80)
+        {
+            if (dmcChannel.bytesRemaining > 0)
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+
+        dmcInterrupt = false;
         break;
     case 0x4017:
         frameCounter.mode = data >> 7;
