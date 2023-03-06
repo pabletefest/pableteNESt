@@ -10,7 +10,7 @@ namespace nes
 
     static uint16_t dmcRateIndexes[16] = { 428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106,  84,  72,  54 };
 
-    constexpr uint32_t CPU_CLOCK_SPEED = 1789773;
+    //constexpr uint32_t CPU_CLOCK_SPEED = 1789773;
 }
 
 nes::APU::APU(SystemBus* nesBus)
@@ -284,7 +284,8 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
     case 0x4010:
         dmcChannel.irqEnabledFlag = (data & 0x80) > 0;
         dmcChannel.loopFlag = (data & 0x40) > 0;
-        dmcChannel.frequency = CPU_CLOCK_SPEED / (data & 0x0F);
+        //dmcChannel.frequency = CPU_CLOCK_SPEED / (data & 0x0F);
+        dmcChannel.timerRate = dmcRateIndexes[(data & 0x0F)] / 2;
         break;
     case 0x4011:
         dmcChannel.outputLevel = data & 0x7F;

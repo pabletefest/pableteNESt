@@ -349,7 +349,7 @@ namespace nes
         {
             bool irqEnabledFlag = false;
             bool loopFlag = false;
-            uint16_t frequency = 0x0000; // From rateIndex
+            uint8_t timerRate = 0x00; // From rateIndex
             uint16_t sampleAddress = 0xC000;
             uint16_t sampleLength = 0x0000;
             uint8_t sampleBuffer = 0x00;
