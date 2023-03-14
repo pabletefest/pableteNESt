@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 
 namespace nes
 {
@@ -347,17 +348,73 @@ namespace nes
 
         struct DeltaModulationChannel
         {
+            bool enabled = false;
             bool irqEnabledFlag = false;
             bool loopFlag = false;
             uint8_t timerRate = 0x00; // From rateIndex
             uint16_t sampleAddress = 0xC000;
             uint16_t sampleLength = 0x0000;
-            uint8_t sampleBuffer = 0x00;
+            std::optional<uint8_t> sampleBuffer = std::nullopt;
             uint16_t currentAddress = 0x0000;
             uint16_t bytesRemaining = 0x0000;
+            uint8_t shiftRegister = 0x00;
+            uint8_t remainingBits = 8;
+            bool silenceFlag = false;
             uint8_t outputLevel = 0x00;
 
-            uint8_t output()
+            void clock()
+            {
+                if (enabled)
+                {
+                    if (timerRate > 0)
+                    {
+                        timerRate--;
+                    }
+                    else
+                    {
+                        if (remainingBits == 0)
+                        {
+                            remainingBits = 8;
+                            
+                            if (!sampleBuffer.has_value())
+                            {
+                                silenceFlag = true;
+                            }
+                            else
+                            {
+                                silenceFlag = false;
+                                shiftRegister = sampleBuffer.value();
+                            }
+                        }
+                        else
+                        {
+                            if (!silenceFlag)
+                            {
+                                if (shiftRegister & 1)
+                                {
+                                    uint8_t result = outputLevel + 2;
+
+                                    if (result <= 127)
+                                        outputLevel = result;
+                                }
+                                else
+                                {
+                                    uint8_t result = outputLevel - 2;
+
+                                    if (result >= 0)
+                                        outputLevel = result;
+                                }
+
+                                shiftRegister >>= 1;
+
+                                remainingBits--;
+                            }
+                        }
+                    }
+                }
+            }
+
+            uint8_t output() const
             {
                 return outputLevel;
             }

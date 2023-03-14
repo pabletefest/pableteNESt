@@ -151,7 +151,8 @@ float nes::APU::getOutputAPU() const
 
     uint8_t triangleOutput = triangleSequencer.output(); // if (triangleLengthCounter.internalCounter > 0 && triangleLinearCounter.internalCounter > 0), the channel is not silenced, otherwise output is 0 
     uint8_t noiseOutput = (noiseLengthCounter.internalCounter > 0) ? noiseChannelLFSR.output(noiseEnvelope) : 0;
-    uint8_t dmcOutput = 127; // Temporal Stub
+    //uint8_t dmcOutput = 127; // Temporal Stub
+    uint8_t dmcOutput = dmcChannel.output();
 
     float tndChannelsOutput = ((float)triangleOutput / 8227) + ((float)noiseOutput / 12241) + ((float)dmcOutput / 22638);
 
