@@ -394,7 +394,7 @@ namespace nes
                                 sampleBuffer.reset();
                             }
 
-                            if (!sampleBuffer.has_value()) // Buffer emptied, time to read next byte
+                            if (!sampleBuffer.has_value() && bytesRemaining > 0) // Buffer emptied, time to read next byte
                             {
                                 sampleBuffer = memoryReaderFunc(currentAddress);
 
