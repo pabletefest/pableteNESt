@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include <functional>
 
 namespace nes
 {
@@ -36,6 +37,9 @@ namespace nes
     public:
         bool irq = false;
         bool dmcInterrupt = false;
+
+    protected:
+        static APU* apuInstance;
 
     private:
         SystemBus* nes;
@@ -352,6 +356,7 @@ namespace nes
             bool irqEnabledFlag = false;
             bool loopFlag = false;
             uint8_t timerRate = 0x00; // From rateIndex
+            uint8_t timerReload = 0x00;
             uint16_t sampleAddress = 0xC000;
             uint16_t sampleLength = 0x0000;
             std::optional<uint8_t> sampleBuffer = std::nullopt;
@@ -361,6 +366,8 @@ namespace nes
             uint8_t remainingBits = 8;
             bool silenceFlag = false;
             uint8_t outputLevel = 0x00;
+
+            std::function<uint8_t(uint16_t address)> memoryReaderFunc;
 
             void clock()
             {
@@ -384,6 +391,29 @@ namespace nes
                             {
                                 silenceFlag = false;
                                 shiftRegister = sampleBuffer.value();
+                                sampleBuffer.reset();
+                            }
+
+                            if (!sampleBuffer.has_value()) // Buffer emptied, time to read next byte
+                            {
+                                sampleBuffer = memoryReaderFunc(currentAddress);
+
+                                if (currentAddress == 0xFFFF)
+                                    currentAddress = 0x8000;
+                                else
+                                    currentAddress++;
+
+                                bytesRemaining--;
+
+                                if (bytesRemaining == 0 && loopFlag)
+                                {
+                                    currentAddress = sampleAddress;
+                                    bytesRemaining = sampleLength;
+                                }
+                                else if (bytesRemaining == 0 && irqEnabledFlag)
+                                {
+                                    APU::apuInstance->dmcInterrupt = true;
+                                }
                             }
                         }
                         else
@@ -392,24 +422,25 @@ namespace nes
                             {
                                 if (shiftRegister & 1)
                                 {
-                                    uint8_t result = outputLevel + 2;
+                                    int8_t result = outputLevel + 2;
 
                                     if (result <= 127)
                                         outputLevel = result;
                                 }
                                 else
                                 {
-                                    uint8_t result = outputLevel - 2;
+                                    int8_t result = outputLevel - 2;
 
                                     if (result >= 0)
                                         outputLevel = result;
                                 }
-
-                                shiftRegister >>= 1;
-
-                                remainingBits--;
                             }
+
+                            shiftRegister >>= 1;
+                            remainingBits--;
                         }
+
+                        timerRate = timerReload;
                     }
                 }
             }

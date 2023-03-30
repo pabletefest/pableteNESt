@@ -1,4 +1,5 @@
 #include "apu2A03.h"
+#include "nesBus.h"
 #include <vector>
 
 namespace nes
@@ -13,11 +14,19 @@ namespace nes
     //constexpr uint32_t CPU_CLOCK_SPEED = 1789773;
 }
 
+nes::APU* nes::APU::apuInstance;
+
 nes::APU::APU(SystemBus* nesBus)
     : nes(nesBus)
 {
     pulse1Sequencer.pulseId = PULSE1;
     pulse2Sequencer.pulseId = PULSE2;
+    dmcChannel.outputLevel = 0x00;
+    dmcChannel.memoryReaderFunc = [this](uint16_t address){
+        return nes->cpuRead(address);
+    };
+    //dmcInterrupt = false;
+    APU::apuInstance = this;
 }
 
 void nes::APU::reset()
@@ -43,6 +52,7 @@ void nes::APU::clock()
         pulse2Sequencer.pulseSweeper.calculateTargetPeriod();
 
         noiseChannelLFSR.clock();
+        dmcChannel.clock();
  
         elapsedFrameCounterCycles++;
 
@@ -284,9 +294,12 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         break;
     case 0x4010:
         dmcChannel.irqEnabledFlag = (data & 0x80) > 0;
+        if (!dmcChannel.irqEnabledFlag)
+            dmcInterrupt = false;
         dmcChannel.loopFlag = (data & 0x40) > 0;
         //dmcChannel.frequency = CPU_CLOCK_SPEED / (data & 0x0F);
-        dmcChannel.timerRate = dmcRateIndexes[(data & 0x0F)] / 2;
+        //dmcChannel.timerRate = dmcRateIndexes[(data & 0x0F)] / 2;
+        dmcChannel.timerReload = dmcRateIndexes[(data & 0x0F)] / 2;
         break;
     case 0x4011:
         dmcChannel.outputLevel = data & 0x7F;
@@ -313,20 +326,19 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
         noiseChannelLFSR.enabled = (data & 0x08) > 0;
         if (!noiseChannelLFSR.enabled)
             noiseLengthCounter.internalCounter = 0;
+        
+        dmcChannel.enabled = (data & 0x10) > 0;
 
-        if ((data & 0x80) == 0)
+        if (!dmcChannel.enabled)
         {
-
+            dmcChannel.bytesRemaining = 0;
         }
-        else if (data & 0x80)
+        else if (dmcChannel.enabled)
         {
-            if (dmcChannel.bytesRemaining > 0)
+            if (dmcChannel.bytesRemaining == 0)
             {
-
-            }
-            else
-            {
-
+                dmcChannel.currentAddress = dmcChannel.sampleAddress;
+                dmcChannel.bytesRemaining = dmcChannel.sampleLength;
             }
         }
 

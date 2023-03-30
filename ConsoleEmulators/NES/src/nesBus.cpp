@@ -150,7 +150,7 @@ namespace nes
 			ppu.nmi = false;
 		}
 
-		if (apu.dmcInterrupt)
+		if (apu.dmcInterrupt) // Same as APU::dmcInterrupt
 		{
 			cpu.irq();
 		}
