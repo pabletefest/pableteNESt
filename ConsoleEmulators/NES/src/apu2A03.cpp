@@ -340,6 +340,28 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
                 dmcChannel.currentAddress = dmcChannel.sampleAddress;
                 dmcChannel.bytesRemaining = dmcChannel.sampleLength;
             }
+
+            if (!dmcChannel.sampleBuffer.has_value())
+            {
+                dmcChannel.sampleBuffer = dmcChannel.memoryReaderFunc(dmcChannel.currentAddress);
+
+                if (dmcChannel.currentAddress == 0xFFFF)
+                    dmcChannel.currentAddress = 0x8000;
+                else
+                    dmcChannel.currentAddress++;
+
+                dmcChannel.bytesRemaining--;
+
+                if (dmcChannel.bytesRemaining == 0 && dmcChannel.loopFlag)
+                {
+                    dmcChannel.currentAddress = dmcChannel.sampleAddress;
+                    dmcChannel.bytesRemaining = dmcChannel.sampleLength;
+                }
+                else if (dmcChannel.bytesRemaining == 0 && dmcChannel.irqEnabledFlag)
+                {
+                    APU::apuInstance->dmcInterrupt = true;
+                }
+            }
         }
 
         dmcInterrupt = false;
