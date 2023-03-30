@@ -298,8 +298,8 @@ void nes::APU::cpuWrite(uint16_t address, uint8_t data)
             dmcInterrupt = false;
         dmcChannel.loopFlag = (data & 0x40) > 0;
         //dmcChannel.frequency = CPU_CLOCK_SPEED / (data & 0x0F);
-        //dmcChannel.timerRate = dmcRateIndexes[(data & 0x0F)] / 2;
-        dmcChannel.timerReload = dmcRateIndexes[(data & 0x0F)] / 2;
+        //dmcChannel.timer = dmcRateIndexes[(data & 0x0F)] / 2;
+        dmcChannel.timerRate = dmcRateIndexes[(data & 0x0F)] / 2;
         break;
     case 0x4011:
         dmcChannel.outputLevel = data & 0x7F;

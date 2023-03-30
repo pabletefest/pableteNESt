@@ -356,7 +356,7 @@ namespace nes
             bool irqEnabledFlag = false;
             bool loopFlag = false;
             uint8_t timerRate = 0x00; // From rateIndex
-            uint8_t timerReload = 0x00;
+            uint8_t timer = 0x00;
             uint16_t sampleAddress = 0xC000;
             uint16_t sampleLength = 0x0000;
             std::optional<uint8_t> sampleBuffer = std::nullopt;
@@ -373,9 +373,9 @@ namespace nes
             {
                 if (enabled)
                 {
-                    if (timerRate > 0)
+                    if (timer > 0)
                     {
-                        timerRate--;
+                        timer--;
                     }
                     else
                     {
@@ -440,7 +440,7 @@ namespace nes
                             remainingBits--;
                         }
 
-                        timerRate = timerReload;
+                        timer = timerRate;
                     }
                 }
             }
