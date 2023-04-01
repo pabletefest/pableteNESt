@@ -23,7 +23,7 @@ namespace nes
 		};
 
 		Cartridge(const std::string& filename);
-		~Cartridge() = default;
+		~Cartridge();
 
 		// Communication with Main Bus
 		bool cpuRead(uint16_t addr, uint8_t& data);

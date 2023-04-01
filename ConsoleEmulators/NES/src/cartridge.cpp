@@ -91,7 +91,7 @@ namespace nes
 				pMapper = std::make_shared<Mapper_000>(nPRGBanks, nCHRBanks);
 				break;
 			case 1:
-				pMapper = std::make_shared<Mapper_001>(nPRGBanks, nCHRBanks, header.mapper1 & 0x02, *this);
+				pMapper = std::make_shared<Mapper_001>(nPRGBanks, nCHRBanks, (header.mapper1 & 0x02) || header.prg_ram_size == 0, *this);
 
 				if ((header.mapper1 & 0x02) || header.prg_ram_size == 0)
 					vPRGMemory.resize(vPRGMemory.capacity() + 0x2000);
@@ -113,7 +113,24 @@ namespace nes
 				break;
 			}
 
+			if (hasBatteryBackedRAM())
+			{
+				std::ifstream inFile("SaveFiles/" + gameName + "_OnChipRAM.bin", std::ofstream::binary);
+				auto offsetWRAM = nPRGBanks * convertKBToBytes(16);
+				inFile.read((char*)vPRGMemory.data() + offsetWRAM, 0x2000);
+			}
+
 			ifs.close();
+		}
+	}
+
+	Cartridge::~Cartridge()
+	{
+		if (hasBatteryBackedRAM())
+		{
+			std::ofstream outFile("SaveFiles/" + gameName + "_OnChipRAM.bin", std::ofstream::binary);
+			auto offsetWRAM = nPRGBanks * convertKBToBytes(16);
+			outFile.write((const char*)vPRGMemory.data() + offsetWRAM, 0x2000);
 		}
 	}
 
