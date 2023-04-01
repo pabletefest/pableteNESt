@@ -5,6 +5,8 @@ VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NES", "NES\NES.vcxproj", "{056840A2-4E03-4C20-A26B-A8D953241F61}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EmulatorsFrontendGUI", "EmulatorsFrontendGUI\EmulatorsFrontendGUI.vcxproj", "{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{056840A2-4E03-4C20-A26B-A8D953241F61}.Release|x64.Build.0 = Release|x64
 		{056840A2-4E03-4C20-A26B-A8D953241F61}.Release|x86.ActiveCfg = Release|Win32
 		{056840A2-4E03-4C20-A26B-A8D953241F61}.Release|x86.Build.0 = Release|Win32
+		{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}.Debug|x64.ActiveCfg = Debug|x64
+		{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}.Debug|x64.Build.0 = Debug|x64
+		{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}.Debug|x86.ActiveCfg = Debug|x64
+		{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}.Debug|x86.Build.0 = Debug|x64
+		{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}.Release|x64.ActiveCfg = Release|x64
+		{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}.Release|x64.Build.0 = Release|x64
+		{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}.Release|x86.ActiveCfg = Release|x64
+		{D5468C9A-C8DE-48A4-A58A-BAE0DF4DA69D}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

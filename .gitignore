@@ -11,6 +11,8 @@ bin/
 ConsoleEmulators/bin/x64/Debug/NES_EMULATOR.exe
 ConsoleEmulators/bin/x64/Debug/NES_EMULATOR.pdb
 ConsoleEmulators/NES/NES.vcxproj.user
+enc_temp_folder/
+ConsoleEmulators/enc_temp_folder/
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio
@@ -49,6 +51,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+ConsoleEmulators/**/[Rr]om/s
+ConsoleEmulators/[Ll]ib/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
