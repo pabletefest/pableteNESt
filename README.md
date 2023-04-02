@@ -3,11 +3,11 @@ pableteNESt
 
 pableteNESt is a NES console emulator written C++ with different levels of accuracy depending on the component emulated. Being my first emulator, the goals are learning and explore deeper into emulation universe. Thus, this emulator is almost "complete" but still under development.
 
-![screenshot1](docs/SMB-Screenshot.png)
-![screenshot2](docs/Metroid-Screenshot.png)
-![screenshot3](docs/Zelda-Screenshot.png)
-![screenshot4](docs/Contra-Screenshot.png)
-![screenshot5](docs/Castlevania-Screenshot.png)
+![screenshot1](docs/SMB-Screenshot.PNG)
+![screenshot2](docs/Metroid-Screenshot.PNG)
+![screenshot3](docs/Zelda-Screenshot.PNG)
+![screenshot4](docs/Contra-Screenshot.PNG)
+![screenshot5](docs/Castlevania-Screenshot.PNG)
 
 Features
 --------
