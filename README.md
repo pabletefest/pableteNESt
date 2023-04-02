@@ -1,7 +1,7 @@
 pableteNESt
 ===========
 
-pableteNESt is a NES console emulator written C++ with different levels of accuracy depending on the component emulated. Being my first emulator, the goals are learning and explore deeper into emulation universe. Thus, this emulator is almost "complete" but still under development.
+pableteNESt is a NES console emulator written in C++ with different levels of accuracy depending on the component emulated. Being my first emulator, the goals are to learn and explore deeper into the emulation universe and understand retro consoles hardware. Thus, while being almost "complete" for me but this emulator is still under development and a lot of work can be done.
 
 ![screenshot1](docs/SMB-Screenshot.PNG)
 ![screenshot2](docs/Metroid-Screenshot.PNG)
