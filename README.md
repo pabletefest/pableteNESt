@@ -64,3 +64,10 @@ Among other playable games. Some supported games by the mappers listed above may
 - Improve and correct bugs in audio chip.
 - Rewrite CPU to be cycle-level accurate.
 - Polish and fix possible bugs.
+
+## Copyright
+
+pableteNESt is Copyright © 2022 - 2023 pabletefest.<br>
+It is licensed under the terms of the GNU General Public License (GPL) 3.0 or any later version. See [LICENSE](LICENSE) for details.
+
+Nintendo Entertainment System is a registered trademark of Nintendo Co., Ltd.
